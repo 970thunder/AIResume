@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, h } from 'vue';
+import { ref, computed, h, onMounted } from 'vue';
 import { UploadFilled, Document, CircleCheck, CircleClose, Loading, Download } from '@element-plus/icons-vue'
 import axios from 'axios';
 import { ElNotification, ElLoading } from 'element-plus'
@@ -11,14 +11,114 @@ const generatedResume = ref(null); // This will hold the AI analysis data for pr
 const generatedResumeWithId = ref(null); // This will hold the final resume object with ID
 const isLoading = ref(false);
 
-const resumeTemplates = [
-  { id: 1, name: "经典商务", type: "free", description: "适合传统行业和商务场合" },
-  { id: 2, name: "现代简约", type: "free", description: "简洁现代，适合各种职位" },
+const resumeTemplates = ref([
+  { id: 1, name: "经典商务", type: "free", description: "适合传统行业和商务场合", path: '/src/templates/classic.html', html: '' },
+  { id: 2, name: "现代简约", type: "free", description: "简洁现代，适合各种职位", path: '/src/templates/modern.html', html: '' },
   { id: 3, name: "创意设计", type: "premium", price: "¥29", description: "适合设计师和创意工作者" },
   { id: 4, name: "技术专业", type: "premium", price: "¥35", description: "专为技术人员优化" },
   { id: 5, name: "高端商务", type: "premium", price: "¥45", description: "高级管理层专用模板" },
   { id: 6, name: "学术研究", type: "free", description: "适合学术界和研究人员" }
-];
+]);
+
+onMounted(async () => {
+  for (const template of resumeTemplates.value) {
+    if (template.path) {
+      try {
+        const response = await fetch(template.path);
+        template.html = await response.text();
+      } catch (error) {
+        console.error(`Error loading template ${template.path}:`, error);
+        // Provide fallback content if the template fails to load
+        template.html = `<div style='text-align: center; padding: 20px; color: red;'>加载模板失败</div>`;
+      }
+    }
+  }
+});
+
+const finalResumeHtml = computed(() => {
+  if (!generatedResume.value || !selectedTemplate.value || !selectedTemplate.value.html) {
+    return '<p>请先完成AI分析并选择一个模板。</p>';
+  }
+
+  let html = selectedTemplate.value.html;
+  const data = generatedResume.value;
+
+  // Populate personal info
+  if (data.personalInfo) {
+    html = html.replace(/{{name}}/g, data.personalInfo.name || '');
+    html = html.replace(/{{phone}}/g, data.personalInfo?.phone || '');
+    html = html.replace(/{{email}}/g, data.personalInfo.email || '');
+    html = html.replace(/{{address}}/g, data.personalInfo.address || '');
+  }
+
+  // Populate summary
+  html = html.replace(/{{summary}}/g, data.summary || '');
+
+  // Populate education
+  const educationHtml = data.education?.map(edu => {
+    if (selectedTemplate.value.id === 1) { // Classic
+      return `<div class="item">
+                <div class="item-header">
+                    <span class="title">${edu.school}</span>
+                    <span class="date">${edu.duration}</span>
+                </div>
+                <div class="item-content">
+                    <p><strong>${edu.degree}</strong></p>
+                </div>
+            </div>`;
+    }
+    if (selectedTemplate.value.id === 2) { // Modern
+      return `<div class="item">
+                <div class="item-header">
+                    <span class="title">${edu.school}</span>
+                    <span class="date">${edu.duration}</span>
+                </div>
+                <div class="item-content">
+                     <p><strong>${edu.degree}</strong></p>
+                </div>
+            </div>`;
+    }
+    return '';
+  }).join('');
+  html = html.replace('<!-- {{education}} -->', educationHtml);
+
+  // Populate experience
+  const experienceHtml = data.experience?.map(exp => {
+    if (selectedTemplate.value.id === 1) { // Classic
+      return `<div class="item">
+                <div class="item-header">
+                    <span class="title">${exp.company}</span>
+                    <span>${exp.position}</span>
+                    <span class="date">${exp.duration}</span>
+                </div>
+                <div class="item-content">
+                    <p>${exp.description}</p>
+                </div>
+            </div>`;
+    }
+    if (selectedTemplate.value.id === 2) { // Modern
+      return `<div class="item">
+                <div class="item-header">
+                    <span class="title">${exp.company}</span>
+                     <span>${exp.position}</span>
+                    <span class="date">${exp.duration}</span>
+                </div>
+                <div class="item-content">
+                    <p>${exp.description}</p>
+                </div>
+            </div>`;
+    }
+    return '';
+  }).join('');
+  html = html.replace('<!-- {{experience}} -->', experienceHtml);
+
+  // Populate skills
+  const skillsHtml = data.skills?.map(skill => `<li>${skill}</li>`).join('');
+  html = html.replace('<!-- {{skills}} -->', skillsHtml);
+
+  return html;
+});
+
 
 const handleFileChange = (file, fileList) => {
   uploadedFiles.value = fileList;
@@ -189,10 +289,16 @@ const generateAndPreview = async () => {
               <el-col :span="8" v-for="template in resumeTemplates" :key="template.id">
                 <el-card shadow="hover" class="template-card"
                   :class="{ selected: selectedTemplate?.id === template.id }" @click="selectTemplate(template)">
-                  <div class="template-name">{{ template.name }}</div>
-                  <div class="template-desc">{{ template.description }}</div>
-                  <el-tag :type="template.type === 'free' ? 'success' : 'warning'" size="small">{{ template.type ===
-                    'free' ? '免费' : template.price }}</el-tag>
+                  <div v-if="template.html" class="template-preview-wrapper">
+                    <div class="template-preview" :style="{ transform: 'scale(0.3)', transformOrigin: 'top left' }"
+                      v-html="template.html"></div>
+                  </div>
+                  <div class="template-info">
+                    <div class="template-name">{{ template.name }}</div>
+                    <div class="template-desc">{{ template.description }}</div>
+                    <el-tag :type="template.type === 'free' ? 'success' : 'warning'" size="small">{{ template.type ===
+                      'free' ? '免费' : template.price }}</el-tag>
+                  </div>
                 </el-card>
               </el-col>
             </el-row>
@@ -205,34 +311,8 @@ const generateAndPreview = async () => {
           <!-- Step 4: Preview -->
           <div v-if="currentStep === 3 && generatedResume" class="step-content">
             <h2>简历预览</h2>
-            <p class="subtitle">这是根据您的AI分析生成的简历内容预览。</p>
-            <div class="resume-preview-container">
-              <div class="resume-preview">
-                <h3>个人信息</h3>
-                <p><strong>姓名:</strong> {{ generatedResume.personalInfo.name }}</p>
-                <p><strong>邮箱:</strong> {{ generatedResume.personalInfo.email }}</p>
-                <p><strong>电话:</strong> {{ generatedResume.personalInfo.phone }}</p>
-                <p><strong>地址:</strong> {{ generatedResume.personalInfo.address }}</p>
-
-                <h3>个人简介</h3>
-                <p>{{ generatedResume.summary }}</p>
-
-                <h3>工作经历</h3>
-                <div v-for="exp in generatedResume.experience" :key="exp.company" class="experience-item">
-                  <p><strong>{{ exp.position }}</strong> at {{ exp.company }} ({{ exp.duration }})</p>
-                  <p>{{ exp.description }}</p>
-                </div>
-
-                <h3>教育背景</h3>
-                <div v-for="edu in generatedResume.education" :key="edu.school" class="education-item">
-                  <p><strong>{{ edu.degree }}</strong>, {{ edu.school }} ({{ edu.duration }})</p>
-                </div>
-
-                <h3>技能</h3>
-                <el-tag v-for="skill in generatedResume.skills" :key="skill" type="primary" class="skill-tag">{{ skill
-                  }}</el-tag>
-              </div>
-            </div>
+            <p class="subtitle">这是根据您的AI分析和所选模板生成的最终简历预览。</p>
+            <div class="final-resume-container" v-html="finalResumeHtml"></div>
             <el-button @click="goToStep(2)" class="step-button">返回</el-button>
           </div>
 
@@ -325,6 +405,11 @@ const generateAndPreview = async () => {
   transform: translateY(-5px);
 }
 
+.template-info {
+  padding: 14px;
+  text-align: center;
+}
+
 .template-name {
   font-weight: bold;
   margin-bottom: 5px;
@@ -335,6 +420,33 @@ const generateAndPreview = async () => {
   color: #606266;
   margin-bottom: 10px;
   min-height: 40px;
+}
+
+.template-preview-wrapper {
+  height: 280px;
+  overflow: hidden;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.template-preview {
+  width: 840px;
+  /* Match the content width to keep proportions */
+  height: 1188px;
+  /* Approximate A4 paper ratio */
+}
+
+.final-resume-container {
+  border: 1px solid #ebeef5;
+  background-color: #fafafa;
+  padding: 20px;
+}
+
+.final-resume-container :deep(.resume-container) {
+  margin: 0 auto !important;
+  zoom: 0.75;
+  /* Using zoom to scale layout space */
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .resume-preview-container {
