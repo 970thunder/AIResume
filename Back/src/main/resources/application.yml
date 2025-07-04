@@ -4,8 +4,8 @@ server:
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/resume_generator?useSSL=false&serverTimezone=UTC
-    username: hyper
-    password: 1010411661 # <-- IMPORTANT: Replace with your MySQL password
+    username: 小泥人hyper
+    password: xxx # <-- 更改成你的账号密码
     driver-class-name: com.mysql.cj.jdbc.Driver
   
   jpa:
@@ -22,7 +22,7 @@ spring:
       max-request-size: 100MB
 
 deepseek:
-  api-key: sk-ade771e428464713ad6a86407fe07fda # <-- IMPORTANT: Replace with your DeepSeek API key
+  api-key: xxx # <-- 更改成你的Key
   base-url: https://api.deepseek.com/v1
   model: deepseek-chat
 
