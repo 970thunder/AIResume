@@ -40,11 +40,16 @@ CREATE TABLE IF NOT EXISTS `resumes` (
 
 -- Insert initial data for templates
 -- Note: template_path and preview_image are placeholders as per the design.
-INSERT INTO templates (name, type, price, description, template_path, preview_image, created_at) VALUES
-('经典商务', 'free', 0.00, '适合传统行业和商务场合', '/templates/classic_business.html', '/images/classic_business.jpg', NOW()),
-('现代简约', 'free', 0.00, '简洁现代，适合各种职位', '/templates/modern_simple.html', '/images/modern_simple.jpg', NOW()),
-('创意设计', 'premium', 29.00, '适合设计师和创意工作者', '/templates/creative_design.html', '/images/creative_design.jpg', NOW()),
-('技术专业', 'premium', 35.00, '专为技术人员优化', '/templates/tech_professional.html', '/images/tech_professional.jpg', NOW()),
-('高端商务', 'premium', 45.00, '高级管理层专用模板', '/templates/executive_business.html', '/images/executive_business.jpg', NOW()),
-('学术研究', 'free', 0.00, '适合学术界和研究人员', '/templates/academic_research.html', '/images/academic_research.jpg', NOW())
-ON DUPLICATE KEY UPDATE name=name; -- Prevents errors if you run the script multiple times 
+INSERT INTO templates (id, name, type, price, description, template_path, created_at) VALUES
+(1, '现代简约', 'free', 0.00, '简洁现代，适合各种职位', '/templates/modern.html', NOW()),
+(2, '经典商务', 'free', 0.00, '适合传统行业和商务场合', '/templates/classic.html', NOW()),
+(3, '创意设计', 'premium', 29.00, '适合设计师和创意工作者', '/templates/modern.html', NOW()),
+(4, '技术专业', 'premium', 35.00, '专为技术人员优化', '/templates/modern.html', NOW()),
+(5, '高端商务', 'premium', 45.00, '高级管理层专用模板', '/templates/classic.html', NOW()),
+(6, '学术研究', 'free', 0.00, '适合学术界和研究人员', '/templates/classic.html', NOW())
+ON DUPLICATE KEY UPDATE 
+    name=VALUES(name), 
+    type=VALUES(type), 
+    price=VALUES(price), 
+    description=VALUES(description), 
+    template_path=VALUES(template_path); 

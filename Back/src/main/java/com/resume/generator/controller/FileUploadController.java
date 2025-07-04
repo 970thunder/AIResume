@@ -13,7 +13,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/files")
-@CrossOrigin(origins = "*")
 public class FileUploadController {
 
     @Autowired
@@ -41,18 +40,21 @@ public class FileUploadController {
             }
 
             // Save to database
-            fileProcessService.saveUserProfile(sessionId, fileNames, extractedContent.toString());
+            String content = extractedContent.toString();
+            fileProcessService.saveUserProfile(sessionId, fileNames, content);
 
             return ResponseEntity.ok(new FileUploadResponse(
                     true,
                     "Files uploaded successfully.",
                     sessionId,
-                    fileNames));
+                    fileNames,
+                    content));
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new FileUploadResponse(
                     false,
                     "File upload failed: " + e.getMessage(),
+                    null,
                     null,
                     null));
         }

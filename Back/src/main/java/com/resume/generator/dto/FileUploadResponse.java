@@ -14,4 +14,5 @@ public class FileUploadResponse {
     private String message;
     private String sessionId;
     private List<String> fileNames;
+    private String extractedContent;
 }

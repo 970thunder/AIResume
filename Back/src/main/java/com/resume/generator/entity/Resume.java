@@ -24,9 +24,6 @@ public class Resume {
     @Column(name = "template_id")
     private Long templateId;
 
-    @Column(name = "resume_content", columnDefinition = "TEXT")
-    private String resumeContent;
-
     @Column(name = "file_path")
     private String filePath;
 

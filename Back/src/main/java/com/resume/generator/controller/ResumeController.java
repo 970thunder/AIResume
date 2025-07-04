@@ -2,7 +2,9 @@ package com.resume.generator.controller;
 
 import com.resume.generator.dto.AIAnalysisRequest;
 import com.resume.generator.dto.ResumeGenerateRequest;
+import com.resume.generator.entity.Resume;
 import com.resume.generator.service.AIAnalysisService;
+import com.resume.generator.service.FileProcessService;
 import com.resume.generator.service.ResumeGenerateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -16,7 +18,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/resume")
-@CrossOrigin(origins = "*")
 public class ResumeController {
 
     @Autowired
@@ -25,14 +26,20 @@ public class ResumeController {
     @Autowired
     private ResumeGenerateService resumeGenerateService;
 
+    @Autowired
+    private FileProcessService fileProcessService;
+
     @PostMapping("/analyze")
     public ResponseEntity<Map<String, Object>> analyzeProfile(@RequestBody AIAnalysisRequest request) {
         try {
-            String aiAnalysis = aiAnalysisService.analyzeProfile(request.getExtractedContent());
+            Map<String, Object> aiAnalysisMap = aiAnalysisService.analyzeProfile(request.getExtractedContent());
+
+            // Save the analysis to the database
+            fileProcessService.saveAiAnalysis(request.getSessionId(), aiAnalysisMap);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("analysis", aiAnalysis);
+            response.put("analysis", aiAnalysisMap);
             response.put("sessionId", request.getSessionId());
 
             return ResponseEntity.ok(response);
@@ -49,14 +56,13 @@ public class ResumeController {
     @PostMapping("/generate")
     public ResponseEntity<Map<String, Object>> generateResume(@RequestBody ResumeGenerateRequest request) {
         try {
-            String resumeContent = resumeGenerateService.generateResume(
+            Resume newResume = resumeGenerateService.generateResume(
                     request.getSessionId(),
-                    request.getTemplateId(),
-                    request.getAiAnalysis());
+                    request.getTemplateId());
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("resumeContent", resumeContent);
+            response.put("resume", newResume);
 
             return ResponseEntity.ok(response);
 
@@ -66,21 +72,6 @@ public class ResumeController {
             response.put("message", "Resume generation failed: " + e.getMessage());
 
             return ResponseEntity.badRequest().body(response);
-        }
-    }
-
-    @GetMapping("/download/{resumeId}")
-    public ResponseEntity<Resource> downloadResume(@PathVariable Long resumeId) {
-        try {
-            Resource resource = resumeGenerateService.generatePDF(resumeId);
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"resume.pdf\"")
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .body(resource);
-
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
         }
     }
 }

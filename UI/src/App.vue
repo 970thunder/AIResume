@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, h } from 'vue';
 import { UploadFilled, Document, CircleCheck, CircleClose, Loading, Download } from '@element-plus/icons-vue'
 import axios from 'axios';
 import { ElNotification, ElLoading } from 'element-plus'
@@ -7,7 +7,9 @@ import { ElNotification, ElLoading } from 'element-plus'
 const currentStep = ref(0);
 const uploadedFiles = ref([]);
 const selectedTemplate = ref(null);
-const generatedResume = ref(null);
+const generatedResume = ref(null); // This will hold the AI analysis data for preview
+const generatedResumeWithId = ref(null); // This will hold the final resume object with ID
+const isLoading = ref(false);
 
 const resumeTemplates = [
   { id: 1, name: "经典商务", type: "free", description: "适合传统行业和商务场合" },
@@ -31,12 +33,7 @@ const goToStep = (step) => {
 };
 
 const processWithAI = async () => {
-  const loading = ElLoading.service({
-    lock: true,
-    text: 'AI正在分析您的资料，请稍候...',
-    background: 'rgba(0, 0, 0, 0.7)',
-  });
-
+  isLoading.value = true;
   const formData = new FormData();
   uploadedFiles.value.forEach(file => {
     formData.append('files', file.raw);
@@ -49,22 +46,27 @@ const processWithAI = async () => {
 
     const analysisResponse = await axios.post('http://localhost:8080/api/resume/analyze', {
       sessionId: response.data.sessionId,
-      extractedContent: response.data.extractedContent, // Assuming backend provides this
+      extractedContent: response.data.extractedContent,
     });
 
-    generatedResume.value = JSON.parse(analysisResponse.data.analysis); // The analysis is a JSON string
+    generatedResume.value = analysisResponse.data.analysis;
+    generatedResume.value.sessionId = response.data.sessionId;
     goToStep(2);
     ElNotification({
       title: '成功',
-      message: 'AI分析完成！',
+      dangerouslyUseHTMLString: true,
+      message: '<strong>AI分析完成！</strong>',
       type: 'success',
+      icon: CircleCheck,
     });
   } catch (error) {
     console.error('Error during AI processing:', error);
     ElNotification({
       title: '错误',
-      message: 'AI处理失败，请检查后端服务和API配置。',
+      dangerouslyUseHTMLString: true,
+      message: '<strong>AI处理失败，请检查后端服务和API配置。</strong>',
       type: 'error',
+      icon: CircleClose,
     });
     // Fallback for UI testing
     generatedResume.value = {
@@ -72,11 +74,12 @@ const processWithAI = async () => {
       summary: "这是模拟的个人简介...",
       experience: [{ company: "模拟公司", position: "软件工程师", duration: "2022-2024", description: "负责模拟项目开发..." }],
       education: [{ school: "模拟大学", degree: "计算机科学", duration: "2018-2022" }],
-      skills: ["Vue", "Spring Boot", "Element Plus"]
+      skills: ["Vue", "Spring Boot", "Element Plus"],
+      sessionId: "mock-session-id-123" // Add mock session ID for testing
     };
     goToStep(2);
   } finally {
-    loading.close();
+    isLoading.value = false;
   }
 };
 
@@ -85,30 +88,53 @@ const selectTemplate = (template) => {
   if (template.type === 'premium') {
     ElNotification({
       title: '提示',
-      message: `选择了付费模板: ${template.name} - ${template.price}`,
+      dangerouslyUseHTMLString: true,
+      message: `<strong>选择了付费模板: ${template.name} - ${template.price}</strong>`,
       type: 'info',
     });
   }
 };
 
 const generateAndPreview = async () => {
-  // In a real app, this would call the backend's generate endpoint
-  // and likely a download endpoint. For now, we just move to the preview step.
-  goToStep(3);
+  isLoading.value = true;
+  try {
+    const response = await axios.post('http://localhost:8080/api/resume/generate', {
+      sessionId: generatedResume.value.sessionId,
+      templateId: selectedTemplate.value.id,
+    });
+    if (response.data.success) {
+      generatedResumeWithId.value = response.data.resume;
+      goToStep(3);
+      ElNotification({
+        title: '成功',
+        dangerouslyUseHTMLString: true,
+        message: '<strong>简历已生成！</strong>',
+        type: 'success',
+        icon: CircleCheck,
+      });
+    } else {
+      throw new Error(response.data.message || '生成失败');
+    }
+  } catch (error) {
+    console.error('Error generating resume:', error);
+    ElNotification({
+      title: '错误',
+      dangerouslyUseHTMLString: true,
+      message: `<strong>${error.message || '生成简历时发生错误。'}</strong>`,
+      type: 'error',
+      icon: CircleClose,
+    });
+  } finally {
+    isLoading.value = false;
+  }
 }
 
-const downloadResume = () => {
-  ElNotification({
-    title: '提示',
-    message: '下载功能正在开发中。',
-    type: 'info',
-  });
-};
 </script>
 
 <template>
   <div id="app-container">
-    <el-container>
+    <el-container v-loading="isLoading" element-loading-background="rgba(255, 255, 255, 0.8)"
+      element-loading-text="AI分析中，请稍候...">
       <el-header class="app-header">
         <h1>AI 智能简历生成器</h1>
       </el-header>
@@ -179,46 +205,34 @@ const downloadResume = () => {
           <!-- Step 4: Preview -->
           <div v-if="currentStep === 3 && generatedResume" class="step-content">
             <h2>简历预览</h2>
-            <p class="subtitle">这是根据您的选择生成的简历，检查后即可下载。</p>
-            <el-card class="resume-preview">
-              <el-descriptions title="个人信息" :column="2" border>
-                <el-descriptions-item label="姓名">{{ generatedResume.personalInfo.name }}</el-descriptions-item>
-                <el-descriptions-item label="电话">{{ generatedResume.personalInfo.phone }}</el-descriptions-item>
-                <el-descriptions-item label="邮箱">{{ generatedResume.personalInfo.email }}</el-descriptions-item>
-                <el-descriptions-item label="地址">{{ generatedResume.personalInfo.address }}</el-descriptions-item>
-              </el-descriptions>
+            <p class="subtitle">这是根据您的AI分析生成的简历内容预览。</p>
+            <div class="resume-preview-container">
+              <div class="resume-preview">
+                <h3>个人信息</h3>
+                <p><strong>姓名:</strong> {{ generatedResume.personalInfo.name }}</p>
+                <p><strong>邮箱:</strong> {{ generatedResume.personalInfo.email }}</p>
+                <p><strong>电话:</strong> {{ generatedResume.personalInfo.phone }}</p>
+                <p><strong>地址:</strong> {{ generatedResume.personalInfo.address }}</p>
 
-              <el-divider />
-              <h3>个人简介</h3>
-              <p>{{ generatedResume.summary }}</p>
+                <h3>个人简介</h3>
+                <p>{{ generatedResume.summary }}</p>
 
-              <el-divider />
-              <h3>工作经历</h3>
-              <el-timeline>
-                <el-timeline-item v-for="(exp, index) in generatedResume.experience" :key="index"
-                  :timestamp="exp.duration">
-                  <h4>{{ exp.position }} @ {{ exp.company }}</h4>
+                <h3>工作经历</h3>
+                <div v-for="exp in generatedResume.experience" :key="exp.company" class="experience-item">
+                  <p><strong>{{ exp.position }}</strong> at {{ exp.company }} ({{ exp.duration }})</p>
                   <p>{{ exp.description }}</p>
-                </el-timeline-item>
-              </el-timeline>
+                </div>
 
-              <el-divider />
-              <h3>教育背景</h3>
-              <div v-for="(edu, index) in generatedResume.education" :key="index" class="education-item">
-                <h4>{{ edu.school }} ({{ edu.duration }})</h4>
-                <p>{{ edu.degree }}</p>
+                <h3>教育背景</h3>
+                <div v-for="edu in generatedResume.education" :key="edu.school" class="education-item">
+                  <p><strong>{{ edu.degree }}</strong>, {{ edu.school }} ({{ edu.duration }})</p>
+                </div>
+
+                <h3>技能</h3>
+                <el-tag v-for="skill in generatedResume.skills" :key="skill" type="primary" class="skill-tag">{{ skill
+                }}</el-tag>
               </div>
-
-              <el-divider />
-              <h3>技能</h3>
-              <el-space wrap>
-                <el-tag v-for="(skill, index) in generatedResume.skills" :key="index">{{ skill }}</el-tag>
-              </el-space>
-            </el-card>
-
-            <el-button type="primary" @click="downloadResume" :icon="Download" class="step-button">
-              下载简历
-            </el-button>
+            </div>
             <el-button @click="goToStep(2)" class="step-button">返回</el-button>
           </div>
 
@@ -229,6 +243,12 @@ const downloadResume = () => {
 </template>
 
 <style scoped>
+:deep(.el-loading-spinner .el-loading-text) {
+  color: #337ecc;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
 #app-container {
   padding: 20px;
 }
@@ -317,9 +337,13 @@ const downloadResume = () => {
   min-height: 40px;
 }
 
-.resume-preview {
+.resume-preview-container {
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 20px;
+  min-height: 400px;
+  background-color: #fafafa;
   text-align: left;
-  margin-top: 20px;
 }
 
 .resume-preview h3 {
@@ -330,7 +354,14 @@ const downloadResume = () => {
   padding-left: 10px;
 }
 
+.experience-item,
 .education-item {
+  margin-bottom: 15px;
+  padding-left: 15px;
+}
+
+.skill-tag {
+  margin-right: 10px;
   margin-bottom: 10px;
 }
 </style>

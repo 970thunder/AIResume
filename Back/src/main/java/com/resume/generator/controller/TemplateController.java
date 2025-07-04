@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/templates")
-@CrossOrigin(origins = "*")
 public class TemplateController {
 
     @Autowired

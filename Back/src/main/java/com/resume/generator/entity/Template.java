@@ -34,9 +34,6 @@ public class Template {
     @Column(name = "template_path")
     private String templatePath;
 
-    @Column(name = "preview_image")
-    private String previewImage;
-
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

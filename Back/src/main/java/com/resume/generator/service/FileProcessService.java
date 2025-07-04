@@ -1,5 +1,7 @@
 package com.resume.generator.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resume.generator.entity.UserProfile;
 import com.resume.generator.repository.UserProfileRepository;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -13,12 +15,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class FileProcessService {
 
     @Autowired
     private UserProfileRepository userProfileRepository;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String extractContent(MultipartFile file) throws IOException {
         String filename = file.getOriginalFilename();
@@ -60,5 +65,23 @@ public class FileProcessService {
         profile.setOriginalFiles(String.join(",", fileNames));
         profile.setExtractedContent(extractedContent);
         userProfileRepository.save(profile);
+    }
+
+    public void saveAiAnalysis(String sessionId, Map<String, Object> aiAnalysis) {
+        UserProfile profile = userProfileRepository.findBySessionId(sessionId);
+        if (profile != null) {
+            try {
+                String aiAnalysisString = objectMapper.writeValueAsString(aiAnalysis);
+                profile.setAiAnalysis(aiAnalysisString);
+                userProfileRepository.save(profile);
+            } catch (JsonProcessingException e) {
+                // In a real application, you'd likely use a logger
+                System.err.println("Could not serialize AI analysis to save to DB for session ID: " + sessionId);
+                throw new RuntimeException("Failed to serialize AI analysis", e);
+            }
+        } else {
+            // In a real application, you might want more robust error handling
+            System.err.println("Could not find profile for session ID to save analysis: " + sessionId);
+        }
     }
 }

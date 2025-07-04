@@ -1,5 +1,8 @@
 package com.resume.generator.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resume.generator.config.DeepSeekConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -24,7 +27,9 @@ public class AIAnalysisService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public String analyzeProfile(String extractedContent) {
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public Map<String, Object> analyzeProfile(String extractedContent) {
         try {
             // Build DeepSeek API request
             Map<String, Object> requestBody = new HashMap<>();
@@ -59,7 +64,16 @@ public class AIAnalysisService {
                 if (!choices.isEmpty()) {
                     Map<String, Object> firstChoice = choices.get(0);
                     Map<String, String> messageContent = (Map<String, String>) firstChoice.get("message");
-                    return messageContent.get("content");
+                    String rawJson = messageContent.get("content");
+
+                    // Clean and parse the JSON response from the AI
+                    String cleanedJson = rawJson.replaceAll("```json", "").replaceAll("```", "").trim();
+                    try {
+                        return objectMapper.readValue(cleanedJson, new TypeReference<>() {
+                        });
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException("Failed to parse AI response as JSON", e);
+                    }
                 }
             }
 

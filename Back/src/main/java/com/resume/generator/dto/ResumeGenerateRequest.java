@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 public class ResumeGenerateRequest {
     private String sessionId;
     private Long templateId;
-    private String aiAnalysis;
 }
