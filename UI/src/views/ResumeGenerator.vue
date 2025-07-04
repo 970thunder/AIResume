@@ -3,6 +3,7 @@ import { ref, computed, h, onMounted } from 'vue';
 import { UploadFilled, Document, CircleCheck, CircleClose, Loading, Download } from '@element-plus/icons-vue'
 import axios from 'axios';
 import { ElNotification, ElLoading } from 'element-plus'
+import html2pdf from 'html2pdf.js';
 
 const currentStep = ref(0);
 const uploadedFiles = ref([]);
@@ -10,6 +11,66 @@ const selectedTemplate = ref(null);
 const generatedResume = ref(null); // This will hold the AI analysis data for preview
 const generatedResumeWithId = ref(null); // This will hold the final resume object with ID
 const isLoading = ref(false);
+
+const downloadAsPdf = () => {
+    const elementToPrint = document.querySelector('.final-resume-container .resume-container');
+    if (!elementToPrint) {
+        ElNotification({
+            title: '错误',
+            message: '找不到可以下载的简历内容。',
+            type: 'error',
+        });
+        return;
+    }
+
+    const loadingInstance = ElLoading.service({
+        lock: true,
+        text: '正在生成高清PDF，请稍候...',
+        background: 'rgba(0, 0, 0, 0.7)',
+    })
+
+    const fullName = generatedResume.value?.personalInfo?.fullName || 'resume';
+    const fileName = `Resume_${fullName.replace(/\s/g, '_')}.pdf`;
+
+    // Options for html2pdf.js
+    const opt = {
+        margin: 0,
+        filename: fileName,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            onclone: (document) => {
+                // Ensure the cloned element has no transformations applied
+                const clonedElement = document.querySelector('.resume-container');
+                if (clonedElement) {
+                    clonedElement.style.transform = 'none';
+                    clonedElement.style.zoom = '1';
+                    clonedElement.style.height = 'auto'; // let height be natural
+                }
+            }
+        },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(elementToPrint).set(opt).save().then(() => {
+        loadingInstance.close();
+        ElNotification({
+            title: '成功',
+            message: 'PDF文件已开始下载。',
+            type: 'success',
+        });
+    }).catch((err) => {
+        loadingInstance.close();
+        ElNotification({
+            title: '错误',
+            message: '生成PDF时发生未知错误。',
+            type: 'error',
+        });
+        console.error('PDF generation error:', err);
+    });
+}
 
 const resumeTemplates = ref([
     { id: 1, name: "经典商务", type: "free", description: "适合传统行业和商务场合", path: '/src/templates/classic.html', html: '' },
@@ -457,10 +518,12 @@ const generateAndPreview = async () => {
             </div>
 
             <!-- Step 4: Preview -->
-            <div v-if="currentStep === 3 && generatedResume" class="step-content">
+            <div v-if="currentStep === 3 && generatedResume" class="step-content preview-step">
                 <h2>简历预览</h2>
                 <p class="subtitle">这是根据您的AI分析和所选模板生成的最终简历预览。</p>
                 <div class="final-resume-container" v-html="finalResumeHtml"></div>
+                <el-button type="success" :icon="Download" @click="downloadAsPdf" class="step-button">下载为
+                    PDF</el-button>
                 <el-button @click="goToStep(2)" class="step-button">返回</el-button>
             </div>
 
@@ -497,6 +560,10 @@ const generateAndPreview = async () => {
 .step-content {
     max-width: 700px;
     margin: 40px auto;
+}
+
+.step-content.preview-step {
+    max-width: 900px;
 }
 
 .step-content:not(:has(.final-resume-container)) {
@@ -583,19 +650,16 @@ const generateAndPreview = async () => {
 .final-resume-container {
     border: 1px solid #ebeef5;
     background-color: #f9f9f9;
-    padding: 20px;
-    overflow: hidden;
+    padding: 0;
+    overflow: visible;
 }
 
 .final-resume-container :deep(.resume-container) {
     margin: 0 auto !important;
-    zoom: 0.75;
-    /* Using zoom to scale layout space */
     border: none !important;
     box-shadow: none !important;
-    transform: scale(0.85);
+    transform: none;
     transform-origin: top;
-    height: 1100px;
 }
 
 .resume-preview-container {

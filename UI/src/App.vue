@@ -28,11 +28,15 @@ const handleMenuSelect = (index) => {
       </div>
       <el-menu default-active="home" @select="handleMenuSelect" :collapse="isCollapsed" class="sidebar-menu">
         <el-menu-item index="home">
-          <el-icon><house /></el-icon>
+          <el-icon>
+            <house />
+          </el-icon>
           <template #title>首页</template>
         </el-menu-item>
         <el-menu-item index="generator">
-          <el-icon><document /></el-icon>
+          <el-icon>
+            <document />
+          </el-icon>
           <template #title>AI 简历</template>
         </el-menu-item>
         <el-menu-item index="store">
@@ -57,6 +61,7 @@ const handleMenuSelect = (index) => {
 .main-layout {
   height: 100vh;
 }
+
 .sidebar {
   background-color: #f4f6f8;
   border-right: 1px solid #e0e0e0;
@@ -64,6 +69,7 @@ const handleMenuSelect = (index) => {
   display: flex;
   flex-direction: column;
 }
+
 .sidebar-header {
   height: 60px;
   display: flex;
@@ -76,46 +82,55 @@ const handleMenuSelect = (index) => {
   white-space: nowrap;
   overflow: hidden;
 }
+
 .sidebar-title {
   margin-top: 6vh;
-  
+
 }
+
 .sidebar-menu {
   margin-top: 5vh;
   flex-grow: 1;
   border-right: none;
   background: transparent;
 }
+
 .sidebar-menu:not(.el-menu--collapse) {
   width: 100%;
 }
+
 .el-menu-item {
-    font-size: 1em;
+  font-size: 1em;
 }
+
 .el-menu-item.is-active {
   background-color: #e6f7ff;
   color: #337ecc;
   border-right: 3px solid #337ecc;
 }
+
 .content-area {
   padding: 20px;
   background-color: #fff;
   overflow-y: auto;
 }
+
 .sidebar-toggle {
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    background-color: #f0f2f5;
-    color: #606266;
-    flex-shrink: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: #f0f2f5;
+  color: #606266;
+  flex-shrink: 0;
 }
+
 .sidebar-toggle:hover {
-    background-color: #e9ebee;
+  background-color: #e9ebee;
 }
+
 .sidebar-toggle .el-icon {
-    font-size: 20px;
+  font-size: 20px;
 }
 </style>
