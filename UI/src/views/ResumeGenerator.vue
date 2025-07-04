@@ -42,12 +42,13 @@ const downloadAsPdf = () => {
             useCORS: true,
             logging: false,
             onclone: (document) => {
-                // Ensure the cloned element has no transformations applied
+                // Ensure the cloned element has no transformations applied and fits A4
                 const clonedElement = document.querySelector('.resume-container');
                 if (clonedElement) {
                     clonedElement.style.transform = 'none';
                     clonedElement.style.zoom = '1';
-                    clonedElement.style.height = 'auto'; // let height be natural
+                    clonedElement.style.width = '790px'; // Explicitly set width for PDF rendering
+                    clonedElement.style.height = 'auto';
                 }
             }
         },
