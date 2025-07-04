@@ -86,40 +86,88 @@ public class AIAnalysisService {
 
     private String buildAnalysisPrompt(String extractedContent) {
         return """
-                Please analyze the following profile content and return the structured resume information in JSON format:
+                Please analyze the following resume content and return a comprehensive, structured JSON object.
+                The JSON object should conform to the schema provided below. Extract as much relevant information as possible.
+                If a particular piece of information is not available in the content, omit the key or set its value to null.
 
                 Profile Content:
                 """
-                + extractedContent + """
+                + extractedContent
+                + """
 
-                        Please return the analysis result in the following JSON format:
+                        Please return the analysis result strictly in the following JSON format. Do not include any text before or after the JSON object.
                         {
-                            "personalInfo": {
-                                "name": "Name",
-                                "email": "Email",
-                                "phone": "Phone",
-                                "address": "Address"
+                          "personalInfo": {
+                            "fullName": "Full Name",
+                            "jobTitle": "Target Job Title or Current Role",
+                            "email": "email@example.com",
+                            "phone": "Phone Number",
+                            "address": {
+                              "city": "City",
+                              "state": "State/Province",
+                              "country": "Country"
                             },
-                            "summary": "Personal summary (a few sentences)",
-                            "experience": [
-                                {
-                                    "company": "Company Name",
-                                    "position": "Position",
-                                    "duration": "Work Duration",
-                                    "description": "Job Description"
-                                }
-                            ],
-                            "education": [
-                                {
-                                    "school": "School Name",
-                                    "degree": "Degree",
-                                    "duration": "Study Duration"
-                                }
-                            ],
-                            "skills": ["Skill 1", "Skill 2", "Skill 3"]
+                            "links": {
+                              "linkedInUrl": "LinkedIn Profile URL",
+                              "githubUrl": "GitHub Profile URL",
+                              "portfolioUrl": "Personal Website/Portfolio URL"
+                            }
+                          },
+                          "summary": "A 2-4 sentence professional summary.",
+                          "experience": [
+                            {
+                              "companyName": "Company Name",
+                              "jobTitle": "Position Held",
+                              "location": "City, State",
+                              "startDate": "YYYY-MM",
+                              "endDate": "YYYY-MM or Present",
+                              "responsibilities": [
+                                "Achievement or responsibility 1.",
+                                "Achievement or responsibility 2."
+                              ]
+                            }
+                          ],
+                          "education": [
+                            {
+                              "institutionName": "University/College Name",
+                              "location": "City, State",
+                              "degree": "Degree (e.g., Bachelor of Science)",
+                              "major": "Field of Study (e.g., Computer Science)",
+                              "gpa": "Grade Point Average (if available)",
+                              "graduationDate": "YYYY-MM",
+                              "relevantCoursework": ["Course 1", "Course 2"],
+                              "honors": "Academic Honors (e.g., Dean's List)"
+                            }
+                          ],
+                          "skills": {
+                            "technicalSkills": ["Skill A", "Skill B"],
+                            "softSkills": ["Skill C", "Skill D"],
+                            "tools": ["Tool E", "Tool F"]
+                          },
+                          "projects": [
+                            {
+                              "projectName": "Project Name",
+                              "description": "A brief description of the project.",
+                              "technologiesUsed": ["Tech 1", "Tech 2"],
+                              "projectUrl": "Live project URL",
+                              "repositoryUrl": "Source code URL"
+                            }
+                          ],
+                          "certifications": [
+                            {
+                              "name": "Certification Name",
+                              "issuingOrganization": "Issuing Body",
+                              "issueDate": "YYYY-MM",
+                              "credentialId": "ID or Code (if available)"
+                            }
+                          ],
+                          "languages": [
+                            {
+                              "language": "Language (e.g., English)",
+                              "proficiency": "Proficiency Level (e.g., Native, Fluent, Conversational)"
+                            }
+                          ]
                         }
-
-                        Please only return the content in JSON format, without any other text.
                         """;
     }
 }

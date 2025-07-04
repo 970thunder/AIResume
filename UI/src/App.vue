@@ -35,86 +35,183 @@ onMounted(async () => {
   }
 });
 
+const normalizedResume = computed(() => {
+  const rawData = generatedResume.value;
+  if (!rawData) return null;
+
+  // Deep copy to avoid mutating the original state
+  const data = JSON.parse(JSON.stringify(rawData));
+
+  // Normalize Personal Info
+  if (data.personalInfo) {
+    data.personalInfo.fullName = data.personalInfo.fullName || data.personalInfo.name;
+    if (typeof data.personalInfo.address === 'string') {
+      data.personalInfo.address = { city: data.personalInfo.address };
+    }
+  }
+
+  // Normalize Experience
+  if (data.experience) {
+    data.experience.forEach(exp => {
+      exp.companyName = exp.companyName || exp.company;
+      exp.jobTitle = exp.jobTitle || exp.position;
+      if (exp.duration && !exp.startDate) {
+        const parts = exp.duration.split(/–|-/).map(p => p.trim());
+        exp.startDate = parts[0] || '';
+        exp.endDate = parts[1] || 'Present';
+      }
+      if (exp.description && !Array.isArray(exp.responsibilities)) {
+        exp.responsibilities = exp.description.split(/[。；\n]/).filter(s => s.trim());
+      }
+    });
+  }
+
+  // Normalize Education
+  if (data.education) {
+    data.education.forEach(edu => {
+      edu.institutionName = edu.institutionName || edu.school;
+      if (edu.duration && !edu.graduationDate) {
+        const parts = edu.duration.split(/–|-/).map(p => p.trim());
+        edu.graduationDate = parts[1] || parts[0] || '';
+      }
+      if (edu.degree && !edu.major) {
+        const parts = edu.degree.split('|').map(p => p.trim());
+        edu.degree = parts[0];
+        edu.major = parts[1] || '';
+      }
+    });
+  }
+
+  // Normalize Skills
+  if (Array.isArray(data.skills)) {
+    data.skills = { technicalSkills: data.skills, softSkills: [], tools: [] };
+  }
+
+  return data;
+});
+
 const finalResumeHtml = computed(() => {
-  if (!generatedResume.value || !selectedTemplate.value || !selectedTemplate.value.html) {
+  if (!normalizedResume.value || !selectedTemplate.value || !selectedTemplate.value.html) {
     return '<p>请先完成AI分析并选择一个模板。</p>';
   }
 
   let html = selectedTemplate.value.html;
-  const data = generatedResume.value;
+  const data = normalizedResume.value;
 
-  // Populate personal info
-  if (data.personalInfo) {
-    html = html.replace(/{{name}}/g, data.personalInfo.name || '');
-    html = html.replace(/{{phone}}/g, data.personalInfo?.phone || '');
-    html = html.replace(/{{email}}/g, data.personalInfo.email || '');
-    html = html.replace(/{{address}}/g, data.personalInfo.address || '');
-  }
-
-  // Populate summary
-  html = html.replace(/{{summary}}/g, data.summary || '');
-
-  // Populate education
-  const educationHtml = data.education?.map(edu => {
-    if (selectedTemplate.value.id === 1) { // Classic
-      return `<div class="item">
-                <div class="item-header">
-                    <span class="title">${edu.school}</span>
-                    <span class="date">${edu.duration}</span>
-                </div>
-                <div class="item-content">
-                    <p><strong>${edu.degree}</strong></p>
-                </div>
-            </div>`;
+  // --- Helper function to prevent errors on missing data ---
+  const get = (obj, path, defaultValue = '') => {
+    const keys = Array.isArray(path) ? path : path.split('.');
+    let result = obj;
+    for (const key of keys) {
+      if (result === null || result === undefined) return defaultValue;
+      result = result[key];
     }
-    if (selectedTemplate.value.id === 2) { // Modern
-      return `<div class="item">
-                <div class="item-header">
-                    <span class="title">${edu.school}</span>
-                    <span class="date">${edu.duration}</span>
-                </div>
-                <div class="item-content">
-                     <p><strong>${edu.degree}</strong></p>
-                </div>
-            </div>`;
-    }
+    return result === undefined ? defaultValue : result;
+  };
+
+  // 1. Populate Personal Info
+  html = html.replace(/{{fullName}}/g, get(data, 'personalInfo.fullName'));
+  html = html.replace(/{{jobTitle}}/g, get(data, 'personalInfo.jobTitle'));
+  html = html.replace(/{{phone}}/g, get(data, 'personalInfo.phone'));
+  html = html.replace(/{{email}}/g, get(data, 'personalInfo.email'));
+  const address = [get(data, 'personalInfo.address.city'), get(data, 'personalInfo.address.state'), get(data, 'personalInfo.address.country')].filter(Boolean).join(', ');
+  html = html.replace(/{{address}}/g, address);
+
+  const links = get(data, 'personalInfo.links', {});
+  const linksHtml = Object.entries(links).map(([key, value]) => {
+    if (value) return `<li><a href="${value}" target="_blank">${key.replace('Url', '')}</a></li>`;
     return '';
   }).join('');
+  html = html.replace('<!-- {{links}} -->', linksHtml);
+  html = html.replace('{{links}}', linksHtml);
+
+
+  // 2. Populate Summary
+  html = html.replace(/{{summary}}/g, get(data, 'summary'));
+
+  // 3. Populate Education
+  const educationHtml = get(data, 'education', []).map(edu => `
+    <div class="item">
+      <div class="item-header">
+        <span class="title">${get(edu, 'institutionName')} - ${get(edu, 'major')}</span>
+        <span class="date">${get(edu, 'graduationDate')}</span>
+      </div>
+      <div class="item-content">
+        <p><strong>${get(edu, 'degree')}</strong> ${get(edu, 'honors') ? `(${get(edu, 'honors')})` : ''}</p>
+        ${get(edu, 'gpa') ? `<p>GPA: ${get(edu, 'gpa')}</p>` : ''}
+      </div>
+    </div>
+  `).join('');
   html = html.replace('<!-- {{education}} -->', educationHtml);
+  html = html.replace('{{education}}', educationHtml);
 
-  // Populate experience
-  const experienceHtml = data.experience?.map(exp => {
-    if (selectedTemplate.value.id === 1) { // Classic
-      return `<div class="item">
-                <div class="item-header">
-                    <span class="title">${exp.company}</span>
-                    <span>${exp.position}</span>
-                    <span class="date">${exp.duration}</span>
-                </div>
-                <div class="item-content">
-                    <p>${exp.description}</p>
-                </div>
-            </div>`;
-    }
-    if (selectedTemplate.value.id === 2) { // Modern
-      return `<div class="item">
-                <div class="item-header">
-                    <span class="title">${exp.company}</span>
-                     <span>${exp.position}</span>
-                    <span class="date">${exp.duration}</span>
-                </div>
-                <div class="item-content">
-                    <p>${exp.description}</p>
-                </div>
-            </div>`;
+  // 4. Populate Experience
+  const experienceHtml = get(data, 'experience', []).map(exp => `
+    <div class="item">
+      <div class="item-header">
+        <span class="title">${get(exp, 'jobTitle')} at ${get(exp, 'companyName')}</span>
+        <span class="date">${get(exp, 'startDate')} - ${get(exp, 'endDate')}</span>
+      </div>
+       <div class="item-subheader">${get(exp, 'location')}</div>
+      <ul class="item-content responsibilities">
+        ${get(exp, 'responsibilities', []).map(r => `<li>${r}</li>`).join('')}
+      </ul>
+    </div>
+  `).join('');
+  html = html.replace('<!-- {{experience}} -->', experienceHtml);
+  html = html.replace('{{experience}}', experienceHtml);
+
+  // 5. Populate Skills
+  const skillsData = get(data, 'skills', {});
+  const skillsHtml = Object.entries(skillsData).map(([category, skillList]) => {
+    if (Array.isArray(skillList) && skillList.length > 0) {
+      return `<strong>${category.replace('Skills', '')}:</strong> ` + skillList.map(skill => `<span class="skill-tag">${skill}</span>`).join(' ');
     }
     return '';
-  }).join('');
-  html = html.replace('<!-- {{experience}} -->', experienceHtml);
+  }).filter(Boolean).join('<br>');
+  html = html.replace('<!-- {{skills}} -->', `<div class="skills-section">${skillsHtml}</div>`);
+  html = html.replace('{{skills}}', `<div class="skills-section">${skillsHtml}</div>`);
 
-  // Populate skills
-  const skillsHtml = data.skills?.map(skill => `<li>${skill}</li>`).join('');
-  html = html.replace('<!-- {{skills}} -->', skillsHtml);
+  // 6. Populate Projects
+  const projectsHtml = get(data, 'projects', []).map(proj => `
+    <div class="item">
+      <div class="item-header">
+        <span class="title">${get(proj, 'projectName')}</span>
+        <span class="date">
+            ${get(proj, 'projectUrl') ? `<a href="${get(proj, 'projectUrl')}" target="_blank">Live Demo</a>` : ''}
+            ${get(proj, 'repositoryUrl') ? ` | <a href="${get(proj, 'repositoryUrl')}" target="_blank">Source Code</a>` : ''}
+        </span>
+      </div>
+      <div class="item-content">
+        <p>${get(proj, 'description')}</p>
+        <p><strong>Technologies:</strong> ${get(proj, 'technologiesUsed', []).join(', ')}</p>
+      </div>
+    </div>
+  `).join('');
+  html = html.replace('<!-- {{projects}} -->', projectsHtml);
+  html = html.replace('{{projects}}', projectsHtml);
+
+  // 7. Populate Certifications
+  const certsHtml = get(data, 'certifications', []).map(cert => `
+    <div class="item">
+        <div class="item-header">
+            <span class="title">${get(cert, 'name')}</span>
+            <span class="date">${get(cert, 'issueDate')}</span>
+        </div>
+        <div class="item-content">
+            <p>Issued by: ${get(cert, 'issuingOrganization')}</p>
+        </div>
+    </div>
+  `).join('');
+  html = html.replace('<!-- {{certifications}} -->', certsHtml);
+  html = html.replace('{{certifications}}', certsHtml);
+
+  // 8. Populate Languages
+  const langsHtml = get(data, 'languages', []).map(lang => `
+    <span class="language-item"><strong>${get(lang, 'language')}:</strong> ${get(lang, 'proficiency')}</span>
+  `).join(' | ');
+  html = html.replace('<!-- {{languages}} -->', langsHtml);
+  html = html.replace('{{languages}}', langsHtml);
 
   return html;
 });
@@ -170,12 +267,61 @@ const processWithAI = async () => {
     });
     // Fallback for UI testing
     generatedResume.value = {
-      personalInfo: { name: "张三 (模拟)", email: "zhangsan-mock@example.com", phone: "138-0000-0000", address: "模拟数据地址" },
-      summary: "这是模拟的个人简介...",
-      experience: [{ company: "模拟公司", position: "软件工程师", duration: "2022-2024", description: "负责模拟项目开发..." }],
-      education: [{ school: "模拟大学", degree: "计算机科学", duration: "2018-2022" }],
-      skills: ["Vue", "Spring Boot", "Element Plus"],
-      sessionId: "mock-session-id-123" // Add mock session ID for testing
+      personalInfo: {
+        fullName: "张三 (模拟)",
+        jobTitle: "高级软件工程师",
+        email: "zhangsan-mock@example.com",
+        phone: "138-0000-0000",
+        address: { city: "深圳", state: "广东", country: "中国" },
+        links: {
+          linkedInUrl: "https://www.linkedin.com/in/mock",
+          githubUrl: "https://github.com/mock",
+          portfolioUrl: "https://portfolio.mock.com"
+        }
+      },
+      summary: "一位充满激情、注重细节的软件工程师，在设计、开发和维护高性能Web应用方面拥有超过5年的经验。擅长使用Vue和Spring Boot技术栈，并致力于编写整洁、可扩展的代码。",
+      experience: [{
+        companyName: "模拟科技公司",
+        jobTitle: "软件工程师",
+        location: "深圳, 广东",
+        startDate: "2022-01",
+        endDate: "至今",
+        responsibilities: [
+          "领导了旗舰产品的重构项目，将前端性能提升了40%。",
+          "设计并实现了一个新的RESTful API网关，处理超过100万次/天的请求。",
+          "指导了两位初级工程师，并主导了团队的代码审查流程。"
+        ]
+      }],
+      education: [{
+        institutionName: "模拟大学",
+        location: "北京",
+        degree: "计算机科学学士",
+        major: "计算机科学",
+        gpa: "3.8/4.0",
+        graduationDate: "2022-06",
+        honors: "优秀毕业生"
+      }],
+      skills: {
+        technicalSkills: ["Java", "Spring Boot", "Vue.js", "JavaScript", "SQL"],
+        softSkills: ["团队协作", "解决问题", "沟通能力"],
+        tools: ["Git", "Docker", "Jira", "IntelliJ IDEA"]
+      },
+      projects: [{
+        projectName: "AI简历生成器",
+        description: "一个智能Web应用，可以分析用户上传的简历文件，并使用AI生成结构化的、专业的简历。",
+        technologiesUsed: ["Vue.js", "Element Plus", "Spring Boot", "DeepSeek API"],
+        repositoryUrl: "https://github.com/mock/ai-resume"
+      }],
+      certifications: [{
+        name: "Oracle认证Java程序员 (OCP)",
+        issuingOrganization: "Oracle",
+        issueDate: "2023-08"
+      }],
+      languages: [
+        { language: "中文", proficiency: "母语" },
+        { language: "English", proficiency: "专业工作能力" }
+      ],
+      sessionId: "mock-session-id-123"
     };
     goToStep(2);
   } finally {
