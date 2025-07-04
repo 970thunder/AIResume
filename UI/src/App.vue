@@ -230,7 +230,7 @@ const generateAndPreview = async () => {
 
                 <h3>技能</h3>
                 <el-tag v-for="skill in generatedResume.skills" :key="skill" type="primary" class="skill-tag">{{ skill
-                }}</el-tag>
+                  }}</el-tag>
               </div>
             </div>
             <el-button @click="goToStep(2)" class="step-button">返回</el-button>
