@@ -20,4 +20,7 @@ yarn-error.log*
 
 # OS-specific files
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Backend build artifacts
+/Back/target/

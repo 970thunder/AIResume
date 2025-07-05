@@ -12,7 +12,7 @@ const generatedResume = ref(null); // This will hold the AI analysis data for pr
 const generatedResumeWithId = ref(null); // This will hold the final resume object with ID
 const isLoading = ref(false);
 
-const downloadAsPdf = () => {
+const downloadAsPdf = async () => {
     const elementToPrint = document.querySelector('.final-resume-container .resume-container');
     if (!elementToPrint) {
         ElNotification({
@@ -23,6 +23,11 @@ const downloadAsPdf = () => {
         return;
     }
 
+    // Temporarily make the element visible to measure its full height
+    elementToPrint.style.display = 'block';
+    const contentHeight = elementToPrint.scrollHeight;
+    elementToPrint.style.display = ''; // Revert style change
+
     const loadingInstance = ElLoading.service({
         lock: true,
         text: '正在生成高清PDF，请稍候...',
@@ -31,6 +36,11 @@ const downloadAsPdf = () => {
 
     const fullName = generatedResume.value?.personalInfo?.fullName || 'resume';
     const fileName = `Resume_${fullName.replace(/\s/g, '_')}.pdf`;
+
+    // A4 page height in pixels at 96 DPI is approx 1123px. 
+    // We use a threshold slightly smaller to be safe.
+    const a4HeightPx = 1123;
+    const isMultiPage = contentHeight > a4HeightPx;
 
     // Options for html2pdf.js
     const opt = {
@@ -52,7 +62,11 @@ const downloadAsPdf = () => {
                 }
             }
         },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        jsPDF: {
+            unit: 'px',
+            format: isMultiPage ? [794, contentHeight + 10] : 'a4', // a4 width is ~794px
+            orientation: 'portrait'
+        }
     };
 
     html2pdf().from(elementToPrint).set(opt).save().then(() => {
@@ -74,12 +88,12 @@ const downloadAsPdf = () => {
 }
 
 const resumeTemplates = ref([
-    { id: 1, name: "经典商务", type: "free", description: "适合传统行业和商务场合", path: '/src/templates/classic.html', html: '' },
-    { id: 2, name: "现代简约", type: "free", description: "简洁现代，适合各种职位", path: '/src/templates/modern.html', html: '' },
+    { id: 1, name: "经典商务", type: "free", description: "适合传统行业和商务场合", path: '/templates/classic.html', html: '' },
+    { id: 2, name: "现代简约", type: "free", description: "简洁现代，适合各种职位", path: '/templates/modern.html', html: '' },
     { id: 3, name: "创意设计", type: "premium", price: "¥29", description: "适合设计师和创意工作者" },
     { id: 4, name: "技术专业", type: "premium", price: "¥35", description: "专为技术人员优化" },
     { id: 5, "name": "高端商务", type: "premium", price: "¥45", description: "高级管理层专用模板" },
-    { id: 6, name: "学术研究", type: "free", description: "适合学术界和研究人员" }
+    { id: 6, name: "学术研究", type: "free", description: "适合学术界和研究人员", path: '/templates/academic.html', html: '' }
 ]);
 
 onMounted(async () => {
@@ -299,11 +313,11 @@ const processWithAI = async () => {
     });
 
     try {
-        const response = await axios.post('http://localhost:8080/api/files/upload', formData, {
+        const response = await axios.post('http://47.122.119.35:9090/api/files/upload', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
 
-        const analysisResponse = await axios.post('http://localhost:8080/api/resume/analyze', {
+        const analysisResponse = await axios.post('http://47.122.119.35:9090/api/resume/analyze', {
             sessionId: response.data.sessionId,
             extractedContent: response.data.extractedContent,
         });
@@ -406,7 +420,7 @@ const selectTemplate = (template) => {
 const generateAndPreview = async () => {
     isLoading.value = true;
     try {
-        const response = await axios.post('http://localhost:8080/api/resume/generate', {
+        const response = await axios.post('http://47.122.119.35:9090/api/resume/generate', {
             sessionId: generatedResume.value.sessionId,
             templateId: selectedTemplate.value.id,
         });

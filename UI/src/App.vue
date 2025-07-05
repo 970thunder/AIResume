@@ -101,12 +101,19 @@ const handleMenuSelect = (index) => {
 
 .el-menu-item {
   font-size: 1em;
+  transition: all 0.2s ease-in-out;
+}
+
+.el-menu-item:hover:not(.is-active) {
+  background-color: #f0f2f5;
 }
 
 .el-menu-item.is-active {
   background-color: #e6f7ff;
   color: #337ecc;
   border-right: 3px solid #337ecc;
+  transform: translateX(5px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(51, 126, 204, 0.2);
 }
 
 .content-area {
