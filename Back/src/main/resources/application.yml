@@ -4,8 +4,8 @@ server:
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/resume_generator?useSSL=false&serverTimezone=UTC
-    username: resume_generator
-    password: 1010411661 # <-- 更改成你的账号密码
+    username: hyper
+    password: xxx # <-- 更改成你的账号密码
     driver-class-name: com.mysql.cj.jdbc.Driver
   
   jpa:
