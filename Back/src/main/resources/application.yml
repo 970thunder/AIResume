@@ -22,7 +22,7 @@ spring:
       max-request-size: 100MB
 
 deepseek:
-  api-key: sk-ade771e428464713ad6a86407fe07fda # <-- 更改成你的Key
+  api-key: xxx # <-- 更改成你的Key
   base-url: https://api.deepseek.com/v1
   model: deepseek-chat
 
