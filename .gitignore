@@ -18,6 +18,13 @@ yarn-error.log*
 .env.local
 .env.*.local
 
+# Development configuration files
+/Back/src/main/resources/application.yml
+/Back/src/main/resources/application-dev.yml
+!/Back/src/main/resources/application-prod.yml
+!/Back/src/main/resources/application.yml.example
+
+/Back/src/resources
 # OS-specific files
 .DS_Store
 Thumbs.db
