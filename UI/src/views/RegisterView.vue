@@ -48,6 +48,7 @@ import { useAuthStore } from '@/stores/auth';
 import { ElMessage } from 'element-plus';
 import { User, Lock, Message, Key } from '@element-plus/icons-vue';
 import axios from 'axios';
+import { API_URLS, getHeaders } from '@/config/api';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -143,8 +144,9 @@ const sendVerificationCode = async () => {
         sending.value = true;
 
         // 检查邮箱是否已注册
-        const checkResponse = await axios.get('http://47.122.119.35:9090/api/auth/check-email', {
-            params: { email: registerForm.email }
+        const checkResponse = await axios.get(API_URLS.auth.checkEmail, {
+            params: { email: registerForm.email },
+            headers: getHeaders()
         });
 
         if (checkResponse.data.exists) {
@@ -155,8 +157,9 @@ const sendVerificationCode = async () => {
         // 开始倒计时
         startCooldown();
 
-        await axios.post('http://47.122.119.35:9090/api/auth/send-verification-code', null, {
-            params: { email: registerForm.email }
+        await axios.post(API_URLS.auth.sendVerificationCode, null, {
+            params: { email: registerForm.email },
+            headers: getHeaders()
         });
         ElMessage.success('验证码已发送到您的邮箱，请注意查收');
     } catch (error) {

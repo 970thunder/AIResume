@@ -56,4 +56,12 @@ application:
   security:
     jwt:
       secret-key: ${JWT_SECRET_KEY}
-      expiration: 86400000 
+      expiration: 86400000
+
+# CORS配置
+cors:
+  allowed-origins: http://47.122.119.35
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
+  allow-credentials: false
+  max-age: 3600 

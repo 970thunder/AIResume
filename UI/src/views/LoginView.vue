@@ -30,6 +30,7 @@ import { ElNotification } from 'element-plus';
 import { User, Lock } from '@element-plus/icons-vue';
 import Loading from '@/component/loading.vue';
 import axios from 'axios';
+import { API_URLS, getHeaders } from '@/config/api';
 
 const router = useRouter();
 const loginFormRef = ref(null);
@@ -51,7 +52,9 @@ const handleLogin = async () => {
         if (valid) {
             loading.value = true;
             try {
-                const response = await axios.post('http://47.122.119.35:9090/api/auth/login', loginForm);
+                const response = await axios.post(API_URLS.auth.login, loginForm, {
+                    headers: getHeaders()
+                });
                 const token = response.data.token;
                 const user = response.data.user;
 

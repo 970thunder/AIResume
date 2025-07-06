@@ -4,6 +4,7 @@ import { UploadFilled, Document, CircleCheck, CircleClose, Loading, Download } f
 import axios from 'axios';
 import { ElNotification, ElLoading } from 'element-plus'
 import html2pdf from 'html2pdf.js';
+import { API_URLS, getHeaders } from '@/config/api';
 
 const currentStep = ref(0);
 const uploadedFiles = ref([]);
@@ -11,6 +12,26 @@ const selectedTemplate = ref(null);
 const generatedResume = ref(null); // This will hold the AI analysis data for preview
 const generatedResumeWithId = ref(null); // This will hold the final resume object with ID
 const isLoading = ref(false);
+
+// 修改为从数据库获取模板
+const resumeTemplates = ref([]);
+
+// 获取模板列表
+const fetchTemplates = async () => {
+    try {
+        const response = await axios.get(API_URLS.templates.all, {
+            headers: getHeaders()
+        });
+        resumeTemplates.value = response.data;
+    } catch (error) {
+        console.error('Error fetching templates:', error);
+        ElNotification({
+            title: '错误',
+            message: '获取模板列表失败',
+            type: 'error',
+        });
+    }
+};
 
 const downloadAsPdf = async () => {
     const elementToPrint = document.querySelector('.final-resume-container .resume-container');
@@ -82,24 +103,18 @@ const downloadAsPdf = async () => {
     });
 }
 
-const resumeTemplates = ref([
-    { id: 1, name: "经典商务", type: "free", description: "适合传统行业和商务场合", path: '/templates/classic.html', html: '', price: null },
-    { id: 2, name: "现代简约", type: "free", description: "简洁现代，适合各种职位", path: '/templates/modern.html', html: '', price: null },
-    { id: 3, name: "创意设计", type: "premium", price: "¥29", description: "适合设计师和创意工作者", path: '/templates/creative.html', html: '' },
-    { id: 4, name: "技术专业", type: "premium", price: "¥35", description: "专为技术人员优化", path: '/templates/technical.html', html: '' },
-    { id: 5, name: "高端商务", type: "premium", price: "¥45", description: "高级管理层专用模板", path: '/templates/executive.html', html: '' },
-    { id: 6, name: "学术研究", type: "free", description: "适合学术界和研究人员", path: '/templates/academic.html', html: '', price: null }
-]);
-
 onMounted(async () => {
+    // 获取模板列表
+    await fetchTemplates();
+
+    // 加载模板HTML内容
     for (const template of resumeTemplates.value) {
-        if (template.path) {
+        if (template.templatePath) {
             try {
-                const response = await fetch(template.path);
+                const response = await fetch(template.templatePath);
                 template.html = await response.text();
             } catch (error) {
-                console.error(`Error loading template ${template.path}:`, error);
-                // Provide fallback content if the template fails to load
+                console.error(`Error loading template ${template.templatePath}:`, error);
                 template.html = `<div style='text-align: center; padding: 20px; color: red;'>加载模板失败</div>`;
             }
         }
@@ -308,13 +323,17 @@ const processWithAI = async () => {
     });
 
     try {
-        const response = await axios.post('http://47.122.119.35:9090/api/files/upload', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
+        const response = await axios.post(API_URLS.resume.upload, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
         });
 
-        const analysisResponse = await axios.post('http://47.122.119.35:9090/api/resume/analyze', {
+        const analysisResponse = await axios.post(API_URLS.resume.analyze, {
             sessionId: response.data.sessionId,
             extractedContent: response.data.extractedContent,
+        }, {
+            headers: getHeaders()
         });
 
         generatedResume.value = analysisResponse.data.analysis;
@@ -408,17 +427,19 @@ const selectTemplate = (template) => {
 const generateAndPreview = async () => {
     isLoading.value = true;
     try {
-        const response = await axios.post('http://47.122.119.35:9090/api/resume/generate', {
+        const response = await axios.post(API_URLS.resume.generate, {
             templateId: selectedTemplate.value.id,
-            aiAnalysis: generatedResume.value // Send the whole analysis object
+            aiAnalysis: generatedResume.value
+        }, {
+            headers: getHeaders()
         });
 
-        if (response.data) {  // 移除.success检查
-            const newResume = response.data.resume || response.data;  // 添加fallback
+        if (response.data) {
+            const newResume = response.data.resume || response.data;
             generatedResumeWithId.value = newResume;
-            generatedResume.value = newResume.resumeData || newResume;  // 添加fallback
+            generatedResume.value = newResume.resumeData || newResume;
 
-            goToStep(3);  // 确保这行代码会执行
+            goToStep(3);
             ElNotification({
                 title: '成功',
                 dangerouslyUseHTMLString: true,
@@ -514,8 +535,9 @@ const generateAndPreview = async () => {
                             <div class="template-info">
                                 <div class="template-name">{{ template.name }}</div>
                                 <div class="template-desc">{{ template.description }}</div>
-                                <el-tag :type="template.type === 'free' ? 'success' : 'warning'" size="small">{{
-                                    template.type === 'free' ? '免费' : template.price }}</el-tag>
+                                <el-tag :type="template.type === 'free' ? 'success' : 'warning'" size="small">
+                                    {{ template.type === 'free' ? '免费' : `¥${template.price}` }}
+                                </el-tag>
                             </div>
                         </el-card>
                     </el-col>

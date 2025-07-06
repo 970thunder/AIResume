@@ -2,16 +2,16 @@ package com.resume.generator.service;
 
 import com.resume.generator.entity.Template;
 import com.resume.generator.repository.TemplateRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TemplateService {
 
-    @Autowired
-    private TemplateRepository templateRepository;
+    private final TemplateRepository templateRepository;
 
     public List<Template> getAllTemplates() {
         return templateRepository.findAll();
