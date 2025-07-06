@@ -26,13 +26,12 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
 import { ElNotification } from 'element-plus';
 import { User, Lock } from '@element-plus/icons-vue';
 import Loading from '@/component/loading.vue';
+import axios from 'axios';
 
 const router = useRouter();
-const authStore = useAuthStore();
 const loginFormRef = ref(null);
 const loading = ref(false);
 
@@ -52,7 +51,17 @@ const handleLogin = async () => {
         if (valid) {
             loading.value = true;
             try {
-                await authStore.login(loginForm);
+                const response = await axios.post('http://47.122.119.35:9090/api/auth/login', loginForm);
+                const token = response.data.token;
+                const user = response.data.user;
+
+                // 存储token和用户信息
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+
+                // 设置后续请求的Authorization header
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
                 ElNotification({
                     title: '成功',
                     message: '登录成功，欢迎回来！',

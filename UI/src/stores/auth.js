@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
+const API_BASE_URL = 'http://47.122.119.35:9090';
+
 const useAuthStore = defineStore('auth', {
     state: () => ({
         token: localStorage.getItem('token') || null,
@@ -11,13 +13,13 @@ const useAuthStore = defineStore('auth', {
     },
     actions: {
         async login(credentials) {
-            const response = await axios.post('/api/auth/login', credentials);
+            const response = await axios.post(`${API_BASE_URL}/api/auth/login`, credentials);
             this.setToken(response.data.token);
             this.setUser(response.data.user);
             return response.data;
         },
         async register(userInfo) {
-            const response = await axios.post('/api/auth/register', userInfo);
+            const response = await axios.post(`${API_BASE_URL}/api/auth/register`, userInfo);
             this.setToken(response.data.token);
             this.setUser(response.data.user);
             return response.data;

@@ -143,7 +143,7 @@ const sendVerificationCode = async () => {
         sending.value = true;
 
         // 检查邮箱是否已注册
-        const checkResponse = await axios.get('/api/auth/check-email', {
+        const checkResponse = await axios.get('http://47.122.119.35:9090/api/auth/check-email', {
             params: { email: registerForm.email }
         });
 
@@ -155,7 +155,7 @@ const sendVerificationCode = async () => {
         // 开始倒计时
         startCooldown();
 
-        await axios.post('/api/auth/send-verification-code', null, {
+        await axios.post('http://47.122.119.35:9090/api/auth/send-verification-code', null, {
             params: { email: registerForm.email }
         });
         ElMessage.success('验证码已发送到您的邮箱，请注意查收');

@@ -308,11 +308,11 @@ const processWithAI = async () => {
     });
 
     try {
-        const response = await axios.post('/api/files/upload', formData, {
+        const response = await axios.post('http://47.122.119.35:9090/api/files/upload', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
 
-        const analysisResponse = await axios.post('/api/resume/analyze', {
+        const analysisResponse = await axios.post('http://47.122.119.35:9090/api/resume/analyze', {
             sessionId: response.data.sessionId,
             extractedContent: response.data.extractedContent,
         });
@@ -408,7 +408,7 @@ const selectTemplate = (template) => {
 const generateAndPreview = async () => {
     isLoading.value = true;
     try {
-        const response = await axios.post('/api/resume/generate', {
+        const response = await axios.post('http://47.122.119.35:9090/api/resume/generate', {
             templateId: selectedTemplate.value.id,
             aiAnalysis: generatedResume.value // Send the whole analysis object
         });
