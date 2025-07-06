@@ -1,30 +1,28 @@
 <template>
-    <div class="store-page">
-        <div class="placeholder">
-            <el-icon :size="50" color="#c0c4cc"><shopping-cart-full /></el-icon>
-            <h1>模板商城即将上线</h1>
-            <p>敬请期待更多精美、专业的简历模板！</p>
-        </div>
+    <div class="page-container">
+        <el-card>
+            <template #header>
+                <div class="card-header">
+                    <h1>模板商城</h1>
+                </div>
+            </template>
+            <p>这里将来会展示所有可用的精美简历模板，敬请期待！</p>
+            <el-empty description="模板正在加速上架中..." />
+        </el-card>
     </div>
 </template>
 
 <script setup>
-import { ShoppingCartFull } from '@element-plus/icons-vue';
+// 未来将在这里添加模板商城的逻辑，例如从后端获取模板列表
 </script>
 
 <style scoped>
-.store-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    text-align: center;
-    color: #909399;
+.page-container {
+    padding: 20px;
 }
 
-.placeholder h1 {
-    font-size: 2em;
-    color: #606266;
-    margin: 20px 0 10px 0;
+.card-header h1 {
+    margin: 0;
+    font-size: 24px;
 }
 </style>

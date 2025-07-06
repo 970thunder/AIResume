@@ -1,13 +1,12 @@
 package com.resume.generator.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class ResumeGenerateRequest {
-    private String sessionId;
+    // It no longer needs sessionId
+    // private String sessionId;
+
     private Long templateId;
+    private Object aiAnalysis; // Receive the full analysis object
 }

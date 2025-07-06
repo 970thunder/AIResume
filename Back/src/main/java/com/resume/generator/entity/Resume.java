@@ -18,15 +18,23 @@ public class Resume {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_profile_id")
-    private Long userProfileId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    @Column(name = "template_id")
+    @Column(name = "template_id", nullable = false)
     private Long templateId;
 
     @Column(name = "file_path")
     private String filePath;
 
+    @Column(name = "ai_analysis_data", columnDefinition = "TEXT")
+    private String aiAnalysisData;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    // This field will not be persisted in the database.
+    // It's used to carry the full resume data to the frontend.
+    @Transient
+    private Object resumeData;
 }

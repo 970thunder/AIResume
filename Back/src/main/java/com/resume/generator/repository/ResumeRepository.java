@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface ResumeRepository extends JpaRepository<Resume, Long> {
-    List<Resume> findByUserProfileId(Long userProfileId);
+    List<Resume> findByUserId(Long userId);
 }

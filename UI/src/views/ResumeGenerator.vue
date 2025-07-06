@@ -37,11 +37,6 @@ const downloadAsPdf = async () => {
     const fullName = generatedResume.value?.personalInfo?.fullName || 'resume';
     const fileName = `Resume_${fullName.replace(/\s/g, '_')}.pdf`;
 
-    // A4 page height in pixels at 96 DPI is approx 1123px. 
-    // We use a threshold slightly smaller to be safe.
-    const a4HeightPx = 1123;
-    const isMultiPage = contentHeight > a4HeightPx;
-
     // Options for html2pdf.js
     const opt = {
         margin: 0,
@@ -52,7 +47,7 @@ const downloadAsPdf = async () => {
             useCORS: true,
             logging: false,
             onclone: (document) => {
-                // Ensure the cloned element has no transformations applied and fits A4
+                // Ensure the cloned element has no transformations applied
                 const clonedElement = document.querySelector('.resume-container');
                 if (clonedElement) {
                     clonedElement.style.transform = 'none';
@@ -64,7 +59,7 @@ const downloadAsPdf = async () => {
         },
         jsPDF: {
             unit: 'px',
-            format: isMultiPage ? [794, contentHeight + 10] : 'a4', // a4 width is ~794px
+            format: [794, contentHeight + 40], // 使用实际内容高度，添加一些边距
             orientation: 'portrait'
         }
     };
@@ -88,12 +83,12 @@ const downloadAsPdf = async () => {
 }
 
 const resumeTemplates = ref([
-    { id: 1, name: "经典商务", type: "free", description: "适合传统行业和商务场合", path: '/templates/classic.html', html: '' },
-    { id: 2, name: "现代简约", type: "free", description: "简洁现代，适合各种职位", path: '/templates/modern.html', html: '' },
-    { id: 3, name: "创意设计", type: "premium", price: "¥29", description: "适合设计师和创意工作者" },
-    { id: 4, name: "技术专业", type: "premium", price: "¥35", description: "专为技术人员优化" },
-    { id: 5, "name": "高端商务", type: "premium", price: "¥45", description: "高级管理层专用模板" },
-    { id: 6, name: "学术研究", type: "free", description: "适合学术界和研究人员", path: '/templates/academic.html', html: '' }
+    { id: 1, name: "经典商务", type: "free", description: "适合传统行业和商务场合", path: '/templates/classic.html', html: '', price: null },
+    { id: 2, name: "现代简约", type: "free", description: "简洁现代，适合各种职位", path: '/templates/modern.html', html: '', price: null },
+    { id: 3, name: "创意设计", type: "premium", price: "¥29", description: "适合设计师和创意工作者", path: '/templates/creative.html', html: '' },
+    { id: 4, name: "技术专业", type: "premium", price: "¥35", description: "专为技术人员优化", path: '/templates/technical.html', html: '' },
+    { id: 5, name: "高端商务", type: "premium", price: "¥45", description: "高级管理层专用模板", path: '/templates/executive.html', html: '' },
+    { id: 6, name: "学术研究", type: "free", description: "适合学术界和研究人员", path: '/templates/academic.html', html: '', price: null }
 ]);
 
 onMounted(async () => {
@@ -313,11 +308,11 @@ const processWithAI = async () => {
     });
 
     try {
-        const response = await axios.post('http://localhost:9090/api/files/upload', formData, {
+        const response = await axios.post('/api/files/upload', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
 
-        const analysisResponse = await axios.post('http://localhost:9090/api/resume/analyze', {
+        const analysisResponse = await axios.post('/api/resume/analyze', {
             sessionId: response.data.sessionId,
             extractedContent: response.data.extractedContent,
         });
@@ -407,26 +402,23 @@ const processWithAI = async () => {
 
 const selectTemplate = (template) => {
     selectedTemplate.value = template;
-    if (template.type === 'premium') {
-        ElNotification({
-            title: '提示',
-            dangerouslyUseHTMLString: true,
-            message: `<strong>选择了付费模板: ${template.name} - ${template.price}</strong>`,
-            type: 'info',
-        });
-    }
+    // No other logic needed here, just set the selection.
 };
 
 const generateAndPreview = async () => {
     isLoading.value = true;
     try {
-        const response = await axios.post('http://localhost:9090/api/resume/generate', {
-            sessionId: generatedResume.value.sessionId,
+        const response = await axios.post('/api/resume/generate', {
             templateId: selectedTemplate.value.id,
+            aiAnalysis: generatedResume.value // Send the whole analysis object
         });
-        if (response.data.success) {
-            generatedResumeWithId.value = response.data.resume;
-            goToStep(3);
+
+        if (response.data) {  // 移除.success检查
+            const newResume = response.data.resume || response.data;  // 添加fallback
+            generatedResumeWithId.value = newResume;
+            generatedResume.value = newResume.resumeData || newResume;  // 添加fallback
+
+            goToStep(3);  // 确保这行代码会执行
             ElNotification({
                 title: '成功',
                 dangerouslyUseHTMLString: true,
@@ -435,10 +427,13 @@ const generateAndPreview = async () => {
                 icon: CircleCheck,
             });
         } else {
-            throw new Error(response.data.message || '生成失败');
+            throw new Error(response.data?.message || '生成失败');
         }
     } catch (error) {
         console.error('Error generating resume:', error);
+        if (error.response) {
+            console.error('Backend Error Response:', error.response.data);
+        }
         ElNotification({
             title: '错误',
             dangerouslyUseHTMLString: true,
@@ -460,7 +455,7 @@ const generateAndPreview = async () => {
             <h1>AI 智能简历生成器</h1>
         </div>
         <el-card class="main-card">
-            <el-steps :active="currentStep" finish-status="success" align-center>
+            <el-steps :active="currentStep + 1" finish-status="success" align-center>
                 <el-step title="上传资料" />
                 <el-step title="AI 分析" />
                 <el-step title="选择模板" />
@@ -509,7 +504,7 @@ const generateAndPreview = async () => {
                 <el-row :gutter="20">
                     <el-col :span="8" v-for="template in resumeTemplates" :key="template.id">
                         <el-card shadow="hover" class="template-card"
-                            :class="{ selected: selectedTemplate?.id === template.id }"
+                            :class="{ selected: selectedTemplate && selectedTemplate.id === template.id }"
                             @click="selectTemplate(template)">
                             <div v-if="template.html" class="template-preview-wrapper">
                                 <div class="template-preview"
@@ -520,8 +515,7 @@ const generateAndPreview = async () => {
                                 <div class="template-name">{{ template.name }}</div>
                                 <div class="template-desc">{{ template.description }}</div>
                                 <el-tag :type="template.type === 'free' ? 'success' : 'warning'" size="small">{{
-                                    template.type ===
-                                        'free' ? '免费' : template.price }}</el-tag>
+                                    template.type === 'free' ? '免费' : template.price }}</el-tag>
                             </div>
                         </el-card>
                     </el-col>

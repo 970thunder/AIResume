@@ -4,12 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resume.generator.entity.Resume;
 import com.resume.generator.entity.Template;
-import com.resume.generator.entity.UserProfile;
 import com.resume.generator.repository.ResumeRepository;
-import com.resume.generator.repository.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.util.Map;
 
@@ -21,24 +18,27 @@ public class ResumeGenerateService {
     @Autowired
     private TemplateService templateService;
     @Autowired
-    private UserProfileRepository userProfileRepository;
+    private ObjectMapper objectMapper;
 
-    public Resume generateResume(String sessionId, Long templateId) throws Exception {
-        UserProfile userProfile = userProfileRepository.findBySessionId(sessionId);
-        if (userProfile == null) {
-            throw new RuntimeException("Profile not found for session: " + sessionId);
-        }
+    public Resume generateResume(Long userId, String aiAnalysisJson, Long templateId) throws Exception {
 
         Template template = templateService.getTemplateById(templateId);
         if (template == null) {
             throw new RuntimeException("Template not found for id: " + templateId);
         }
 
-        // Create a record in the database without generating a file
         Resume resume = new Resume();
-        resume.setUserProfileId(userProfile.getId());
+        resume.setUserId(userId);
         resume.setTemplateId(templateId);
-        resume.setFilePath(null); // No file path as no file is generated
-        return resumeRepository.save(resume);
+        resume.setFilePath(null);
+        resume.setAiAnalysisData(aiAnalysisJson);
+
+        Resume savedResume = resumeRepository.save(resume);
+
+        Map<String, Object> resumeDataMap = objectMapper.readValue(aiAnalysisJson, new TypeReference<>() {
+        });
+        savedResume.setResumeData(resumeDataMap);
+
+        return savedResume;
     }
 }
