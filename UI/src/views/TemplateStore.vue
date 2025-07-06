@@ -3,7 +3,14 @@
         <el-card>
             <template #header>
                 <div class="card-header">
-                    <h1>模板商城</h1>
+                    <div class="header-left">
+                        <h1>模板商城</h1>
+                        <div class="brutalist-container">
+                            <input v-model="searchQuery" @input="handleSearch" placeholder="搜索模板..."
+                                class="brutalist-input smooth-type" type="text" />
+                            <label class="brutalist-label">搜索模板</label>
+                        </div>
+                    </div>
                     <div class="filter-buttons">
                         <el-radio-group v-model="currentFilter" @change="filterTemplates">
                             <el-radio-button label="all">全部</el-radio-button>
@@ -15,10 +22,10 @@
             </template>
 
             <div v-loading="loading" class="templates-container">
-                <el-row :gutter="20" v-if="templates.length > 0">
-                    <el-col :xs="24" :sm="12" :md="8" v-for="template in templates" :key="template.id">
+                <el-row :gutter="20" v-if="filteredTemplates.length > 0">
+                    <el-col :xs="24" :sm="12" :md="8" v-for="template in filteredTemplates" :key="template.id">
                         <el-card shadow="hover" class="template-card">
-                            <div class="template-preview-wrapper">
+                            <div class="template-preview-wrapper" v-loading="templateLoadingStates[template.id]">
                                 <div v-if="template.html" class="template-preview"
                                     :style="{ transform: 'scale(0.3)', transformOrigin: 'top left' }"
                                     v-html="template.html">
@@ -33,21 +40,21 @@
                                         {{ template.type === 'free' ? '免费' : `¥${template.price}` }}
                                     </el-tag>
                                     <el-button type="primary" size="small" @click="useTemplate(template)">
-                                        {{ template.type === 'free' ? '立即使用' : '购买使用' }}
+                                        查看详情
                                     </el-button>
                                 </div>
                             </div>
                         </el-card>
                     </el-col>
                 </el-row>
-                <el-empty v-else description="暂无可用模板" />
+                <el-empty v-else description="未找到匹配的模板" />
             </div>
         </el-card>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { ElNotification } from 'element-plus';
@@ -57,6 +64,53 @@ const router = useRouter();
 const templates = ref([]);
 const loading = ref(false);
 const currentFilter = ref('all');
+const templateLoadingStates = ref({});
+const searchQuery = ref('');
+
+// 搜索处理函数
+const handleSearch = () => {
+    // 这里不需要特别的处理，因为我们使用计算属性来过滤模板
+};
+
+// 过滤后的模板列表
+const filteredTemplates = computed(() => {
+    return templates.value.filter(template => {
+        const searchLower = searchQuery.value.toLowerCase();
+        return (
+            template.name.toLowerCase().includes(searchLower) ||
+            template.description.toLowerCase().includes(searchLower)
+        );
+    });
+});
+
+// 设置模板加载状态
+const setTemplateLoading = (templateId, isLoading) => {
+    templateLoadingStates.value[templateId] = isLoading;
+};
+
+// 加载模板HTML内容
+const loadTemplateHtml = async (templates) => {
+    // 初始化所有模板的加载状态为true
+    templates.forEach(template => {
+        setTemplateLoading(template.id, true);
+    });
+
+    for (const template of templates) {
+        if (template.templatePath) {
+            try {
+                const response = await fetch(template.templatePath);
+                template.html = await response.text();
+                // 添加1秒延迟
+                await new Promise(resolve => setTimeout(resolve, 700));
+            } catch (error) {
+                console.error(`Error loading template ${template.templatePath}:`, error);
+                template.html = `<div style='text-align: center; padding: 20px; color: red;'>加载模板失败</div>`;
+            } finally {
+                setTemplateLoading(template.id, false);
+            }
+        }
+    }
+};
 
 // 获取模板列表
 const fetchTemplates = async () => {
@@ -66,19 +120,7 @@ const fetchTemplates = async () => {
             headers: getHeaders()
         });
         templates.value = response.data;
-
-        // 加载模板HTML内容
-        for (const template of templates.value) {
-            if (template.templatePath) {
-                try {
-                    const response = await fetch(template.templatePath);
-                    template.html = await response.text();
-                } catch (error) {
-                    console.error(`Error loading template ${template.templatePath}:`, error);
-                    template.html = `<div style='text-align: center; padding: 20px; color: red;'>加载模板失败</div>`;
-                }
-            }
-        }
+        await loadTemplateHtml(templates.value);
     } catch (error) {
         console.error('Error fetching templates:', error);
         ElNotification({
@@ -105,6 +147,7 @@ const filterTemplates = async (filter) => {
             headers: getHeaders()
         });
         templates.value = response.data;
+        await loadTemplateHtml(templates.value);
     } catch (error) {
         console.error('Error filtering templates:', error);
         ElNotification({
@@ -146,11 +189,111 @@ onMounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 .card-header h1 {
     margin: 0;
     font-size: 24px;
+    white-space: nowrap;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.brutalist-container {
+    position: relative;
+    width: 300px;
+    font-family: monospace;
+}
+
+.brutalist-input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #5192ed;
+    background-color: #fff;
+    border: 3px solid #003898;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 4px 4px 0 #8ec9ed, 8px 8px 0 #4a90e2;
+}
+
+.brutalist-input:focus {
+    transform: translate(-4px, -4px);
+    box-shadow: 8px 8px 0 #000, 12px 12px 0 #4a90e2;
+}
+
+.brutalist-input:not(:focus) {
+    transform: translate(0, 0);
+}
+
+.brutalist-input:focus {
+    animation: none;
+}
+
+.brutalist-label {
+    position: absolute;
+    left: -10px;
+    top: -15px;
+    font-size: 10px;
+    font-weight: bold;
+    color: rgb(255, 255, 255);
+    background-color: #bcddff;
+    padding: 3px 8px;
+    transform: rotate(-1deg);
+    z-index: 1;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.smooth-type {
+    position: relative;
+    overflow: hidden;
+}
+
+.smooth-type::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, 0) 100%);
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.smooth-type:focus::before {
+    opacity: 1;
+    animation: type-gradient 2s linear infinite;
+}
+
+@keyframes type-gradient {
+    0% {
+        background-position: 300px 0;
+    }
+
+    100% {
+        background-position: 0 0;
+    }
+}
+
+.brutalist-input::placeholder {
+    color: #888;
+    transition: color 0.3s ease;
+}
+
+.brutalist-input:focus::placeholder {
+    color: transparent;
 }
 
 .templates-container {
@@ -172,6 +315,7 @@ onMounted(() => {
     overflow: hidden;
     border-bottom: 1px solid #ebeef5;
     background-color: #f8f9fa;
+    position: relative;
 }
 
 .template-preview {
@@ -203,6 +347,20 @@ onMounted(() => {
 }
 
 .filter-buttons {
-    margin-left: 20px;
+    margin-left: auto;
+}
+
+/* 自定义加载动画样式 */
+:deep(.el-loading-mask) {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+:deep(.el-loading-spinner) {
+    top: 40%;
+}
+
+:deep(.el-loading-spinner .circular) {
+    width: 30px;
+    height: 30px;
 }
 </style>
