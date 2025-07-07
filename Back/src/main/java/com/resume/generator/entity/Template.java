@@ -21,6 +21,11 @@ public class Template {
     @Column(name = "template_path")
     private String templatePath;
 
+    @Lob
+    @Basic(fetch = FetchType.EAGER)
+    @Column(name = "html_content", columnDefinition = "LONGTEXT")
+    private String htmlContent;
+
     @Column(name = "preview_image")
     private String previewImage;
 

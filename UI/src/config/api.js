@@ -6,7 +6,7 @@ const ENV = {
     },
     production: {
         API_BASE_URL: 'http://47.122.119.35:9090/api',
-        ALLOWED_ORIGINS: ['http://47.122.119.35']
+        ALLOWED_ORIGINS: ['http://47.122.119.35:80']
     }
 };
 
