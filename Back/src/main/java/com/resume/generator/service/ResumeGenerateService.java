@@ -28,6 +28,7 @@ public class ResumeGenerateService {
         }
 
         Resume resume = new Resume();
+        resume.setTitle(generateUniqueTitle(userId));
         resume.setUserId(userId);
         resume.setTemplateId(templateId);
         resume.setFilePath(null);
@@ -40,5 +41,21 @@ public class ResumeGenerateService {
         savedResume.setResumeData(resumeDataMap);
 
         return savedResume;
+    }
+
+    private String generateUniqueTitle(Long userId) {
+        String baseTitle = "未命名简历";
+        if (!resumeRepository.existsByUserIdAndTitle(userId, baseTitle)) {
+            return baseTitle;
+        }
+
+        int counter = 1;
+        while (true) {
+            String newTitle = String.format("%s (%d)", baseTitle, counter);
+            if (!resumeRepository.existsByUserIdAndTitle(userId, newTitle)) {
+                return newTitle;
+            }
+            counter++;
+        }
     }
 }

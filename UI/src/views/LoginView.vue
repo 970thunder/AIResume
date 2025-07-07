@@ -28,7 +28,7 @@ import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElNotification } from 'element-plus';
 import { User, Lock } from '@element-plus/icons-vue';
-import Loading from '@/component/loading.vue';
+import Loading from '@/components/loading.vue';
 import axios from 'axios';
 import { API_URLS, getHeaders } from '@/config/api';
 

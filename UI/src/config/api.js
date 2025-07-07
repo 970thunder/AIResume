@@ -33,6 +33,11 @@ export const API_URLS = {
         analyze: `${API_BASE_URL}/resume/analyze`,
         generate: `${API_BASE_URL}/resume/generate`,
         upload: `${API_BASE_URL}/files/upload`,
+        history: `${API_BASE_URL}/resume/history`,
+        byId: (id) => `${API_BASE_URL}/resume/${id}`,
+        update: (id) => `${API_BASE_URL}/resume/${id}`,
+        updateTitle: (id) => `${API_BASE_URL}/resume/${id}/title`,
+        delete: (id) => `${API_BASE_URL}/resume/${id}`,
     }
 };
 

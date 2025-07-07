@@ -11,7 +11,7 @@
 .home-page {
     display: flex;
     justify-content: center;
-    align-items: center;
+
     height: 100%;
     text-align: center;
 }
@@ -20,6 +20,7 @@
     font-size: 4em;
     color: #337ecc;
     font-weight: 600;
+    margin-top: 30vh;
     margin-bottom: 20px;
 }
 

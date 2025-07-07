@@ -1,5 +1,6 @@
 package com.resume.generator.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -30,5 +31,6 @@ public class Template {
     private String previewImage;
 
     @Column(name = "created_at")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 }

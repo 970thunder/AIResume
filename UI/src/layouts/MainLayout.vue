@@ -2,7 +2,11 @@
     <el-container class="main-layout">
         <el-aside :width="isCollapsed ? '64px' : '200px'" class="sidebar">
             <div class="sidebar-header">
-                <h2 v-if="!isCollapsed" class="sidebar-title">Hyper 简生</h2>
+                <GradientText v-if="!isCollapsed"
+                    :colors="['#4079ff', '#40ffaa', '#549EBB', '#4079ff', '#40B5FF', '#549EBB']" :animationSpeed="8"
+                    :showBorder="false" customClass="sidebar-title-gradient">
+                    Hyper 简生
+                </GradientText>
                 <el-icon v-else :size="28" color="#337ecc">
                     <MagicStick />
                 </el-icon>
@@ -27,6 +31,12 @@
                     <template #title>模板商城</template>
                 </el-menu-item>
             </el-menu>
+            <div class="sidebar-bottom-content">
+                <InfoButton :is-collapsed="isCollapsed"></InfoButton>
+                <div v-if="!isCollapsed" class="beian-info">
+                    <a href="https://beian.miit.gov.cn/" target="_blank">桂ICP备2024034221号-1</a>
+                </div>
+            </div>
             <div class="sidebar-toggle" @click="isCollapsed = !isCollapsed">
                 <el-icon>
                     <Fold v-if="!isCollapsed" />
@@ -70,6 +80,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import GradientText from '@/components/GradientText.vue';
+import InfoButton from '@/components/InfoButton.vue';
 import {
     HomeFilled,
     Document,
@@ -106,6 +118,8 @@ const handleCommand = (command) => {
     transition: width 0.3s ease;
     display: flex;
     flex-direction: column;
+    overflow: visible !important;
+    /* 允许显示溢出的子元素 */
 }
 
 .sidebar-header {
@@ -124,10 +138,20 @@ const handleCommand = (command) => {
     overflow: hidden;
 }
 
+.sidebar-title-gradient {
+    font-size: 20px;
+    font-weight: 600;
+}
+
 .sidebar-menu {
     flex-grow: 1;
     border-right: none;
     background: #ffffff;
+}
+
+.sidebar-bottom-content {
+    flex-shrink: 0;
+    transition: all 0.3s ease;
 }
 
 .el-menu-item {
@@ -165,5 +189,24 @@ const handleCommand = (command) => {
 
 .content-area {
     padding: 20px;
+}
+
+.beian-info {
+    padding: 15px 0;
+    text-align: center;
+    font-size: 12px;
+    color: #909399;
+    flex-shrink: 0;
+}
+
+.beian-info a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.beian-info a:hover {
+    color: #409eff;
+    text-decoration: underline;
 }
 </style>

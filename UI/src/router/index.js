@@ -8,6 +8,7 @@ import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import TemplateStore from '../views/TemplateStore.vue';
 import UserProfile from '../views/UserProfile.vue';
+import ResumeEditor from '../views/ResumeEditor.vue';
 
 const routes = [
     {
@@ -20,6 +21,7 @@ const routes = [
             { path: 'generator', name: 'Generator', component: ResumeGenerator },
             { path: 'store', name: 'Store', component: TemplateStore },
             { path: 'profile', name: 'Profile', component: UserProfile },
+            { path: 'editor/:id', name: 'Editor', component: ResumeEditor, props: true },
         ],
     },
     {

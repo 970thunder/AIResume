@@ -4,9 +4,8 @@
             <template #header>
                 <div class="card-header">
                     <div class="header-left">
-                        <h1>模板商城</h1>
                         <div class="brutalist-container">
-                            <input v-model="searchQuery" @input="handleSearch" placeholder="搜索模板..."
+                            <input v-model="searchQuery" @input="handleSearch" placeholder="搜索-支持搜索标题、描述..."
                                 class="brutalist-input smooth-type" type="text" />
                             <label class="brutalist-label">搜索模板</label>
                         </div>
@@ -207,7 +206,7 @@ onMounted(() => {
 
 .brutalist-container {
     position: relative;
-    width: 300px;
+    width: 400px;
     font-family: monospace;
 }
 

@@ -2,12 +2,14 @@ package com.resume.generator.controller;
 
 import com.resume.generator.dto.AIAnalysisRequest;
 import com.resume.generator.dto.ResumeGenerateRequest;
+import com.resume.generator.dto.ResumeUpdateRequest;
 import com.resume.generator.entity.Resume;
 import com.resume.generator.entity.User;
 import com.resume.generator.repository.UserRepository;
 import com.resume.generator.service.AIAnalysisService;
 import com.resume.generator.service.FileProcessService;
 import com.resume.generator.service.ResumeGenerateService;
+import com.resume.generator.service.ResumeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -16,7 +18,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.security.Principal;
 
@@ -38,6 +42,14 @@ public class ResumeController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ResumeService resumeService;
+
+    private User getUserByPrincipal(Principal principal) {
+        return userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found: " + principal.getName()));
+    }
 
     @PostMapping("/analyze")
     public ResponseEntity<Map<String, Object>> analyzeProfile(@RequestBody AIAnalysisRequest request) {
@@ -88,11 +100,56 @@ public class ResumeController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "Resume generation failed: " + e.getMessage());
-
-            return ResponseEntity.badRequest().body(response);
+            e.printStackTrace();
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to generate resume: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<Resume>> getResumesHistory(Principal principal) {
+        User user = getUserByPrincipal(principal);
+        return ResponseEntity.ok(resumeService.findResumesByUser(user));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Resume> getResumeDetails(@PathVariable Long id, Principal principal) {
+        User user = getUserByPrincipal(principal);
+        return ResponseEntity.ok(resumeService.findResumeByIdAndUser(id, user));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Resume> updateResume(
+            @PathVariable Long id,
+            @RequestBody ResumeUpdateRequest request,
+            Principal principal) {
+        User user = getUserByPrincipal(principal);
+        Resume updatedResume = resumeService.updateResume(
+                id,
+                user,
+                request.getAiAnalysisData(),
+                request.getTemplateId());
+        return ResponseEntity.ok(updatedResume);
+    }
+
+    @PutMapping("/{id}/title")
+    public ResponseEntity<Resume> updateResumeTitle(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload,
+            Principal principal) {
+        User user = getUserByPrincipal(principal);
+        String newTitle = payload.get("title");
+        if (newTitle == null || newTitle.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(resumeService.updateResumeTitle(id, newTitle, user));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteResume(@PathVariable Long id, Principal principal) {
+        User user = getUserByPrincipal(principal);
+        resumeService.deleteResume(id, user);
+        return ResponseEntity.noContent().build();
     }
 }
