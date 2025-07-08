@@ -24,10 +24,6 @@ public class ApplicationConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByUsername(username)
-                .map(user -> new org.springframework.security.core.userdetails.User(
-                        user.getUsername(),
-                        user.getPasswordHash(),
-                        new ArrayList<>()))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 

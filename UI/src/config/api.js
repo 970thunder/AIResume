@@ -22,12 +22,17 @@ export const API_URLS = {
         free: `${API_BASE_URL}/templates/free`,
         premium: `${API_BASE_URL}/templates/premium`,
         byId: (id) => `${API_BASE_URL}/templates/${id}`,
+        create: `${API_BASE_URL}/templates/create`,
     },
     auth: {
         login: `${API_BASE_URL}/auth/login`,
         register: `${API_BASE_URL}/auth/register`,
         sendVerificationCode: `${API_BASE_URL}/auth/send-verification-code`,
         checkEmail: `${API_BASE_URL}/auth/check-email`,
+    },
+    admin: {
+        templates: `${API_BASE_URL}/admin/templates`,
+        updateTemplateStatus: (id) => `${API_BASE_URL}/admin/templates/${id}/status`,
     },
     resume: {
         analyze: `${API_BASE_URL}/resume/analyze`,
@@ -42,10 +47,17 @@ export const API_URLS = {
 };
 
 // 请求头配置
-export const getHeaders = () => ({
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-});
+export const getHeaders = () => {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    };
+    const token = localStorage.getItem('token');
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+};
 
 // 文件上传请求头
 export const getUploadHeaders = () => ({

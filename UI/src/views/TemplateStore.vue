@@ -9,6 +9,9 @@
                                 class="brutalist-input smooth-type" type="text" />
                             <label class="brutalist-label">搜索模板</label>
                         </div>
+                        <router-link to="/template/create">
+                            <el-button type="success">创建模板</el-button>
+                        </router-link>
                     </div>
                     <div class="filter-buttons">
                         <el-radio-group v-model="currentFilter" @change="filterTemplates">
@@ -95,18 +98,24 @@ const loadTemplateHtml = async (templates) => {
     });
 
     for (const template of templates) {
-        if (template.templatePath) {
-            try {
+        try {
+            if (template.htmlContent) {
+                // 优先使用数据库中的 htmlContent
+                template.html = template.htmlContent;
+            } else if (template.templatePath) {
+                // Fallback 到旧的 templatePath 方式
                 const response = await fetch(template.templatePath);
                 template.html = await response.text();
-                // 添加1秒延迟
-                await new Promise(resolve => setTimeout(resolve, 700));
-            } catch (error) {
-                console.error(`Error loading template ${template.templatePath}:`, error);
-                template.html = `<div style='text-align: center; padding: 20px; color: red;'>加载模板失败</div>`;
-            } finally {
-                setTemplateLoading(template.id, false);
+            } else {
+                template.html = `<div style='text-align: center; padding: 20px; color: grey;'>预览不可用</div>`;
             }
+            // 添加1秒延迟
+            await new Promise(resolve => setTimeout(resolve, 700));
+        } catch (error) {
+            console.error(`Error loading template ${template.templatePath || `ID: ${template.id}`}:`, error);
+            template.html = `<div style='text-align: center; padding: 20px; color: red;'>加载模板失败</div>`;
+        } finally {
+            setTemplateLoading(template.id, false);
         }
     }
 };

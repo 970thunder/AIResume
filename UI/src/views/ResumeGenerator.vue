@@ -265,7 +265,7 @@ const finalResumeHtml = computed(() => {
         <span class="title">${get(proj, 'projectName')}</span>
         <span class="date">
             ${get(proj, 'projectUrl') ? `<a href="${get(proj, 'projectUrl')}" target="_blank">Live Demo</a>` : ''}
-            ${get(proj, 'repositoryUrl') ? ` | <a href="${get(proj, 'repositoryUrl')}" target="_blank">Source Code</a>` : ''}
+            ${get(proj, 'repositoryUrl') ? ` | <a href="${get(proj, 'repositoryUrl')}" target="_blank">${get(proj, 'repositoryUrl')}</a>` : ''}
         </span>
       </div>
       <div class="item-content">

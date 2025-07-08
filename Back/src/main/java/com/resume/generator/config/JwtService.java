@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -38,6 +39,10 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId());
         claims.put("email", user.getEmail());
+        // 从 User 对象中获取权限，并添加到 claims 中
+        claims.put("roles", user.getAuthorities().stream()
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .collect(Collectors.toList()));
         return generateToken(claims, user.getUsername());
     }
 
@@ -48,8 +53,7 @@ public class JwtService {
     private String buildToken(
             Map<String, Object> extraClaims,
             String subject,
-            long expiration
-    ) {
+            long expiration) {
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(subject)
@@ -85,4 +89,4 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-} 
+}
