@@ -5,8 +5,8 @@ const ENV = {
         ALLOWED_ORIGINS: ['http://localhost:5173', 'http://localhost:8080']
     },
     production: {
-        API_BASE_URL: 'http://47.122.119.35:9090/api',
-        ALLOWED_ORIGINS: ['http://47.122.119.35:80']
+        API_BASE_URL: '/api',
+        ALLOWED_ORIGINS: ['https://www.hyper99.shop']
     }
 };
 

@@ -32,7 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
         if (isProduction) {
             // 生产环境: 只允许特定域名访问
             registry.addMapping("/**")
-                    .allowedOrigins("http://47.122.119.35")
+                    .allowedOrigins("https://www.hyper99.shop")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowedHeaders("*")
                     .exposedHeaders("Authorization", "Content-Disposition")

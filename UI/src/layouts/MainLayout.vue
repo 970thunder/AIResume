@@ -34,7 +34,7 @@
             <div class="sidebar-bottom-content">
                 <InfoButton :is-collapsed="isCollapsed"></InfoButton>
                 <div v-if="!isCollapsed" class="beian-info">
-                    <a href="https://beian.miit.gov.cn/" target="_blank">桂ICP备2024034221号-1</a>
+                    <a href="https://beian.miit.gov.cn/" target="_blank">桂ICP备2024034221号-2</a>
                 </div>
             </div>
             <div class="sidebar-toggle" @click="isCollapsed = !isCollapsed">
