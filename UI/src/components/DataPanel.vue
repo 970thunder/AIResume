@@ -61,7 +61,6 @@ onMounted(async () => {
 .grid {
     font-weight: 500;
     padding-top: 12px;
-    padding-bottom: 12px;
     padding-left: 12px;
     padding-right: 12px;
     justify-items: center;
@@ -71,7 +70,7 @@ onMounted(async () => {
 }
 
 .text {
-    font-size: .875rem;
+    font-size: .65rem;
     line-height: 1.25rem;
 }
 </style>
