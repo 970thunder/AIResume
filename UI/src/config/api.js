@@ -17,6 +17,10 @@ export const API_BASE_URL = config.API_BASE_URL;
 export const ALLOWED_ORIGINS = config.ALLOWED_ORIGINS;
 
 export const API_URLS = {
+    visits: {
+        record: `${API_BASE_URL}/visits/record`,
+        stats: `${API_BASE_URL}/visits/stats`,
+    },
     templates: {
         all: `${API_BASE_URL}/templates`,
         free: `${API_BASE_URL}/templates/free`,

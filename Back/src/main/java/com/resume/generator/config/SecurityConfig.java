@@ -28,6 +28,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(req -> req.requestMatchers(
                                                 "/api/auth/**",
                                                 "/api/templates/**", // <-- 请确保这一行存在
+                                                "/api/visits/**",
                                                 "/",
                                                 "/index.html",
                                                 "/assets/**",
