@@ -470,218 +470,585 @@ const generateAndPreview = async () => {
 </script>
 
 <template>
-    <div v-loading="isLoading" element-loading-background="rgba(255, 255, 255, 0.8)"
+    <div class="pixel-generator" v-loading="isLoading" element-loading-background="rgba(255, 255, 255, 0.8)"
         element-loading-text="AI分析中，请稍候...">
-        <div class="app-header">
-            <h1>AI 智能简历生成器</h1>
+
+        <!-- 像素化背景装饰 -->
+        <div class="pixel-bg-decoration"></div>
+
+        <div class="pixel-header">
+            <h1 class="pixel-main-title">AI 智能简历生成器</h1>
+            <p class="pixel-header-subtitle">让AI帮您打造完美简历</p>
         </div>
-        <el-card class="main-card">
-            <el-steps :active="currentStep + 1" finish-status="success" align-center>
-                <el-step title="上传资料" />
-                <el-step title="AI 分析" />
-                <el-step title="选择模板" />
-                <el-step title="生成预览" />
-            </el-steps>
+
+        <div class="pixel-main-card">
+            <!-- 像素风格步骤指示器 -->
+            <div class="pixel-steps">
+                <div class="step-item" :class="{ active: currentStep >= 0, completed: currentStep > 0 }">
+                    <div class="step-number">1</div>
+                    <div class="step-label">上传资料</div>
+                </div>
+                <div class="step-connector" :class="{ active: currentStep >= 1 }"></div>
+                <div class="step-item" :class="{ active: currentStep >= 1, completed: currentStep > 1 }">
+                    <div class="step-number">2</div>
+                    <div class="step-label">AI 分析</div>
+                </div>
+                <div class="step-connector" :class="{ active: currentStep >= 2 }"></div>
+                <div class="step-item" :class="{ active: currentStep >= 2, completed: currentStep > 2 }">
+                    <div class="step-number">3</div>
+                    <div class="step-label">选择模板</div>
+                </div>
+                <div class="step-connector" :class="{ active: currentStep >= 3 }"></div>
+                <div class="step-item" :class="{ active: currentStep >= 3, completed: currentStep > 3 }">
+                    <div class="step-number">4</div>
+                    <div class="step-label">生成预览</div>
+                </div>
+            </div>
 
             <!-- Step 1: Upload -->
-            <div v-if="currentStep === 0" class="step-content">
-                <h2>上传您的个人资料</h2>
-                <p class="subtitle">支持PDF, Word, TXT等格式。AI将自动提取关键信息。</p>
-                <el-upload drag multiple action="#" :auto-upload="false" :on-change="handleFileChange"
-                    :on-remove="handleFileRemove" class="upload-area">
-                    <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-                    <div class="el-upload__text">
-                        将文件拖到此处，或<em>点击上传</em>
+            <div v-if="currentStep === 0" class="pixel-step-content">
+                <div class="pixel-content-card">
+                    <h2 class="pixel-step-title">📁 上传您的个人资料</h2>
+                    <p class="pixel-subtitle">支持PDF, Word, TXT等格式。AI将自动提取关键信息。</p>
+
+                    <div class="pixel-upload-area">
+                        <el-upload drag multiple action="#" :auto-upload="false" :on-change="handleFileChange"
+                            :on-remove="handleFileRemove" class="pixel-upload">
+                            <div class="upload-content">
+                                <div class="upload-icon">📎</div>
+                                <div class="upload-text">
+                                    <div class="primary-text">将文件拖到此处</div>
+                                    <div class="secondary-text">或 <em>点击上传</em></div>
+                                </div>
+                            </div>
+                        </el-upload>
                     </div>
-                </el-upload>
-                <el-button type="primary" :disabled="uploadedFiles.length === 0" @click="goToStep(1)"
-                    class="step-button">
-                    下一步
-                </el-button>
+
+                    <div class="pixel-button-group">
+                        <button class="pixel-btn primary" :disabled="uploadedFiles.length === 0" @click="goToStep(1)">
+                            下一步 →
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Step 2: AI Process -->
-            <div v-if="currentStep === 1" class="step-content">
-                <h2>AI 智能分析</h2>
-                <p class="subtitle">我们即将使用 DeepSeek AI 分析您的资料，请确认开始。</p>
-                <div class="file-list">
-                    <h4>待处理文件:</h4>
-                    <el-tag v-for="file in uploadedFiles" :key="file.uid" type="info" class="file-tag">
-                        <el-icon>
-                            <Document />
-                        </el-icon> {{ file.name }}
-                    </el-tag>
+            <div v-if="currentStep === 1" class="pixel-step-content">
+                <div class="pixel-content-card">
+                    <h2 class="pixel-step-title">🤖 AI 智能分析</h2>
+                    <p class="pixel-subtitle">我们即将使用 DeepSeek AI 分析您的资料，请确认开始。</p>
+
+                    <div class="pixel-file-list">
+                        <h4 class="file-list-title">📋 待处理文件:</h4>
+                        <div class="file-tags">
+                            <div v-for="file in uploadedFiles" :key="file.uid" class="pixel-file-tag">
+                                <span class="file-icon">📄</span>
+                                <span class="file-name">{{ file.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pixel-button-group">
+                        <button class="pixel-btn primary" @click="processWithAI">
+                            <span class="btn-icon">⚡</span>
+                            开始AI分析
+                        </button>
+                        <button class="pixel-btn secondary" @click="goToStep(0)">
+                            ← 返回
+                        </button>
+                    </div>
                 </div>
-                <el-button type="primary" @click="processWithAI" :icon="Loading" class="step-button">
-                    开始AI分析
-                </el-button>
-                <el-button @click="goToStep(0)" class="step-button">返回</el-button>
             </div>
 
             <!-- Step 3: Template Selection -->
-            <div v-if="currentStep === 2" class="step-content">
-                <h2>选择简历模板</h2>
-                <p class="subtitle">选择一个最适合您的模板设计。</p>
-                <el-row :gutter="20">
-                    <el-col :span="8" v-for="template in resumeTemplates" :key="template.id">
-                        <el-card shadow="hover" class="template-card"
+            <div v-if="currentStep === 2" class="pixel-step-content">
+                <div class="pixel-content-card">
+                    <h2 class="pixel-step-title">🎨 选择简历模板</h2>
+                    <p class="pixel-subtitle">选择一个最适合您的模板设计。</p>
+
+                    <div class="pixel-templates-grid">
+                        <div v-for="template in resumeTemplates" :key="template.id" class="pixel-template-card"
                             :class="{ selected: selectedTemplate && selectedTemplate.id === template.id }"
                             @click="selectTemplate(template)">
-                            <div v-if="template.html" class="template-preview-wrapper">
-                                <div class="template-preview"
-                                    :style="{ transform: 'scale(0.3)', transformOrigin: 'top left' }"
-                                    v-html="template.html"></div>
+                            <div class="template-preview-container">
+                                <div v-if="template.html" class="template-preview-wrapper">
+                                    <div class="template-preview"
+                                        :style="{ transform: 'scale(0.25)', transformOrigin: 'top left' }"
+                                        v-html="template.html"></div>
+                                </div>
+                                <div class="template-overlay">
+                                    <div class="select-indicator">✓</div>
+                                </div>
                             </div>
                             <div class="template-info">
                                 <div class="template-name">{{ template.name }}</div>
                                 <div class="template-desc">{{ template.description }}</div>
-                                <el-tag :type="template.type === 'free' ? 'success' : 'warning'" size="small">
-                                    {{ template.type === 'free' ? '免费' : `¥${template.price}` }}
-                                </el-tag>
+                                <div class="template-price">
+                                    <span class="price-tag" :class="template.type">
+                                        {{ template.type === 'free' ? '免费' : `¥${template.price}` }}
+                                    </span>
+                                </div>
                             </div>
-                        </el-card>
-                    </el-col>
-                </el-row>
-                <el-button type="primary" :disabled="!selectedTemplate" @click="generateAndPreview" class="step-button">
-                    生成并预览
-                </el-button>
-                <el-button @click="goToStep(1)" class="step-button">返回</el-button>
+                        </div>
+                    </div>
+
+                    <div class="pixel-button-group">
+                        <button class="pixel-btn primary" :disabled="!selectedTemplate" @click="generateAndPreview">
+                            生成并预览 →
+                        </button>
+                        <button class="pixel-btn secondary" @click="goToStep(1)">
+                            ← 返回
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Step 4: Preview -->
-            <div v-if="currentStep === 3 && generatedResume" class="step-content preview-step">
-                <h2>简历预览</h2>
-                <p class="subtitle">这是根据您的AI分析和所选模板生成的最终简历预览。</p>
-                <div class="final-resume-container" v-html="finalResumeHtml"></div>
-                <el-button type="success" :icon="Download" @click="downloadAsPdf" class="step-button">下载为
-                    PDF</el-button>
-                <el-button @click="goToStep(2)" class="step-button">返回</el-button>
-            </div>
+            <div v-if="currentStep === 3 && generatedResume" class="pixel-step-content preview-step">
+                <div class="pixel-content-card preview-card">
+                    <h2 class="pixel-step-title">👀 简历预览</h2>
+                    <p class="pixel-subtitle">这是根据您的AI分析和所选模板生成的最终简历预览。</p>
 
-        </el-card>
+                    <div class="pixel-preview-container">
+                        <div class="final-resume-container" v-html="finalResumeHtml"></div>
+                    </div>
+
+                    <div class="pixel-button-group">
+                        <button class="pixel-btn success" @click="downloadAsPdf">
+                            <span class="btn-icon">📥</span>
+                            下载为 PDF
+                        </button>
+                        <button class="pixel-btn secondary" @click="goToStep(2)">
+                            ← 返回
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <style scoped>
-:deep(.el-loading-spinner .el-loading-text) {
-    color: #337ecc;
-    font-size: 16px;
-    margin-top: 10px;
+.pixel-generator {
+    --main-color: #09465d;
+    --bg-color: #fff;
+    --font-color: #060606;
+    --font-color-sub: #383838;
+    --input-focus: #2d8cf0;
+    --card-bg: rgb(220, 244, 251);
+    --success-color: #67c23a;
+
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8f4f8 100%);
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
 }
 
-.app-header {
+/* 像素化背景装饰 */
+.pixel-bg-decoration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(circle at 15% 25%, var(--main-color) 2px, transparent 2px),
+        radial-gradient(circle at 85% 15%, var(--input-focus) 1px, transparent 1px),
+        radial-gradient(circle at 70% 75%, var(--main-color) 1px, transparent 1px),
+        radial-gradient(circle at 30% 85%, var(--input-focus) 1.5px, transparent 1.5px);
+    background-size: 120px 120px, 180px 180px, 100px 100px, 140px 140px;
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.pixel-header {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    z-index: 1;
+    position: relative;
 }
 
-.app-header h1 {
-    color: #337ecc;
+.pixel-main-title {
+    font-size: 3em;
+    color: var(--main-color);
+    font-weight: 900;
+    margin: 0 0 10px 0;
+    text-shadow:
+        2px 2px 0 #fff,
+        4px 4px 0 rgba(9, 70, 93, 0.3);
+    letter-spacing: -1px;
+}
+
+.pixel-header-subtitle {
+    font-size: 1.2em;
+    color: var(--font-color-sub);
+    margin: 0;
     font-weight: 600;
 }
 
-.main-card {
-    max-width: 960px;
+.pixel-main-card {
+    max-width: 1200px;
     margin: 0 auto;
+    background: var(--card-bg);
+    border: 3px solid var(--main-color);
+    border-radius: 12px;
+    box-shadow: 8px 8px 0 var(--main-color);
+    padding: 40px;
+    position: relative;
+    z-index: 1;
 }
 
-.el-steps {
+/* 像素风格步骤指示器 */
+.pixel-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-.step-content {
-    max-width: 700px;
-    margin: 40px auto;
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
-.step-content.preview-step {
-    max-width: 900px;
-}
-
-.step-content:not(:has(.final-resume-container)) {
-    text-align: center;
-}
-
-.step-content h2 {
-    font-size: 1.5em;
-    margin-bottom: 10px;
-    color: #303133;
-}
-
-.step-content .subtitle {
-    color: #909399;
-    margin-bottom: 30px;
-}
-
-.upload-area {
-    margin-bottom: 20px;
-}
-
-.step-button {
-    margin-top: 20px;
-}
-
-.file-list {
-    margin-bottom: 20px;
-    text-align: left;
-    padding: 10px;
-    background-color: #f9fafc;
+.step-number {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--font-color-sub);
+    background: var(--bg-color);
     border-radius: 4px;
-}
-
-.file-tag {
-    margin-right: 10px;
-    margin-top: 5px;
-}
-
-.template-card {
-    cursor: pointer;
-    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--font-color-sub);
+    box-shadow: 3px 3px 0 rgba(9, 70, 93, 0.2);
     transition: all 0.3s ease;
 }
 
-.template-card.selected {
-    border-color: #409eff;
-    box-shadow: 0 0 15px rgba(64, 158, 255, 0.3);
+.step-item.active .step-number {
+    border-color: var(--input-focus);
+    background: var(--input-focus);
+    color: white;
+    box-shadow: 3px 3px 0 rgba(45, 140, 240, 0.3);
 }
 
-.template-card:hover {
-    transform: translateY(-5px);
+.step-item.completed .step-number {
+    border-color: var(--success-color);
+    background: var(--success-color);
+    color: white;
+    box-shadow: 3px 3px 0 rgba(103, 194, 58, 0.3);
 }
 
-.template-info {
-    padding: 14px;
+.step-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--font-color-sub);
     text-align: center;
 }
 
-.template-name {
-    font-weight: bold;
+.step-item.active .step-label {
+    color: var(--input-focus);
+}
+
+.step-item.completed .step-label {
+    color: var(--success-color);
+}
+
+.step-connector {
+    width: 60px;
+    height: 4px;
+    background: var(--font-color-sub);
+    opacity: 0.3;
+    margin: 0 10px;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.step-connector.active {
+    background: var(--input-focus);
+    opacity: 1;
+    box-shadow: 0 2px 4px rgba(45, 140, 240, 0.3);
+}
+
+.pixel-step-content {
+    display: flex;
+    justify-content: center;
+}
+
+.pixel-content-card {
+    background: var(--bg-color);
+    border: 2px solid var(--main-color);
+    border-radius: 8px;
+    box-shadow: 4px 4px 0 var(--main-color);
+    padding: 40px;
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+}
+
+.pixel-content-card.preview-card {
+    max-width: 1000px;
+}
+
+.pixel-step-title {
+    font-size: 1.8em;
+    color: var(--main-color);
+    font-weight: 700;
+    margin: 0 0 15px 0;
+}
+
+.pixel-subtitle {
+    color: var(--font-color-sub);
+    font-size: 1.1em;
+    margin-bottom: 30px;
+    font-weight: 500;
+}
+
+/* 上传区域 */
+.pixel-upload-area {
+    margin: 30px 0;
+}
+
+:deep(.pixel-upload .el-upload-dragger) {
+    border: 3px dashed var(--main-color) !important;
+    border-radius: 8px !important;
+    background: var(--bg-color) !important;
+    box-shadow: 4px 4px 0 rgba(9, 70, 93, 0.2) !important;
+    transition: all 0.3s ease !important;
+    padding: 40px !important;
+}
+
+:deep(.pixel-upload .el-upload-dragger:hover) {
+    border-color: var(--input-focus) !important;
+    background: rgba(220, 244, 251, 0.5) !important;
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 6px 6px 0 rgba(9, 70, 93, 0.3) !important;
+}
+
+.upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.upload-icon {
+    font-size: 3em;
+    opacity: 0.7;
+}
+
+.upload-text .primary-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--font-color);
     margin-bottom: 5px;
 }
 
-.template-desc {
+.upload-text .secondary-text {
     font-size: 14px;
-    color: #606266;
-    margin-bottom: 10px;
-    min-height: 40px;
+    color: var(--font-color-sub);
+}
+
+.upload-text em {
+    color: var(--input-focus);
+    font-weight: 600;
+}
+
+/* 文件列表 */
+.pixel-file-list {
+    background: rgba(220, 244, 251, 0.5);
+    border: 2px solid rgba(9, 70, 93, 0.2);
+    border-radius: 6px;
+    padding: 20px;
+    margin: 30px 0;
+    text-align: left;
+}
+
+.file-list-title {
+    color: var(--main-color);
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    font-size: 1.1em;
+}
+
+.file-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pixel-file-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-color);
+    border: 2px solid var(--main-color);
+    border-radius: 4px;
+    padding: 8px 12px;
+    box-shadow: 2px 2px 0 var(--main-color);
+    font-weight: 600;
+    color: var(--font-color);
+}
+
+.file-icon {
+    font-size: 1.2em;
+}
+
+.file-name {
+    font-size: 14px;
+}
+
+/* 模板网格 */
+.pixel-templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin: 30px 0;
+}
+
+.pixel-template-card {
+    background: var(--bg-color);
+    border: 2px solid var(--main-color);
+    border-radius: 8px;
+    box-shadow: 4px 4px 0 var(--main-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.pixel-template-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--main-color);
+}
+
+.pixel-template-card.selected {
+    border-color: var(--input-focus);
+    box-shadow: 4px 4px 0 var(--input-focus);
+}
+
+.pixel-template-card.selected:hover {
+    box-shadow: 6px 6px 0 var(--input-focus);
+}
+
+.template-preview-container {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background: #f9f9f9;
+    border-bottom: 2px solid var(--main-color);
 }
 
 .template-preview-wrapper {
-    height: 280px;
+    height: 100%;
     overflow: hidden;
-    border-bottom: 1px solid #ebeef5;
 }
 
 .template-preview {
     width: 840px;
-    /* Match the content width to keep proportions */
     height: 1188px;
-    /* Approximate A4 paper ratio */
+    transform-origin: top left;
+}
+
+.template-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(45, 140, 240, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.pixel-template-card.selected .template-overlay {
+    opacity: 1;
+}
+
+.select-indicator {
+    width: 50px;
+    height: 50px;
+    background: var(--input-focus);
+    border: 3px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.template-info {
+    padding: 20px;
+    text-align: center;
+}
+
+.template-name {
+    font-weight: 700;
+    font-size: 1.1em;
+    color: var(--main-color);
+    margin-bottom: 8px;
+}
+
+.template-desc {
+    font-size: 14px;
+    color: var(--font-color-sub);
+    margin-bottom: 12px;
+    line-height: 1.4;
+    min-height: 40px;
+}
+
+.template-price {
+    display: flex;
+    justify-content: center;
+}
+
+.price-tag {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+    border: 2px solid;
+}
+
+.price-tag.free {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+}
+
+.price-tag.premium {
+    background: #f56c6c;
+    color: white;
+    border-color: #f56c6c;
+}
+
+/* 预览容器 */
+.pixel-preview-container {
+    background: #f9f9f9;
+    border: 2px solid var(--main-color);
+    border-radius: 6px;
+    padding: 20px;
+    margin: 30px 0;
+    overflow: auto;
+    max-height: 600px;
 }
 
 .final-resume-container {
-    border: 1px solid #ebeef5;
-    background-color: #f9f9f9;
-    padding: 0;
+    background: white;
+    border-radius: 4px;
     overflow: visible;
 }
 
@@ -690,34 +1057,171 @@ const generateAndPreview = async () => {
     border: none !important;
     box-shadow: none !important;
     transform: none;
-    transform-origin: top;
 }
 
-.resume-preview-container {
-    border: 1px solid #ebeef5;
-    border-radius: 4px;
-    padding: 20px;
-    min-height: 400px;
-    background-color: #fafafa;
-    text-align: left;
+/* 按钮组 */
+.pixel-button-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
 }
 
-.resume-preview h3 {
+.pixel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 15px 25px;
+    border: 2px solid var(--main-color);
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    text-decoration: none;
+    background: var(--bg-color);
+    color: var(--main-color);
+    box-shadow: 4px 4px 0 var(--main-color);
+    min-width: 150px;
+}
+
+.pixel-btn.primary {
+    background: var(--main-color);
+    color: white;
+}
+
+.pixel-btn.secondary {
+    background: var(--bg-color);
+    color: var(--main-color);
+}
+
+.pixel-btn.success {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+    box-shadow: 4px 4px 0 var(--success-color);
+}
+
+.pixel-btn:hover:not(:disabled) {
+    transform: translate(1px, 1px);
+}
+
+.pixel-btn.primary:hover:not(:disabled) {
+    box-shadow: 3px 3px 0 var(--main-color);
+}
+
+.pixel-btn.secondary:hover:not(:disabled) {
+    box-shadow: 3px 3px 0 var(--main-color);
+}
+
+.pixel-btn.success:hover:not(:disabled) {
+    box-shadow: 3px 3px 0 var(--success-color);
+}
+
+.pixel-btn:active:not(:disabled) {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0;
+}
+
+.pixel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #ccc;
+    border-color: #999;
+    color: #666;
+    box-shadow: 4px 4px 0 #999;
+}
+
+.btn-icon {
     font-size: 1.2em;
-    color: #337ecc;
-    margin: 20px 0 10px 0;
-    border-left: 4px solid #337ecc;
-    padding-left: 10px;
 }
 
-.experience-item,
-.education-item {
-    margin-bottom: 15px;
-    padding-left: 15px;
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .pixel-generator {
+        padding: 15px;
+    }
+
+    .pixel-main-title {
+        font-size: 2.2em;
+    }
+
+    .pixel-main-card {
+        padding: 25px;
+    }
+
+    .pixel-content-card {
+        padding: 25px;
+    }
+
+    .pixel-steps {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .step-connector {
+        width: 4px;
+        height: 30px;
+        margin: 5px 0;
+    }
+
+    .pixel-templates-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .pixel-button-group {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .pixel-btn {
+        width: 100%;
+        max-width: 280px;
+    }
 }
 
-.skill-tag {
-    margin-right: 10px;
-    margin-bottom: 10px;
+@media (max-width: 480px) {
+    .pixel-main-title {
+        font-size: 1.8em;
+    }
+
+    .pixel-main-card {
+        padding: 20px;
+    }
+
+    .pixel-content-card {
+        padding: 20px;
+    }
+
+    .step-number {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+
+    .step-label {
+        font-size: 12px;
+    }
+}
+
+/* Loading 样式覆盖 */
+:deep(.el-loading-spinner .el-loading-text) {
+    color: var(--main-color) !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    margin-top: 10px !important;
+}
+
+:deep(.el-loading-spinner .circular) {
+    width: 50px !important;
+    height: 50px !important;
+}
+
+:deep(.el-loading-spinner .path) {
+    stroke: var(--input-focus) !important;
+    stroke-width: 3 !important;
 }
 </style>

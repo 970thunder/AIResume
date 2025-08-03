@@ -43,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, shallowRef, onMounted } from 'vue';
+import { ref, reactive, shallowRef, onMounted, onUnmounted } from 'vue';
 import { ElButton, ElTag, ElDialog, ElForm, ElFormItem, ElInput, ElNotification } from 'element-plus';
 import axios from 'axios';
 import { API_URLS, getHeaders } from '@/config/api';
@@ -63,7 +63,7 @@ const boilerplateHtml = `<!DOCTYPE html>
     <div class="resume-container">
         <style>
             body { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; line-height: 1.6; color: #333; background-color: #fff; }
-            .resume-container { width: 790px; margin: 20px auto; padding: 40px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); }
+            .resume-container { width: 750px; margin: 20px auto; padding: 40px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); }
             .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; margin-bottom: 30px; }
             .user-info { flex-grow: 1; }
             .full-name { font-size: 32px; font-weight: 600; margin: 0 0 5px 0; color: #000; }
@@ -132,12 +132,49 @@ const authStore = useAuthStore(); // Initialize auth store
 
 // --- Methods ---
 const handleReady = (payload) => { view.value = payload.view; };
+
 const updatePreview = () => {
     if (previewFrame.value) {
         const doc = previewFrame.value.contentWindow.document;
         doc.open();
         doc.write(htmlCode.value);
         doc.close();
+
+        // 动态调整缩放以适应容器
+        adjustPreviewScale();
+    }
+};
+
+const adjustPreviewScale = () => {
+    const previewPane = document.querySelector('.preview-pane');
+    const previewWrapper = document.querySelector('.preview-wrapper');
+    const previewIframe = document.querySelector('.preview-iframe');
+
+    if (previewPane && previewWrapper && previewIframe) {
+        const containerWidth = previewPane.clientWidth - 40; // 减去padding和margin
+        const originalWidth = 840; // 简历原始宽度
+        const originalHeight = 1188; // 简历原始高度
+        const maxScale = 0.5; // 最大缩放比例
+
+        // 计算合适的缩放比例
+        const scale = Math.min(containerWidth / originalWidth, maxScale);
+
+        // 计算缩放后的实际尺寸
+        const scaledWidth = Math.floor(originalWidth * scale);
+        const scaledHeight = Math.floor(originalHeight * scale);
+
+        // 直接设置容器和iframe的尺寸，而不是使用transform
+        previewWrapper.style.width = `${scaledWidth}px`;
+        previewWrapper.style.height = `${scaledHeight}px`;
+        previewWrapper.style.transform = 'none';
+
+        // 设置iframe的缩放
+        previewIframe.style.width = `${originalWidth}px`;
+        previewIframe.style.height = `${originalHeight}px`;
+        previewIframe.style.transform = `scale(${scale})`;
+        previewIframe.style.transformOrigin = 'top left';
+
+        console.log(`容器宽度: ${containerWidth}px, 缩放比例: ${scale.toFixed(3)}, 最终尺寸: ${scaledWidth}x${scaledHeight}`);
     }
 };
 
@@ -153,10 +190,17 @@ const testWithSampleData = () => {
         populatedHtml = populatedHtml.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), sampleData[key]);
     }
     const doc = previewFrame.value.contentWindow.document;
-    doc.open(); doc.write(populatedHtml); doc.close();
+    doc.open();
+    doc.write(populatedHtml);
+    doc.close();
+
+    // 确保在内容更新后调整缩放
+    setTimeout(adjustPreviewScale, 50);
 };
 
-const clearPreview = () => { updatePreview(); };
+const clearPreview = () => {
+    updatePreview();
+};
 
 const promptPublishInfo = () => {
     publishForm.name = '';
@@ -197,13 +241,27 @@ const publishTemplate = async () => {
     }
 };
 
-onMounted(() => { updatePreview(); });
+onMounted(() => {
+    updatePreview();
+
+    // 监听窗口大小变化
+    window.addEventListener('resize', adjustPreviewScale);
+
+    // 延迟执行一次缩放调整，确保DOM已完全渲染
+    setTimeout(adjustPreviewScale, 100);
+});
+
+// 在组件卸载时移除事件监听
+onUnmounted(() => {
+    window.removeEventListener('resize', adjustPreviewScale);
+});
 </script>
 
 <style scoped>
 .template-creator-container {
     display: flex;
     height: calc(100vh - 60px);
+    overflow: hidden;
 }
 
 .editor-pane {
@@ -213,19 +271,23 @@ onMounted(() => { updatePreview(); });
     padding: 10px;
     border-right: 1px solid #dcdfe6;
     overflow-y: auto;
+    min-width: 0;
+    /* 确保flex子元素可以收缩 */
 }
 
 .preview-pane {
     flex: 1;
-    overflow-y: auto;
+    overflow: auto;
     height: 100%;
     background-color: #f0f2f5;
-    padding: 20px;
+    padding: 10px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    min-width: 0;
+    /* 确保flex子元素可以收缩 */
 }
 
 /* Hide scrollbar for all panes */
@@ -258,10 +320,12 @@ onMounted(() => { updatePreview(); });
 }
 
 .preview-toolbar {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     display: flex;
     gap: 10px;
     flex-shrink: 0;
+    width: 100%;
+    justify-content: center;
 }
 
 .preview-wrapper {
@@ -269,14 +333,70 @@ onMounted(() => { updatePreview(); });
     height: 1188px;
     transform: scale(0.74);
     transform-origin: top center;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    /* 移除固定尺寸，由JavaScript动态设置 */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     background-color: white;
     flex-shrink: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 auto 20px auto;
+    position: relative;
+    /* 默认尺寸，会被JavaScript覆盖 */
+    width: 420px;
+    height: 594px;
 }
 
 .preview-iframe {
     width: 100%;
     height: 100%;
     border: none;
+    border-radius: 4px;
+    /* 移除overflow hidden，让transform scale正常工作 */
+    display: block;
+    /* 默认尺寸，会被JavaScript覆盖 */
+    width: 840px;
+    height: 1188px;
+    transform-origin: top left;
+}
+
+/* 响应式调整 - 简化，主要依靠JavaScript动态调整 */
+@media (max-width: 1200px) {
+    .template-creator-container {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 60px);
+    }
+
+    .editor-pane {
+        flex: none;
+        height: 45vh;
+        border-right: none;
+        border-bottom: 1px solid #dcdfe6;
+    }
+
+    .preview-pane {
+        flex: none;
+        height: 55vh;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 768px) {
+    .template-creator-container {
+        padding: 8px;
+    }
+
+    .preview-pane {
+        padding: 5px;
+    }
+
+    .toolbar {
+        gap: 4px;
+    }
+
+    .tag-button {
+        font-size: 12px;
+        padding: 2px 6px;
+    }
 }
 </style>
