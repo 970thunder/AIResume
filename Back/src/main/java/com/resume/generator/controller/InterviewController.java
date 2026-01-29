@@ -54,7 +54,7 @@ public class InterviewController {
         return ResponseEntity.ok(stats);
     }
 
-    @GetMapping("/analysis/latest")
+    @GetMapping(value = "/analysis/latest", produces = "application/json;charset=UTF-8")
     public ResponseEntity<String> getLatestAnalysis(Principal principal) {
         User user = getUserByPrincipal(principal);
         String json = interviewService.getLatestAnalysisJson(user.getId());

@@ -122,7 +122,7 @@
             <div class="question-header">
               <el-tag>{{ currentQuestion.category || '综合' }}</el-tag>
               <el-tag :type="getDifficultyType(currentQuestion.difficulty)" class="ml-2">{{ currentQuestion.difficulty
-                }}</el-tag>
+              }}</el-tag>
               <span class="question-index">第 {{ currentQuestionIndex + 1 }} / {{ totalQuestions }} 题</span>
             </div>
           </template>
@@ -307,12 +307,14 @@ const formatText = (text) => {
   return text.replace(/\n/g, '<br>');
 };
 
-const formatAnalysis = (jsonString) => {
+const formatAnalysis = (val) => {
+  if (!val) return '暂无数据';
   try {
-    const obj = JSON.parse(jsonString);
+    const obj = typeof val === 'string' ? JSON.parse(val) : val;
     return JSON.stringify(obj, null, 2);
   } catch (e) {
-    return jsonString;
+    console.error('Format analysis error:', e);
+    return typeof val === 'string' ? val : JSON.stringify(val);
   }
 };
 </script>
@@ -321,7 +323,7 @@ const formatAnalysis = (jsonString) => {
 .interview-prep-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 0 24px 0;
   min-height: 80vh;
 }
 
@@ -331,7 +333,6 @@ const formatAnalysis = (jsonString) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 40px;
 }
 
 /* Center Start Button */
@@ -404,8 +405,8 @@ const formatAnalysis = (jsonString) => {
 /* Orbit Cards */
 .orbit-card {
   position: absolute;
-  width: 180px;
-  height: 140px;
+  width: 220px;
+  height: 170px;
   background: white;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   display: flex;
@@ -446,14 +447,14 @@ const formatAnalysis = (jsonString) => {
 }
 
 .card-bottom-left {
-  bottom: 10%;
+  bottom: 20%;
   left: 15%;
   border-radius: 70% 30% 50% 50% / 60% 40% 60% 40%;
   background: linear-gradient(135deg, #fff 0%, #fff0f0 100%);
 }
 
 .card-bottom-right {
-  bottom: 10%;
+  bottom: 20%;
   right: 15%;
   border-radius: 30% 70% 60% 40% / 40% 60% 50% 50%;
   background: linear-gradient(135deg, #fff 0%, #fff9f0 100%);
