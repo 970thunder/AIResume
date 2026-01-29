@@ -60,7 +60,6 @@
             </div>
             <div class="card-label">错题集</div>
             <div class="card-value">{{ stats.wrongRecords ? stats.wrongRecords.length : 0 }}</div>
-            <div class="card-hint">点击查看详情</div>
           </div>
         </div>
 
@@ -72,7 +71,6 @@
             </div>
             <div class="card-label">简历分析</div>
             <div class="card-value">查看</div>
-            <div class="card-hint">点击回顾分析</div>
           </div>
         </div>
 
