@@ -319,7 +319,7 @@ const handleCommand = (command) => {
     padding: 0;
     overflow: hidden;
     height: 100%;
-    background-color: #f9fafb;
+    background: radial-gradient(circle at 50% 0%, #e0f2fe 0%, #f1f5f9 100%);
 }
 
 @media (max-width: 768px) {

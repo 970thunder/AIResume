@@ -1,80 +1,84 @@
 <template>
     <div class="page-container">
-        <el-card class="box-card">
-            <template #header>
-                <div class="card-header">
-                    <h1>个人中心</h1>
+        <div class="content-wrapper">
+            <el-card class="box-card">
+                <template #header>
+                    <div class="card-header">
+                        <h1>个人中心</h1>
+                    </div>
+                </template>
+                <div v-if="authStore.user">
+                    <el-descriptions title="账户信息" border :column="2">
+                        <el-descriptions-item label="用户名">{{ authStore.user.username }}</el-descriptions-item>
+                        <el-descriptions-item label="电子邮箱">{{ authStore.user.email }}</el-descriptions-item>
+                        <el-descriptions-item label="注册时间">{{ formattedDate(authStore.user.createdAt)
+                            }}</el-descriptions-item>
+                    </el-descriptions>
                 </div>
-            </template>
-            <div v-if="authStore.user">
-                <el-descriptions title="账户信息" border :column="2">
-                    <el-descriptions-item label="用户名">{{ authStore.user.username }}</el-descriptions-item>
-                    <el-descriptions-item label="电子邮箱">{{ authStore.user.email }}</el-descriptions-item>
-                    <el-descriptions-item label="注册时间">{{ formattedDate(authStore.user.createdAt)
-                        }}</el-descriptions-item>
-                </el-descriptions>
-            </div>
-            <el-empty v-else description="无法加载用户信息" />
-        </el-card>
+                <el-empty v-else description="无法加载用户信息" />
+            </el-card>
 
-        <el-card class="box-card" style="margin-top: 20px;">
-            <template #header>
-                <div class="card-header">
-                    <h2>简历历史记录</h2>
-                </div>
-            </template>
-            <div v-loading="loadingResumes">
-                <el-table :data="resumes" style="width: 100%" v-if="resumes.length > 0">
-                    <el-table-column prop="title" label="简历标题" width="250" />
-                    <el-table-column prop="createdAt" label="创建时间">
-                        <template #default="scope">
-                            {{ formattedDate(scope.row.createdAt) }}
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="操作" width="410">
-                        <template #default="scope">
-                            <div class="actions-container">
-                                <a class="fancy" @click.prevent="handleReEdit(scope.row)">
-                                    <span class="top-key"></span>
-                                    <span class="text">重新编辑</span>
-                                    <span class="bottom-key-1"></span>
-                                    <span class="bottom-key-2"></span>
-                                </a>
-                                <button class="button" @click="handleEditTitle(scope.row)"><span>修改标题</span></button>
-                                <button class="bin-button" @click="handleDelete(scope.row.id)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 39 7"
-                                        class="bin-top">
-                                        <line stroke-width="4" stroke="white" y2="5" x2="39" y1="5"></line>
-                                        <line stroke-width="3" stroke="white" y2="1.5" x2="26.0357" y1="1.5" x1="12">
-                                        </line>
-                                    </svg>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 33 39"
-                                        class="bin-bottom">
-                                        <mask fill="white" :id="`path-1-inside-1_8_19_${scope.row.id}`">
-                                            <path
-                                                d="M0 0H33V35C33 37.2091 31.2091 39 29 39H4C1.79086 39 0 37.2091 0 35V0Z">
+            <el-card class="box-card" style="margin-top: 20px;">
+                <template #header>
+                    <div class="card-header">
+                        <h2>简历历史记录</h2>
+                    </div>
+                </template>
+                <div v-loading="loadingResumes">
+                    <el-table :data="resumes" style="width: 100%" v-if="resumes.length > 0">
+                        <el-table-column prop="title" label="简历标题" width="250" />
+                        <el-table-column prop="createdAt" label="创建时间">
+                            <template #default="scope">
+                                {{ formattedDate(scope.row.createdAt) }}
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" width="410">
+                            <template #default="scope">
+                                <div class="actions-container">
+                                    <a class="fancy" @click.prevent="handleReEdit(scope.row)">
+                                        <span class="top-key"></span>
+                                        <span class="text">重新编辑</span>
+                                        <span class="bottom-key-1"></span>
+                                        <span class="bottom-key-2"></span>
+                                    </a>
+                                    <button class="button"
+                                        @click="handleEditTitle(scope.row)"><span>修改标题</span></button>
+                                    <button class="bin-button" @click="handleDelete(scope.row.id)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 39 7"
+                                            class="bin-top">
+                                            <line stroke-width="4" stroke="white" y2="5" x2="39" y1="5"></line>
+                                            <line stroke-width="3" stroke="white" y2="1.5" x2="26.0357" y1="1.5"
+                                                x1="12">
+                                            </line>
+                                        </svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 33 39"
+                                            class="bin-bottom">
+                                            <mask fill="white" :id="`path-1-inside-1_8_19_${scope.row.id}`">
+                                                <path
+                                                    d="M0 0H33V35C33 37.2091 31.2091 39 29 39H4C1.79086 39 0 37.2091 0 35V0Z">
+                                                </path>
+                                            </mask>
+                                            <path :mask="`url(#path-1-inside-1_8_19_${scope.row.id})`" fill="white"
+                                                d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z">
                                             </path>
-                                        </mask>
-                                        <path :mask="`url(#path-1-inside-1_8_19_${scope.row.id})`" fill="white"
-                                            d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z">
-                                        </path>
-                                        <path stroke-width="4" stroke="white" d="M12 6L12 29"></path>
-                                        <path stroke-width="4" stroke="white" d="M21 6V29"></path>
-                                    </svg>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 89 80"
-                                        class="garbage">
-                                        <path fill="white"
-                                            d="M20.5 10.5L37.5 15.5L42.5 11.5L51.5 12.5L68.75 0L72 11.5L79.5 12.5H88.5L87 22L68.75 31.5L75.5066 25L86 26L87 35.5L77.5 48L70.5 49.5L80 50L77.5 71.5L63.5 58.5L53.5 68.5L65.5 70.5L45.5 73L35.5 79.5L28 67L16 63L12 51.5L0 48L16 25L22.5 17L20.5 10.5Z">
-                                        </path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </template>
-                    </el-table-column>
-                </el-table>
-                <el-empty v-else description="暂无简历记录，快去生成一份吧！" />
-            </div>
-        </el-card>
+                                            <path stroke-width="4" stroke="white" d="M12 6L12 29"></path>
+                                            <path stroke-width="4" stroke="white" d="M21 6V29"></path>
+                                        </svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 89 80"
+                                            class="garbage">
+                                            <path fill="white"
+                                                d="M20.5 10.5L37.5 15.5L42.5 11.5L51.5 12.5L68.75 0L72 11.5L79.5 12.5H88.5L87 22L68.75 31.5L75.5066 25L86 26L87 35.5L77.5 48L70.5 49.5L80 50L77.5 71.5L63.5 58.5L53.5 68.5L65.5 70.5L45.5 73L35.5 79.5L28 67L16 63L12 51.5L0 48L16 25L22.5 17L20.5 10.5Z">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <el-empty v-else description="暂无简历记录，快去生成一份吧！" />
+                </div>
+            </el-card>
+        </div>
     </div>
 </template>
 
@@ -178,12 +182,16 @@ onMounted(() => {
 
 <style scoped>
 .page-container {
-    padding: 20px;
-    max-width: 1000px;
-    margin: 0 auto;
+    width: 100%;
     height: 100%;
     overflow-y: auto;
     box-sizing: border-box;
+}
+
+.content-wrapper {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 .card-header h1,
