@@ -8,6 +8,12 @@
     <!-- Loading State -->
     <div v-if="loading" class="loading-container">
       <el-skeleton :rows="5" animated />
+      <div class="loading-text" v-if="!sessionActive">
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
+        <span>题目正在定制中，请稍候...</span>
+      </div>
     </div>
 
     <!-- Main Content -->
@@ -165,8 +171,15 @@
 
       <!-- Interview Session -->
       <div v-if="sessionActive" class="interview-session">
+        <div class="exit-btn-wrapper">
+          <el-button @click="exitSession" type="danger" plain circle>
+            <el-icon>
+              <Close />
+            </el-icon>
+          </el-button>
+        </div>
+
         <div class="session-header">
-          <el-button @click="exitSession" size="small">退出面试</el-button>
           <el-progress :percentage="progressPercentage" :format="progressFormat" class="session-progress" />
         </div>
 
@@ -175,7 +188,7 @@
             <div class="question-header">
               <el-tag>{{ currentQuestion.category || '综合' }}</el-tag>
               <el-tag :type="getDifficultyType(currentQuestion.difficulty)" class="ml-2">{{ currentQuestion.difficulty
-                }}</el-tag>
+              }}</el-tag>
               <span class="question-index">第 {{ currentQuestionIndex + 1 }} / {{ totalQuestions }} 题</span>
             </div>
           </template>
@@ -213,7 +226,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { EditPen, TrendCharts, VideoPlay, Warning, Document } from '@element-plus/icons-vue';
+import { EditPen, TrendCharts, VideoPlay, Warning, Document, Loading, Close } from '@element-plus/icons-vue';
 import { API_URLS, getHeaders } from '@/config/api';
 import axios from 'axios';
 
@@ -647,6 +660,14 @@ const formatAnalysis = (val) => {
 .interview-session {
   max-width: 800px;
   margin: 0 auto;
+  position: relative;
+}
+
+.exit-btn-wrapper {
+  position: absolute;
+  top: -60px;
+  right: 0;
+  z-index: 10;
 }
 
 .question-card {
@@ -668,21 +689,89 @@ const formatAnalysis = (val) => {
   padding: 20px 0;
 }
 
+/* Question Styles */
 .question-content h3 {
+  font-size: 20px;
+  color: #303133;
   margin-bottom: 24px;
   line-height: 1.6;
-  font-size: 18px;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.radio-group-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
 }
 
 .option-item {
+  margin: 0 !important;
   width: 100%;
-  margin-bottom: 12px;
-  margin-right: 0 !important;
+  padding: 12px 16px;
+  border-radius: 8px;
+  transition: all 0.3s;
+  background: #f8fafc;
+  border: 1px solid transparent;
+}
+
+.option-item:hover {
+  background: #f0f9ff;
+}
+
+.option-item.is-checked {
+  background: #ecf5ff;
+  border-color: #409eff;
+}
+
+.text-answer {
+  margin-top: 16px;
+}
+
+.text-answer :deep(.el-textarea__inner) {
+  background: #f8fafc;
+  border: 1px solid transparent;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.text-answer :deep(.el-textarea__inner):focus {
+  background: #fff;
+  border-color: #409eff;
+  box-shadow: 0 0 0 1px #409eff;
 }
 
 .question-footer {
-  margin-top: 24px;
+  margin-top: 32px;
   text-align: right;
+  border-top: 1px solid #ebeef5;
+  padding-top: 20px;
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.loading-text {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #909399;
+  font-size: 16px;
 }
 
 .wrong-question-detail {

@@ -71,21 +71,17 @@ public class InterviewService {
 
         // 2. Fetch questions
         List<InterviewQuestion> questions = new ArrayList<>();
+        int targetQuestionCount = 20;
 
         // Try with keyword
-        questions.addAll(questionRepository.findRandomQuestionsNotAnsweredWithKeyword(userId, keyword, 10));
+        questions.addAll(
+                questionRepository.findRandomQuestionsNotAnsweredWithKeyword(userId, keyword, targetQuestionCount));
 
         // If not enough, try generic unattempted
-        if (questions.size() < 10) {
-            int needed = 10 - questions.size();
+        if (questions.size() < targetQuestionCount) {
+            int needed = targetQuestionCount - questions.size();
             List<InterviewQuestion> generic = questionRepository.findRandomQuestionsNotAnswered(userId, needed);
-            // Avoid duplicates (though the query should handle it, mixing queries might
-            // not)
-            // The second query excludes answered, but might include ones we just picked if
-            // we didn't save a record yet?
-            // Actually, "NotAnswered" checks interview_records. We haven't created records
-            // yet.
-            // So we need to filter locally.
+
             Set<Long> pickedIds = questions.stream().map(InterviewQuestion::getId).collect(Collectors.toSet());
             for (InterviewQuestion q : generic) {
                 if (!pickedIds.contains(q.getId())) {
@@ -96,20 +92,21 @@ public class InterviewService {
         }
 
         // 3. If still not enough, generate with AI
-        if (questions.size() < 10) {
+        // Retry loop to generate more questions
+        int maxAttempts = 3;
+        int attempts = 0;
+
+        while (questions.size() < targetQuestionCount && attempts < maxAttempts) {
+            attempts++;
             try {
-                int needed = 10 - questions.size();
-                // Generate slightly more to ensure we get valid ones, but 10 is the batch size
-                // usually.
-                // The AI service generates 10 fixed. We'll take what we need.
+                // Generate questions
                 List<Map<String, Object>> generated = aiAnalysisService.generateInterviewQuestions(techStack);
 
                 for (Map<String, Object> map : generated) {
-                    if (questions.size() >= 10)
+                    if (questions.size() >= targetQuestionCount)
                         break;
 
                     String content = (String) map.get("content");
-                    // Check if similar question exists? Skipping for now.
 
                     InterviewQuestion q = InterviewQuestion.builder()
                             .content(content)
@@ -125,12 +122,14 @@ public class InterviewService {
                     questions.add(q);
                 }
             } catch (Exception e) {
-                // If AI fails, and we have at least some questions, proceed.
-                // If 0 questions, we might need to fail or return empty?
-                if (questions.isEmpty()) {
-                    throw new RuntimeException("Could not generate questions: " + e.getMessage());
-                }
+                // Log error but continue trying or break if critical
+                System.err.println("AI generation attempt " + attempts + " failed: " + e.getMessage());
             }
+        }
+
+        // Final check
+        if (questions.isEmpty()) {
+            throw new RuntimeException("Could not generate questions.");
         }
 
         // 4. Create Session
