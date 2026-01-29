@@ -43,6 +43,15 @@
                     </template>
                 </el-menu-item>
 
+                <el-menu-item index="/interview">
+                    <el-icon>
+                        <Reading />
+                    </el-icon>
+                    <template #title>
+                        <span>面经八股</span>
+                    </template>
+                </el-menu-item>
+
                 <el-menu-item index="/store">
                     <el-icon>
                         <ShoppingCart />
@@ -113,7 +122,8 @@ import {
     Fold,
     Expand,
     ArrowDown,
-    DataAnalysis
+    DataAnalysis,
+    Reading
 } from '@element-plus/icons-vue';
 
 const isCollapsed = ref(false);

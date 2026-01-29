@@ -11,6 +11,7 @@ import TemplateStore from '../views/TemplateStore.vue';
 import UserProfile from '../views/UserProfile.vue';
 import ResumeEditor from '../views/ResumeEditor.vue';
 import TemplateCreator from '../views/TemplateCreator.vue';
+import InterviewPrep from '../views/InterviewPrep.vue';
 import HyperAdmin from '../views/HyperAdmin.vue';
 import HyperTemplateAuditor from '../views/HyperTemplateAuditor.vue';
 
@@ -24,6 +25,7 @@ const routes = [
             { path: 'home', name: 'Home', component: HomePage },
             { path: 'generator', name: 'Generator', component: ResumeGenerator },
             { path: 'analysis', name: 'Analysis', component: ResumeAnalyzer },
+            { path: 'interview', name: 'Interview', component: InterviewPrep },
             { path: 'store', name: 'Store', component: TemplateStore },
             { path: 'profile', name: 'Profile', component: UserProfile },
             { path: 'editor/:id', name: 'Editor', component: ResumeEditor, props: true },

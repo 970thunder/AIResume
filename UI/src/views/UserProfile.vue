@@ -9,6 +9,9 @@
                 </template>
                 <div v-if="authStore.user">
                     <el-descriptions title="账户信息" border :column="2">
+                        <template #extra>
+                            <el-button type="primary" size="small" @click="handleEditProfile">编辑</el-button>
+                        </template>
                         <el-descriptions-item label="用户名">{{ authStore.user.username }}</el-descriptions-item>
                         <el-descriptions-item label="电子邮箱">{{ authStore.user.email }}</el-descriptions-item>
                         <el-descriptions-item label="注册时间">{{ formattedDate(authStore.user.createdAt)
@@ -79,14 +82,43 @@
                 </div>
             </el-card>
         </div>
+
+        <el-dialog v-model="editDialogVisible" title="编辑账户信息" width="400px">
+            <el-form :model="editForm" :rules="editRules" ref="editFormRef" label-width="80px">
+                <el-form-item label="用户名" prop="username">
+                    <el-input v-model="editForm.username" :prefix-icon="User" />
+                </el-form-item>
+                <el-form-item label="电子邮箱" prop="email">
+                    <el-input v-model="editForm.email" :prefix-icon="Message" />
+                </el-form-item>
+                <el-form-item v-if="isEmailChanged" label="验证码" prop="verificationCode">
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <el-input v-model="editForm.verificationCode" :prefix-icon="Key" placeholder="输入验证码" />
+                        <el-button @click="sendVerificationCode" :loading="sending" :disabled="cooldown > 0"
+                            size="small">
+                            {{ cooldown > 0 ? `${cooldown}秒` : '发送' }}
+                        </el-button>
+                    </div>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="editDialogVisible = false">取消</el-button>
+                    <el-button type="primary" @click="submitEditProfile" :loading="savingProfile">
+                        保存
+                    </el-button>
+                </span>
+            </template>
+        </el-dialog>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { ElNotification, ElMessageBox } from 'element-plus';
+import { User, Message, Key } from '@element-plus/icons-vue';
 import axios from 'axios';
 import { API_URLS, getHeaders } from '@/config/api';
 
@@ -94,6 +126,130 @@ const authStore = useAuthStore();
 const router = useRouter();
 const resumes = ref([]);
 const loadingResumes = ref(false);
+
+const editDialogVisible = ref(false);
+const editFormRef = ref(null);
+const savingProfile = ref(false);
+
+const editForm = reactive({
+    username: '',
+    email: '',
+    verificationCode: ''
+});
+
+const editRules = {
+    username: [
+        { required: true, message: '请输入用户名', trigger: 'blur' },
+        { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+    ],
+    email: [
+        { required: true, message: '请输入电子邮箱', trigger: 'blur' },
+        { type: 'email', message: '请输入有效的电子邮箱地址', trigger: 'blur' }
+    ],
+    verificationCode: [
+        { required: false, message: '请输入验证码', trigger: 'blur' }
+    ]
+};
+
+const cooldown = ref(0);
+const sending = ref(false);
+
+const isEmailChanged = computed(() => {
+    return editForm.email !== authStore.user.email;
+});
+
+const sendVerificationCode = async () => {
+    if (!editForm.email) return;
+
+    sending.value = true;
+    try {
+        await axios.post(API_URLS.auth.sendVerificationCode, null, {
+            params: { email: editForm.email }
+        });
+        ElNotification({
+            title: '成功',
+            message: '验证码已发送，请查收',
+            type: 'success',
+        });
+
+        cooldown.value = 60;
+        const timer = setInterval(() => {
+            cooldown.value--;
+            if (cooldown.value <= 0) {
+                clearInterval(timer);
+            }
+        }, 1000);
+    } catch (error) {
+        console.error('Error sending code:', error);
+        ElNotification({
+            title: '错误',
+            message: error.response?.data || '发送失败，请稍后重试',
+            type: 'error',
+        });
+    } finally {
+        sending.value = false;
+    }
+};
+
+const handleEditProfile = () => {
+    editForm.username = authStore.user.username;
+    editForm.email = authStore.user.email;
+    editForm.verificationCode = '';
+    editDialogVisible.value = true;
+};
+
+const submitEditProfile = async () => {
+    if (!editFormRef.value) return;
+
+    await editFormRef.value.validate(async (valid) => {
+        if (valid) {
+            // 如果邮箱变更，必须填写验证码
+            if (isEmailChanged.value && !editForm.verificationCode) {
+                ElNotification({
+                    title: '提示',
+                    message: '修改邮箱需要输入验证码',
+                    type: 'warning',
+                });
+                return;
+            }
+
+            savingProfile.value = true;
+            try {
+                const payload = {
+                    username: editForm.username
+                };
+
+                if (isEmailChanged.value) {
+                    payload.email = editForm.email;
+                    payload.verificationCode = editForm.verificationCode;
+                }
+
+                const response = await axios.put(API_URLS.auth.updateProfile, payload, { headers: getHeaders() });
+
+                // Update store with new token and user info
+                authStore.setToken(response.data.token);
+                authStore.setUser(response.data.user);
+
+                ElNotification({
+                    title: '成功',
+                    message: '账户信息更新成功',
+                    type: 'success',
+                });
+                editDialogVisible.value = false;
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                const msg = error.response?.data?.message || '更新失败';
+                ElNotification({
+                    title: '错误',
+                    message: msg,
+                    type: 'error',
+                });
+            } finally {
+                savingProfile.value = false;
+            }
+        }
+    });
+};
 
 const fetchResumes = async () => {
     loadingResumes.value = true;

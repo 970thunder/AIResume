@@ -33,6 +33,7 @@ export const API_URLS = {
         register: `${API_BASE_URL}/auth/register`,
         sendVerificationCode: `${API_BASE_URL}/auth/send-verification-code`,
         checkEmail: `${API_BASE_URL}/auth/check-email`,
+        updateProfile: `${API_BASE_URL}/auth/profile`,
     },
     admin: {
         templates: `${API_BASE_URL}/admin/templates`,
@@ -50,6 +51,11 @@ export const API_URLS = {
     },
     analysis: {
         career: `${API_BASE_URL}/analysis/career`,
+    },
+    interview: {
+        start: `${API_BASE_URL}/interview/start`,
+        submit: `${API_BASE_URL}/interview/submit`,
+        stats: `${API_BASE_URL}/interview/stats`,
     }
 };
 

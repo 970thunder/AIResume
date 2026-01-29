@@ -133,6 +133,142 @@ public class AIAnalysisService {
     }
   }
 
+  public List<Map<String, Object>> generateInterviewQuestions(String techStack) {
+    try {
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("model", deepSeekConfig.getModel());
+
+      List<Map<String, String>> messages = new ArrayList<>();
+      Map<String, String> message = new HashMap<>();
+      message.put("role", "user");
+      message.put("content", buildInterviewQuestionPrompt(techStack));
+      messages.add(message);
+
+      requestBody.put("messages", messages);
+      requestBody.put("temperature", 0.7);
+      requestBody.put("max_tokens", 3000);
+
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_JSON);
+      headers.setBearerAuth(deepSeekConfig.getApiKey());
+
+      HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+      ResponseEntity<Map> response = restTemplate.postForEntity(
+          deepSeekConfig.getBaseUrl() + "/chat/completions",
+          entity,
+          Map.class);
+
+      if (response.getStatusCode() == HttpStatus.OK) {
+        Map<String, Object> responseBody = response.getBody();
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) responseBody.get("choices");
+        if (!choices.isEmpty()) {
+          Map<String, Object> firstChoice = choices.get(0);
+          Map<String, String> messageContent = (Map<String, String>) firstChoice.get("message");
+          String rawJson = messageContent.get("content");
+
+          String cleanedJson = rawJson.replaceAll("```json", "").replaceAll("```", "").trim();
+          try {
+            return objectMapper.readValue(cleanedJson, new TypeReference<>() {
+            });
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse AI response as JSON", e);
+          }
+        }
+      }
+      throw new RuntimeException("DeepSeek API call failed with status: " + response.getStatusCode());
+    } catch (Exception e) {
+      throw new RuntimeException("Interview generation failed: " + e.getMessage(), e);
+    }
+  }
+
+  public Map<String, Object> evaluateAnswer(String question, String answer) {
+    try {
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("model", deepSeekConfig.getModel());
+
+      List<Map<String, String>> messages = new ArrayList<>();
+      Map<String, String> message = new HashMap<>();
+      message.put("role", "user");
+      message.put("content", buildEvaluationPrompt(question, answer));
+      messages.add(message);
+
+      requestBody.put("messages", messages);
+      requestBody.put("temperature", 0.3);
+      requestBody.put("max_tokens", 1000);
+
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_JSON);
+      headers.setBearerAuth(deepSeekConfig.getApiKey());
+
+      HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+      ResponseEntity<Map> response = restTemplate.postForEntity(
+          deepSeekConfig.getBaseUrl() + "/chat/completions",
+          entity,
+          Map.class);
+
+      if (response.getStatusCode() == HttpStatus.OK) {
+        Map<String, Object> responseBody = response.getBody();
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) responseBody.get("choices");
+        if (!choices.isEmpty()) {
+          Map<String, Object> firstChoice = choices.get(0);
+          Map<String, String> messageContent = (Map<String, String>) firstChoice.get("message");
+          String rawJson = messageContent.get("content");
+          String cleanedJson = rawJson.replaceAll("```json", "").replaceAll("```", "").trim();
+          try {
+            return objectMapper.readValue(cleanedJson, new TypeReference<>() {
+            });
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse AI response as JSON", e);
+          }
+        }
+      }
+      throw new RuntimeException("DeepSeek API call failed");
+    } catch (Exception e) {
+      throw new RuntimeException("Answer evaluation failed: " + e.getMessage(), e);
+    }
+  }
+
+  private String buildInterviewQuestionPrompt(String techStack) {
+    return """
+        Generate 10 technical interview questions based on the following technology stack or keywords.
+        Tech Stack: """ + techStack + """
+
+        Include a mix of Difficulty (EASY, MEDIUM, HARD) and Types (OPEN_ENDED, MULTIPLE_CHOICE).
+        For MULTIPLE_CHOICE, provide 4 options and the correct answer.
+        For OPEN_ENDED, provide a comprehensive reference answer.
+
+        Return STRICTLY a JSON array of objects with the following structure:
+        [
+            {
+                "content": "Question text here",
+                "type": "OPEN_ENDED", // or "MULTIPLE_CHOICE"
+                "options": ["Option A", "Option B", "Option C", "Option D"], // null if OPEN_ENDED
+                "referenceAnswer": "Detailed reference answer or correct option (e.g. Option A)",
+                "difficulty": "MEDIUM",
+                "category": "Java", // The specific tech category e.g. Java, Redis, React
+                "tags": "Java,Backend" // Comma separated tags
+            }
+        ]
+        """;
+  }
+
+  private String buildEvaluationPrompt(String question, String answer) {
+    return """
+        Evaluate the following interview answer.
+        Question: """ + question + """
+        User Answer: """ + answer + """
+
+        Return STRICTLY a JSON object:
+        {
+            "isCorrect": true, // or false. Be somewhat lenient for open ended, strictly check logic.
+            "evaluation": "Detailed feedback on what was right, what was wrong, and how to improve.",
+            "score": 85 // 0-100 score
+        }
+        """;
+  }
+
   private String buildCareerAnalysisPrompt(String extractedContent, String jobDescription) {
     String jdSection = "";
     if (jobDescription != null && !jobDescription.trim().isEmpty()) {
