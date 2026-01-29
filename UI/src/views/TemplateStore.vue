@@ -1,50 +1,58 @@
 <template>
     <div class="page-container">
-        <el-card>
+        <el-card shadow="never" class="store-card">
             <template #header>
                 <div class="card-header">
                     <div class="header-left">
-                        <div class="brutalist-container">
-                            <input v-model="searchQuery" @input="handleSearch" placeholder="搜索-支持搜索标题、描述..."
-                                class="brutalist-input smooth-type" type="text" />
-                            <label class="brutalist-label">搜索模板</label>
+                        <div class="search-container">
+                            <el-input v-model="searchQuery" placeholder="搜索模板..." class="search-input"
+                                :prefix-icon="Search" clearable @input="handleSearch" />
                         </div>
                         <router-link to="/template/create">
-                            <el-button type="success">创建模板</el-button>
+                            <el-button type="primary" class="create-btn">
+                                <el-icon class="el-icon--left">
+                                    <Plus />
+                                </el-icon>
+                                创建模板
+                            </el-button>
                         </router-link>
                     </div>
                     <div class="filter-buttons">
                         <el-radio-group v-model="currentFilter" @change="filterTemplates">
-                            <el-radio-button label="all">全部</el-radio-button>
-                            <el-radio-button label="free">免费模板</el-radio-button>
-                            <el-radio-button label="premium">付费模板</el-radio-button>
+                            <el-radio-button value="all" label="all">全部</el-radio-button>
+                            <el-radio-button value="free" label="free">免费</el-radio-button>
+                            <el-radio-button value="premium" label="premium">付费</el-radio-button>
                         </el-radio-group>
                     </div>
                 </div>
             </template>
 
             <div v-loading="loading" class="templates-container">
-                <el-row :gutter="20" v-if="filteredTemplates.length > 0">
-                    <el-col :xs="24" :sm="12" :md="8" v-for="template in filteredTemplates" :key="template.id">
-                        <el-card shadow="hover" class="template-card">
+                <el-row :gutter="24" v-if="filteredTemplates.length > 0">
+                    <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="template in filteredTemplates" :key="template.id">
+                        <el-card shadow="hover" class="template-card" :body-style="{ padding: '0px' }">
                             <div class="template-preview-wrapper" v-loading="templateLoadingStates[template.id]">
-                                <div v-if="template.html" class="template-preview"
-                                    :style="{ transform: 'scale(0.3)', transformOrigin: 'top left' }"
-                                    v-html="template.html">
+                                <div class="preview-container">
+                                    <ShadowPreview v-if="template.html" class="template-html-content"
+                                        :content="template.html" />
+                                    <el-empty v-else description="预览加载中..." :image-size="60" />
                                 </div>
-                                <el-empty v-else description="预览加载中..." />
-                            </div>
-                            <div class="template-info">
-                                <h3>{{ template.name }}</h3>
-                                <p class="description">{{ template.description }}</p>
-                                <div class="template-footer">
-                                    <el-tag :type="template.type === 'free' ? 'success' : 'warning'" size="small">
-                                        {{ template.type === 'free' ? '免费' : `¥${template.price}` }}
-                                    </el-tag>
-                                    <el-button type="primary" size="small" @click="useTemplate(template)">
-                                        查看详情
+                                <div class="preview-overlay">
+                                    <el-button type="primary" @click="useTemplate(template)">
+                                        立即使用
                                     </el-button>
                                 </div>
+                            </div>
+                            <div class="template-info">
+                                <div class="info-header">
+                                    <h3 class="template-name" :title="template.name">{{ template.name }}</h3>
+                                    <el-tag :type="template.type === 'free' ? 'success' : 'warning'" size="small"
+                                        effect="plain">
+                                        {{ template.type === 'free' ? '免费' : `¥${template.price}` }}
+                                    </el-tag>
+                                </div>
+                                <p class="description" :title="template.description">{{ template.description || '暂无描述'
+                                }}</p>
                             </div>
                         </el-card>
                     </el-col>
@@ -60,7 +68,9 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { ElNotification } from 'element-plus';
+import { Search, Plus } from '@element-plus/icons-vue';
 import { API_URLS, getHeaders } from '@/config/api';
+import ShadowPreview from '@/components/ShadowPreview.vue';
 
 const router = useRouter();
 const templates = ref([]);
@@ -80,7 +90,7 @@ const filteredTemplates = computed(() => {
         const searchLower = searchQuery.value.toLowerCase();
         return (
             template.name.toLowerCase().includes(searchLower) ||
-            template.description.toLowerCase().includes(searchLower)
+            template.description?.toLowerCase().includes(searchLower)
         );
     });
 });
@@ -97,7 +107,8 @@ const loadTemplateHtml = async (templates) => {
         setTemplateLoading(template.id, true);
     });
 
-    for (const template of templates) {
+    // 并行加载所有模板，而不是串行
+    const loadPromises = templates.map(async (template) => {
         try {
             if (template.htmlContent) {
                 // 优先使用数据库中的 htmlContent
@@ -107,17 +118,17 @@ const loadTemplateHtml = async (templates) => {
                 const response = await fetch(template.templatePath);
                 template.html = await response.text();
             } else {
-                template.html = `<div style='text-align: center; padding: 20px; color: grey;'>预览不可用</div>`;
+                template.html = `<div style='text-align: center; padding: 20px; color: #909399;'>预览不可用</div>`;
             }
-            // 添加1秒延迟
-            await new Promise(resolve => setTimeout(resolve, 700));
         } catch (error) {
             console.error(`Error loading template ${template.templatePath || `ID: ${template.id}`}:`, error);
-            template.html = `<div style='text-align: center; padding: 20px; color: red;'>加载模板失败</div>`;
+            template.html = `<div style='text-align: center; padding: 20px; color: #f56c6c;'>加载模板失败</div>`;
         } finally {
             setTemplateLoading(template.id, false);
         }
-    }
+    });
+
+    await Promise.all(loadPromises);
 };
 
 // 获取模板列表
@@ -188,9 +199,16 @@ onMounted(() => {
 
 <style scoped>
 .page-container {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 24px;
+    width: 100%;
+    box-sizing: border-box;
+    max-width: none;
+}
+
+.store-card {
+    border-radius: 12px;
+    border: 1px solid #e4e7ed;
+    box-shadow: 5px 5px 10px 5px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
@@ -198,177 +216,148 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
-}
-
-.card-header h1 {
-    margin: 0;
-    font-size: 24px;
-    white-space: nowrap;
+    gap: 16px;
 }
 
 .header-left {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
+    min-width: 0;
 }
 
-.brutalist-container {
+.search-container {
+    width: 300px;
+}
+
+.create-btn {
+    font-weight: 500;
+}
+
+.templates-container {
+    min-height: 400px;
+}
+
+.template-card {
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.template-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.template-preview-wrapper {
+    height: 360px;
+    overflow: hidden;
+    background-color: #f5f7fa;
     position: relative;
-    width: 400px;
-    font-family: monospace;
-}
-
-.brutalist-input {
+    border-bottom: 1px solid #ebeef5;
     width: 100%;
-    padding: 8px 12px;
-    font-size: 15px;
-    font-weight: bold;
-    color: #5192ed;
-    background-color: #fff;
-    border: 3px solid #003898;
-    position: relative;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.preview-container {
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    border-radius: 0;
-    outline: none;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 4px 4px 0 #8ec9ed, 8px 8px 0 #4a90e2;
+    position: relative;
+    max-width: 100%;
+    min-width: 0;
+    contain: layout style paint;
 }
 
-.brutalist-input:focus {
-    transform: translate(-4px, -4px);
-    box-shadow: 8px 8px 0 #000, 12px 12px 0 #4a90e2;
-}
-
-.brutalist-input:not(:focus) {
-    transform: translate(0, 0);
-}
-
-.brutalist-input:focus {
-    animation: none;
-}
-
-.brutalist-label {
+.template-html-content {
+    width: 210mm;
+    height: 297mm;
+    background: white;
+    transform: translateX(-50%) scale(0.25);
+    transform-origin: top center;
+    overflow: hidden;
+    pointer-events: none;
+    padding: 20px;
+    box-sizing: border-box;
     position: absolute;
-    left: -10px;
-    top: -15px;
-    font-size: 10px;
-    font-weight: bold;
-    color: rgb(255, 255, 255);
-    background-color: #bcddff;
-    padding: 3px 8px;
-    transform: rotate(-1deg);
-    z-index: 1;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    left: 50%;
+    top: 0;
+    min-width: 0;
+    max-width: 100vw;
 }
 
-.smooth-type {
-    position: relative;
-    overflow: hidden;
-}
-
-.smooth-type::before {
-    content: "";
+.preview-overlay {
     position: absolute;
     top: 0;
-    right: 0;
-    bottom: 0;
     left: 0;
-    background: linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, 0) 100%);
-    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
-.smooth-type:focus::before {
+.template-card:hover .preview-overlay {
     opacity: 1;
-    animation: type-gradient 2s linear infinite;
-}
-
-@keyframes type-gradient {
-    0% {
-        background-position: 300px 0;
-    }
-
-    100% {
-        background-position: 0 0;
-    }
-}
-
-.brutalist-input::placeholder {
-    color: #888;
-    transition: color 0.3s ease;
-}
-
-.brutalist-input:focus::placeholder {
-    color: transparent;
-}
-
-.templates-container {
-    margin-top: 20px;
-}
-
-.template-card {
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-}
-
-.template-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.template-preview-wrapper {
-    height: 280px;
-    overflow: hidden;
-    border-bottom: 1px solid #ebeef5;
-    background-color: #f8f9fa;
-    position: relative;
-}
-
-.template-preview {
-    width: 840px;
-    height: 1188px;
 }
 
 .template-info {
-    padding: 15px;
+    padding: 16px;
 }
 
-.template-info h3 {
-    margin: 0 0 10px 0;
-    font-size: 18px;
-    color: #303133;
-}
-
-.description {
-    color: #606266;
-    font-size: 14px;
-    margin-bottom: 15px;
-    min-height: 40px;
-}
-
-.template-footer {
+.info-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 8px;
 }
 
-.filter-buttons {
-    margin-left: auto;
+.template-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #303133;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 70%;
 }
 
-/* 自定义加载动画样式 */
-:deep(.el-loading-mask) {
-    background-color: rgba(255, 255, 255, 0.8);
+.description {
+    color: #909399;
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 40px;
 }
 
-:deep(.el-loading-spinner) {
-    top: 40%;
+/* Custom Scrollbar for the page */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
 }
 
-:deep(.el-loading-spinner .circular) {
-    width: 30px;
-    height: 30px;
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
 </style>

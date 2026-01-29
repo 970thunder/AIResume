@@ -15,9 +15,22 @@
                 <el-button @click="testWithSampleData" type="primary">测试</el-button>
                 <el-button @click="clearPreview" type="warning">清除</el-button>
                 <el-button @click="promptPublishInfo" type="success">发布</el-button>
+                <div class="zoom-controls">
+                    <el-button circle size="small" @click="adjustZoom(0.1)">+</el-button>
+                    <span class="zoom-text">{{ Math.round(scale * 100) }}%</span>
+                    <el-button circle size="small" @click="adjustZoom(-0.1)">-</el-button>
+                    <el-button size="small" @click="resetView">复位</el-button>
+                </div>
             </div>
-            <div class="preview-wrapper">
-                <iframe ref="previewFrame" class="preview-iframe"></iframe>
+            <div class="preview-viewport" @wheel.prevent="handleWheel" @mousedown="startDrag" @mousemove="onDrag"
+                @mouseup="stopDrag" @mouseleave="stopDrag">
+                <div class="preview-content" :style="previewStyle">
+                    <div class="preview-wrapper">
+                        <iframe ref="previewFrame" class="preview-iframe"></iframe>
+                        <!-- 遮罩层，用于捕获鼠标事件以支持拖拽 -->
+                        <div class="iframe-overlay"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -43,8 +56,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, shallowRef, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, shallowRef, onMounted, onUnmounted, computed } from 'vue';
 import { ElButton, ElTag, ElDialog, ElForm, ElFormItem, ElInput, ElNotification } from 'element-plus';
+
+// Debug check
+console.log('TemplateCreator loaded. computed type:', typeof computed);
 import axios from 'axios';
 import { API_URLS, getHeaders } from '@/config/api';
 import { useAuthStore } from '@/stores/auth'; // Import auth store
@@ -62,10 +78,12 @@ const boilerplateHtml = `<!DOCTYPE html>
 <body>
     <div class="resume-container">
         <style>
-            body { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; line-height: 1.6; color: #333; background-color: #fff; }
-            .resume-container { width: 750px; margin: 20px auto; padding: 40px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); }
-            .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; margin-bottom: 30px; }
-            .user-info { flex-grow: 1; }
+            html { overflow-x: hidden; }
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; line-height: 1.6; color: #333; background-color: #fff; margin: 0; padding: 0; }
+            .resume-container { width: 100%; min-height: 100%; box-sizing: border-box; margin: 0 auto; padding: 40px; overflow-wrap: break-word; word-wrap: break-word; }
+            img, video, table, .section-content { max-width: 100%; }
+            .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; margin-bottom: 30px; flex-wrap: wrap; }
+            .user-info { flex-grow: 1; min-width: 200px; }
             .full-name { font-size: 32px; font-weight: 600; margin: 0 0 5px 0; color: #000; }
             .job-title { font-size: 18px; margin: 0 0 15px 0; color: #555; }
             .contact-info { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 15px; font-size: 14px; color: #444; }
@@ -102,6 +120,7 @@ const boilerplateHtml = `<!DOCTYPE html>
 
 const htmlCode = ref(boilerplateHtml);
 const previewFrame = ref(null);
+const previewViewport = ref(null);
 const view = shallowRef();
 const extensions = [html(), oneDark];
 
@@ -130,6 +149,20 @@ const isPublishing = ref(false);
 const publishForm = reactive({ name: '', description: '' });
 const authStore = useAuthStore(); // Initialize auth store
 
+// --- Zoom & Pan State ---
+const scale = ref(1);
+const translateX = ref(0);
+const translateY = ref(0);
+const isDragging = ref(false);
+const startX = ref(0);
+const startY = ref(0);
+
+const previewStyle = computed(() => ({
+    transform: `translate(${translateX.value}px, ${translateY.value}px) scale(${scale.value})`,
+    transformOrigin: 'center center',
+    transition: isDragging.value ? 'none' : 'transform 0.1s ease-out'
+}));
+
 // --- Methods ---
 const handleReady = (payload) => { view.value = payload.view; };
 
@@ -139,43 +172,75 @@ const updatePreview = () => {
         doc.open();
         doc.write(htmlCode.value);
         doc.close();
-
-        // 动态调整缩放以适应容器
-        adjustPreviewScale();
     }
 };
 
-const adjustPreviewScale = () => {
-    const previewPane = document.querySelector('.preview-pane');
-    const previewWrapper = document.querySelector('.preview-wrapper');
-    const previewIframe = document.querySelector('.preview-iframe');
-
-    if (previewPane && previewWrapper && previewIframe) {
-        const containerWidth = previewPane.clientWidth - 40; // 减去padding和margin
-        const originalWidth = 840; // 简历原始宽度
-        const originalHeight = 1188; // 简历原始高度
-        const maxScale = 0.5; // 最大缩放比例
-
-        // 计算合适的缩放比例
-        const scale = Math.min(containerWidth / originalWidth, maxScale);
-
-        // 计算缩放后的实际尺寸
-        const scaledWidth = Math.floor(originalWidth * scale);
-        const scaledHeight = Math.floor(originalHeight * scale);
-
-        // 直接设置容器和iframe的尺寸，而不是使用transform
-        previewWrapper.style.width = `${scaledWidth}px`;
-        previewWrapper.style.height = `${scaledHeight}px`;
-        previewWrapper.style.transform = 'none';
-
-        // 设置iframe的缩放
-        previewIframe.style.width = `${originalWidth}px`;
-        previewIframe.style.height = `${originalHeight}px`;
-        previewIframe.style.transform = `scale(${scale})`;
-        previewIframe.style.transformOrigin = 'top left';
-
-        console.log(`容器宽度: ${containerWidth}px, 缩放比例: ${scale.toFixed(3)}, 最终尺寸: ${scaledWidth}x${scaledHeight}`);
+const handleWheel = (e) => {
+    if (e.ctrlKey || e.metaKey || true) { // Always zoom on wheel as requested
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        const newScale = Math.max(0.1, Math.min(5, scale.value + delta));
+        scale.value = newScale;
     }
+};
+
+const startDrag = (e) => {
+    // Only drag if clicking on the preview content or background, not buttons
+    if (e.target.closest('button') || e.target.closest('.tag-button')) return;
+
+    isDragging.value = true;
+    startX.value = e.clientX - translateX.value;
+    startY.value = e.clientY - translateY.value;
+
+    // Change cursor style
+    document.body.style.cursor = 'grabbing';
+};
+
+const onDrag = (e) => {
+    if (!isDragging.value) return;
+    e.preventDefault();
+    translateX.value = e.clientX - startX.value;
+    translateY.value = e.clientY - startY.value;
+};
+
+const stopDrag = () => {
+    isDragging.value = false;
+    document.body.style.cursor = '';
+};
+
+const adjustZoom = (delta) => {
+    const newScale = Math.max(0.1, Math.min(5, scale.value + delta));
+    scale.value = newScale;
+};
+
+const resetView = () => {
+    scale.value = 1;
+    translateX.value = 0;
+    translateY.value = 0;
+};
+
+const autoFit = () => {
+    if (!previewViewport.value) return;
+
+    const { clientWidth, clientHeight } = previewViewport.value;
+    const padding = 40; // padding for better look
+
+    // A4 dimensions in pixels (96 DPI approx)
+    // 210mm = 793.7px, 297mm = 1122.5px
+    const paperWidth = 794;
+    const paperHeight = 1123;
+
+    const availableWidth = Math.max(100, clientWidth - padding);
+    const availableHeight = Math.max(100, clientHeight - padding);
+
+    const scaleX = availableWidth / paperWidth;
+    const scaleY = availableHeight / paperHeight;
+
+    // Use the smaller scale to ensure full fit
+    scale.value = Math.min(scaleX, scaleY, 1);
+
+    // Center it
+    translateX.value = 0;
+    translateY.value = 0;
 };
 
 const insertTag = (tag) => {
@@ -193,9 +258,6 @@ const testWithSampleData = () => {
     doc.open();
     doc.write(populatedHtml);
     doc.close();
-
-    // 确保在内容更新后调整缩放
-    setTimeout(adjustPreviewScale, 50);
 };
 
 const clearPreview = () => {
@@ -243,24 +305,25 @@ const publishTemplate = async () => {
 
 onMounted(() => {
     updatePreview();
+    // Delay auto-fit slightly to ensure DOM is ready
+    setTimeout(() => {
+        autoFit();
+    }, 100);
 
-    // 监听窗口大小变化
-    window.addEventListener('resize', adjustPreviewScale);
-
-    // 延迟执行一次缩放调整，确保DOM已完全渲染
-    setTimeout(adjustPreviewScale, 100);
+    window.addEventListener('resize', autoFit);
 });
 
 // 在组件卸载时移除事件监听
 onUnmounted(() => {
-    window.removeEventListener('resize', adjustPreviewScale);
+    window.removeEventListener('resize', autoFit);
+    document.body.style.cursor = '';
 });
 </script>
 
 <style scoped>
 .template-creator-container {
     display: flex;
-    height: calc(100vh - 60px);
+    height: 100%;
     overflow: hidden;
 }
 
@@ -277,7 +340,7 @@ onUnmounted(() => {
 
 .preview-pane {
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
     height: 100%;
     background-color: #f0f2f5;
     padding: 10px;
@@ -288,6 +351,67 @@ onUnmounted(() => {
     align-items: center;
     min-width: 0;
     /* 确保flex子元素可以收缩 */
+}
+
+.preview-viewport {
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: radial-gradient(#dfe2e5 1px, transparent 1px);
+    background-size: 20px 20px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+}
+
+.preview-content {
+    /* 这里的样式由Vue动态控制transform */
+    will-change: transform;
+}
+
+.preview-wrapper {
+    width: 210mm;
+    height: 297mm;
+    background-color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.preview-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+.iframe-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    /* 确保在iframe之上 */
+    background: transparent;
+}
+
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    /* 推到右边 */
+}
+
+.zoom-text {
+    font-size: 12px;
+    color: #606266;
+    min-width: 40px;
+    text-align: center;
 }
 
 /* Hide scrollbar for all panes */
@@ -328,36 +452,7 @@ onUnmounted(() => {
     justify-content: center;
 }
 
-.preview-wrapper {
-    width: 840px;
-    height: 1188px;
-    transform: scale(0.74);
-    transform-origin: top center;
-    /* 移除固定尺寸，由JavaScript动态设置 */
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    background-color: white;
-    flex-shrink: 0;
-    border-radius: 4px;
-    overflow: hidden;
-    margin: 0 auto 20px auto;
-    position: relative;
-    /* 默认尺寸，会被JavaScript覆盖 */
-    width: 420px;
-    height: 594px;
-}
-
-.preview-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    border-radius: 4px;
-    /* 移除overflow hidden，让transform scale正常工作 */
-    display: block;
-    /* 默认尺寸，会被JavaScript覆盖 */
-    width: 840px;
-    height: 1188px;
-    transform-origin: top left;
-}
+/* Old preview styles removed */
 
 /* 响应式调整 - 简化，主要依靠JavaScript动态调整 */
 @media (max-width: 1200px) {

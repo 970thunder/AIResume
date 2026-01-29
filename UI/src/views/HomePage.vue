@@ -1,14 +1,14 @@
 <template>
     <div class="home-page">
-        <div class="pixel-container">
-            <div class="title-card">
-                <h1 class="pixel-title">欢迎使用 AI 智能简历生成器</h1>
-                <p class="pixel-subtitle">一站式解决您的简历烦恼，智能、高效、专业</p>
-                <div class="pixel-buttons">
-                    <router-link to="/generator" class="pixel-btn primary">
+        <div class="content-container">
+            <div class="hero-section">
+                <h1 class="main-title">欢迎使用 AI 智能简历生成器</h1>
+                <p class="subtitle">一站式解决您的简历烦恼，智能、高效、专业</p>
+                <div class="action-buttons">
+                    <router-link to="/generator" class="btn primary-btn">
                         开始制作简历 →
                     </router-link>
-                    <router-link to="/store" class="pixel-btn secondary">
+                    <router-link to="/store" class="btn secondary-btn">
                         浏览模板库
                     </router-link>
                 </div>
@@ -16,17 +16,29 @@
 
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">🤖</div>
+                    <div class="feature-icon-wrapper">
+                        <el-icon class="feature-icon">
+                            <MagicStick />
+                        </el-icon>
+                    </div>
                     <h3>AI 智能生成</h3>
                     <p>基于您的信息智能生成专业简历内容</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📋</div>
+                    <div class="feature-icon-wrapper">
+                        <el-icon class="feature-icon">
+                            <Files />
+                        </el-icon>
+                    </div>
                     <h3>多种模板</h3>
                     <p>精选多种专业简历模板，满足不同需求</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
+                    <div class="feature-icon-wrapper">
+                        <el-icon class="feature-icon">
+                            <Lightning />
+                        </el-icon>
+                    </div>
                     <h3>快速生成</h3>
                     <p>几分钟内完成简历制作，高效便捷</p>
                 </div>
@@ -39,209 +51,204 @@
 
 <script setup>
 import DataPanel from '@/components/DataPanel.vue';
+import { MagicStick, Files, Lightning } from '@element-plus/icons-vue';
 </script>
 
 <style scoped>
 .home-page {
-    --main-color: #09465d;
-    --bg-color: #fff;
-    --font-color: #060606;
-    --font-color-sub: #383838;
-    --input-focus: #2d8cf0;
-    --card-bg: rgb(220, 244, 251);
-
-
-
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    overflow-y: auto;
+    box-sizing: border-box;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE 10+ */
 }
 
-/* 添加像素化背景点缀 */
-.home-page::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image:
-        radial-gradient(circle at 20% 30%, var(--main-color) 2px, transparent 2px),
-        radial-gradient(circle at 80% 20%, var(--input-focus) 1px, transparent 1px),
-        radial-gradient(circle at 60% 80%, var(--main-color) 1px, transparent 1px);
-    background-size: 100px 100px, 150px 150px, 80px 80px;
-    opacity: 0.1;
-    pointer-events: none;
+.home-page::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
 }
 
-.pixel-container {
+.content-container {
     max-width: 1200px;
     width: 100%;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.title-card {
-    background: var(--card-bg);
-    border: 3px solid var(--main-color);
-    border-radius: 8px;
-    box-shadow: 6px 6px 0 var(--main-color);
-    padding: 40px;
+.hero-section {
     text-align: center;
+    margin-bottom: 60px;
+    animation: fadeInDown 0.8s ease-out;
+}
+
+.main-title {
+    font-size: 3rem;
+    color: #2c3e50;
+    font-weight: 800;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(120deg, #2563eb, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    font-size: 1.25rem;
+    color: #57606f;
     margin-bottom: 40px;
-    transform: perspective(1000px) rotateX(2deg);
+    font-weight: 400;
 }
 
-.pixel-title {
-    font-size: 3.5em;
-    color: var(--main-color);
-    font-weight: 900;
-    margin: 0 0 20px 0;
-    text-shadow:
-        2px 2px 0 #fff,
-        4px 4px 0 rgba(9, 70, 93, 0.3);
-    letter-spacing: -1px;
-}
-
-.pixel-subtitle {
-    font-size: 1.4em;
-    color: var(--font-color-sub);
-    margin: 0 0 30px 0;
-    font-weight: 600;
-}
-
-.pixel-buttons {
+.action-buttons {
     display: flex;
     gap: 20px;
     justify-content: center;
-    flex-wrap: wrap;
 }
 
-.pixel-btn {
+.btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 15px 25px;
-    border-radius: 6px;
-    border: 2px solid var(--main-color);
-    box-shadow: 4px 4px 0 var(--main-color);
+    padding: 14px 32px;
+    border-radius: 50px;
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 16px;
-    transition: all 0.1s ease;
+    transition: all 0.3s ease;
     cursor: pointer;
-    min-width: 180px;
+    min-width: 160px;
 }
 
-.pixel-btn.primary {
-    background: var(--main-color);
+.primary-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
 }
 
-.pixel-btn.secondary {
-    background: var(--bg-color);
-    color: var(--main-color);
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
 }
 
-.pixel-btn:hover {
-    transform: translate(1px, 1px);
-    box-shadow: 3px 3px 0 var(--main-color);
+.secondary-btn {
+    background: white;
+    color: #57606f;
+    border: 1px solid #e1e4e8;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
-.pixel-btn:active {
-    transform: translate(4px, 4px);
-    box-shadow: 0 0 0 var(--main-color);
+.secondary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    color: #2c3e50;
+    border-color: #d1d5db;
 }
 
 .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
-    margin-bottom: 50px;
+    width: 100%;
+    margin-bottom: 60px;
 }
 
 .feature-card {
-    background: var(--bg-color);
-    border: 2px solid var(--main-color);
-    border-radius: 6px;
-    box-shadow: 4px 4px 0 var(--main-color);
-    padding: 30px 25px;
+    background: white;
+    border-radius: 20px;
+    padding: 40px 30px;
     text-align: center;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
 }
 
 .feature-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 var(--main-color);
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-.feature-icon {
-    font-size: 3em;
-    margin-bottom: 15px;
-    display: block;
+.feature-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    color: white;
+    font-size: 32px;
+}
+
+.feature-card:nth-child(2) .feature-icon-wrapper {
+    background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
+}
+
+.feature-card:nth-child(3) .feature-icon-wrapper {
+    background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
 }
 
 .feature-card h3 {
-    color: var(--main-color);
-    font-size: 1.4em;
+    color: #2c3e50;
+    font-size: 1.5rem;
     font-weight: 700;
-    margin: 0 0 15px 0;
+    margin-bottom: 16px;
 }
 
 .feature-card p {
-    color: var(--font-color-sub);
-    font-size: 1em;
-    line-height: 1.5;
+    color: #7f8c8d;
+    font-size: 1rem;
+    line-height: 1.6;
     margin: 0;
-    font-weight: 500;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-    .home-page {
-        padding: 20px 15px;
+    .main-title {
+        font-size: 2rem;
     }
 
-    .title-card {
-        padding: 30px 20px;
-        transform: none;
+    .subtitle {
+        font-size: 1rem;
     }
 
-    .pixel-title {
-        font-size: 2.5em;
-    }
-
-    .pixel-subtitle {
-        font-size: 1.2em;
-    }
-
-    .pixel-buttons {
+    .action-buttons {
         flex-direction: column;
-        align-items: center;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
     }
 
-    .pixel-btn {
+    .btn {
         width: 100%;
-        max-width: 280px;
     }
 
     .features-grid {
         grid-template-columns: 1fr;
         gap: 20px;
-    }
-}
-
-@media (max-width: 480px) {
-    .pixel-title {
-        font-size: 2em;
-    }
-
-    .feature-card {
-        padding: 25px 20px;
-    }
-
-    .feature-icon {
-        font-size: 2.5em;
     }
 }
 </style>

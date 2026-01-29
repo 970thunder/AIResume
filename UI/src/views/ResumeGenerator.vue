@@ -476,7 +476,7 @@ const generateAndPreview = async () => {
         <!-- 像素化背景装饰 -->
         <div class="pixel-bg-decoration"></div>
 
-        <div class="pixel-header">
+        <div class="pixel-header" v-if="currentStep < 1">
             <h1 class="pixel-main-title">AI 智能简历生成器</h1>
             <p class="pixel-header-subtitle">让AI帮您打造完美简历</p>
         </div>
@@ -638,11 +638,22 @@ const generateAndPreview = async () => {
     --card-bg: rgb(220, 244, 251);
     --success-color: #67c23a;
 
-    min-height: 100vh;
-    background: linear-gradient(135deg, #f5f5f5 0%, #e8f4f8 100%);
-    padding: 20px;
+    height: 100%;
+    background: radial-gradient(circle at 50% 0%, #e0f2fe 0%, #f1f5f9 100%);
+    padding: 10px;
     position: relative;
+    overflow-y: auto;
     overflow-x: hidden;
+    box-sizing: border-box;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE 10+ */
+}
+
+.pixel-generator::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
 }
 
 /* 像素化背景装饰 */
@@ -665,16 +676,16 @@ const generateAndPreview = async () => {
 
 .pixel-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     z-index: 1;
     position: relative;
 }
 
 .pixel-main-title {
-    font-size: 3em;
+    font-size: 2em;
     color: var(--main-color);
     font-weight: 900;
-    margin: 0 0 10px 0;
+    margin: 0 0 5px 0;
     text-shadow:
         2px 2px 0 #fff,
         4px 4px 0 rgba(9, 70, 93, 0.3);
@@ -682,7 +693,7 @@ const generateAndPreview = async () => {
 }
 
 .pixel-header-subtitle {
-    font-size: 1.2em;
+    font-size: 1em;
     color: var(--font-color-sub);
     margin: 0;
     font-weight: 600;
@@ -692,10 +703,10 @@ const generateAndPreview = async () => {
     max-width: 1200px;
     margin: 0 auto;
     background: var(--card-bg);
-    border: 3px solid var(--main-color);
+    border: 2px solid var(--main-color);
     border-radius: 12px;
-    box-shadow: 8px 8px 0 var(--main-color);
-    padding: 40px;
+    box-shadow: 6px 6px 0 var(--main-color);
+    padding: 10px;
     position: relative;
     z-index: 1;
 }
@@ -705,7 +716,7 @@ const generateAndPreview = async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 40px;
+    margin-bottom: 10px;
     flex-wrap: wrap;
     gap: 10px;
 }
@@ -718,18 +729,18 @@ const generateAndPreview = async () => {
 }
 
 .step-number {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--font-color-sub);
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--font-color-sub);
     background: var(--bg-color);
     border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 14px;
     color: var(--font-color-sub);
-    box-shadow: 3px 3px 0 rgba(9, 70, 93, 0.2);
+    box-shadow: 2px 2px 0 rgba(9, 70, 93, 0.2);
     transition: all 0.3s ease;
 }
 
@@ -737,14 +748,14 @@ const generateAndPreview = async () => {
     border-color: var(--input-focus);
     background: var(--input-focus);
     color: white;
-    box-shadow: 3px 3px 0 rgba(45, 140, 240, 0.3);
+    box-shadow: 2px 2px 0 rgba(45, 140, 240, 0.3);
 }
 
 .step-item.completed .step-number {
     border-color: var(--success-color);
     background: var(--success-color);
     color: white;
-    box-shadow: 3px 3px 0 rgba(103, 194, 58, 0.3);
+    box-shadow: 2px 2px 0 rgba(103, 194, 58, 0.3);
 }
 
 .step-label {
@@ -788,7 +799,7 @@ const generateAndPreview = async () => {
     border: 2px solid var(--main-color);
     border-radius: 8px;
     box-shadow: 4px 4px 0 var(--main-color);
-    padding: 40px;
+    padding: 20px;
     max-width: 800px;
     width: 100%;
     text-align: center;
@@ -799,22 +810,22 @@ const generateAndPreview = async () => {
 }
 
 .pixel-step-title {
-    font-size: 1.8em;
+    font-size: 1.5em;
     color: var(--main-color);
     font-weight: 700;
-    margin: 0 0 15px 0;
+    margin: 0 0 10px 0;
 }
 
 .pixel-subtitle {
     color: var(--font-color-sub);
-    font-size: 1.1em;
-    margin-bottom: 30px;
+    font-size: 1em;
+    margin-bottom: 20px;
     font-weight: 500;
 }
 
 /* 上传区域 */
 .pixel-upload-area {
-    margin: 30px 0;
+    margin: 20px 0;
 }
 
 :deep(.pixel-upload .el-upload-dragger) {
@@ -823,7 +834,7 @@ const generateAndPreview = async () => {
     background: var(--bg-color) !important;
     box-shadow: 4px 4px 0 rgba(9, 70, 93, 0.2) !important;
     transition: all 0.3s ease !important;
-    padding: 40px !important;
+    padding: 30px !important;
 }
 
 :deep(.pixel-upload .el-upload-dragger:hover) {
@@ -910,8 +921,8 @@ const generateAndPreview = async () => {
 .pixel-templates-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-    margin: 30px 0;
+    gap: 20px;
+    margin: 20px 0;
 }
 
 .pixel-template-card {
@@ -1065,7 +1076,7 @@ const generateAndPreview = async () => {
     gap: 15px;
     justify-content: center;
     flex-wrap: wrap;
-    margin-top: 30px;
+    margin-top: 20px;
 }
 
 .pixel-btn {
@@ -1073,18 +1084,18 @@ const generateAndPreview = async () => {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 15px 25px;
+    padding: 12px 20px;
     border: 2px solid var(--main-color);
     border-radius: 6px;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 15px;
     cursor: pointer;
     transition: all 0.1s ease;
     text-decoration: none;
     background: var(--bg-color);
     color: var(--main-color);
     box-shadow: 4px 4px 0 var(--main-color);
-    min-width: 150px;
+    min-width: 140px;
 }
 
 .pixel-btn.primary {

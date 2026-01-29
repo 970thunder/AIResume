@@ -47,6 +47,9 @@ export const API_URLS = {
         update: (id) => `${API_BASE_URL}/resume/${id}`,
         updateTitle: (id) => `${API_BASE_URL}/resume/${id}/title`,
         delete: (id) => `${API_BASE_URL}/resume/${id}`,
+    },
+    analysis: {
+        career: `${API_BASE_URL}/analysis/career`,
     }
 };
 

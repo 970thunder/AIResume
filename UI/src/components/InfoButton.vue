@@ -83,7 +83,9 @@ ul {
 .example-2.collapsed {
     flex-direction: column;
     gap: 1rem;
-    margin: 10px auto;
+    margin: 0 auto;
+    width: 100%;
+    align-items: center;
 }
 
 .example-2 .icon-content {

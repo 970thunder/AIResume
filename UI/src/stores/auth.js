@@ -63,12 +63,19 @@ const useAuthStore = defineStore('auth', {
             }
         },
         // Initialize authentication from localStorage
-        initializeAuth() {
+        async initializeAuth() {
             const token = localStorage.getItem('token');
             const user = localStorage.getItem('user');
             if (token && user) {
                 this.setToken(token);
                 this.setUser(JSON.parse(user));
+                // Verify token validity with backend
+                try {
+                    await axios.get(API_URLS.resume.history);
+                } catch (error) {
+                    // 401 error will be handled by the global interceptor in main.js
+                    console.error('Token verification failed:', error);
+                }
             } else {
                 this.setToken(null);
                 this.setUser(null);

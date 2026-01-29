@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth';
 import MainLayout from '@/layouts/MainLayout.vue';
 import HomePage from '../views/HomePage.vue';
 import ResumeGenerator from '../views/ResumeGenerator.vue';
+import ResumeAnalyzer from '../views/ResumeAnalyzer.vue';
 import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import TemplateStore from '../views/TemplateStore.vue';
@@ -22,6 +23,7 @@ const routes = [
             { path: '', redirect: '/home' },
             { path: 'home', name: 'Home', component: HomePage },
             { path: 'generator', name: 'Generator', component: ResumeGenerator },
+            { path: 'analysis', name: 'Analysis', component: ResumeAnalyzer },
             { path: 'store', name: 'Store', component: TemplateStore },
             { path: 'profile', name: 'Profile', component: UserProfile },
             { path: 'editor/:id', name: 'Editor', component: ResumeEditor, props: true },

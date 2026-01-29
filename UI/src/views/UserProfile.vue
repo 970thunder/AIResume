@@ -11,7 +11,7 @@
                     <el-descriptions-item label="用户名">{{ authStore.user.username }}</el-descriptions-item>
                     <el-descriptions-item label="电子邮箱">{{ authStore.user.email }}</el-descriptions-item>
                     <el-descriptions-item label="注册时间">{{ formattedDate(authStore.user.createdAt)
-                    }}</el-descriptions-item>
+                        }}</el-descriptions-item>
                 </el-descriptions>
             </div>
             <el-empty v-else description="无法加载用户信息" />
@@ -181,6 +181,9 @@ onMounted(() => {
     padding: 20px;
     max-width: 1000px;
     margin: 0 auto;
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .card-header h1,

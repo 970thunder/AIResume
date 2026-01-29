@@ -327,8 +327,7 @@ watch(resumeData, () => {
 <style scoped>
 .editor-layout {
     display: flex;
-    height: calc(100vh - 60px);
-    /* Adjust based on your nav height */
+    height: 100%;
 }
 
 .editor-form-panel {

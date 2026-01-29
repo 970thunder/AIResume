@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import axios from 'axios'
 import { API_URLS } from '@/config/api.js'
 
 const sitePv = ref('--')
@@ -8,14 +9,11 @@ const siteUv = ref('--')
 onMounted(async () => {
     try {
         // 1. Record the current visit. We don't need to wait for this to finish.
-        fetch(API_URLS.visits.record, { method: 'POST' })
+        axios.post(API_URLS.visits.record)
 
         // 2. Fetch the latest statistics.
-        const response = await fetch(API_URLS.visits.stats)
-        if (!response.ok) {
-            throw new Error('Failed to fetch stats')
-        }
-        const stats = await response.json()
+        const response = await axios.get(API_URLS.visits.stats)
+        const stats = response.data
 
         // 3. Update the display values.
         sitePv.value = stats.sitePv
