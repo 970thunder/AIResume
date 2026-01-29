@@ -101,10 +101,65 @@
       </el-dialog>
 
       <!-- Resume Analysis Dialog -->
-      <el-dialog v-model="showAnalysis" title="简历分析报告" width="70%">
-        <div v-if="latestAnalysis" class="analysis-content">
+      <el-dialog v-model="showAnalysis" title="简历分析报告" width="70%" class="analysis-dialog">
+        <div v-if="analysisData" class="analysis-report">
+          <!-- Summary -->
+          <div class="report-section">
+            <h3 class="section-title">综合概览</h3>
+            <div class="section-content summary-text">
+              {{ analysisData.summary }}
+            </div>
+          </div>
+
+          <!-- JD Analysis -->
+          <div v-if="analysisData.jdAnalysis" class="report-section">
+            <div class="flex-header">
+              <h3 class="section-title">岗位匹配分析</h3>
+              <el-tag :type="getScoreType(analysisData.jdAnalysis.matchScore)" effect="dark">
+                匹配度: {{ analysisData.jdAnalysis.matchScore }}%
+              </el-tag>
+            </div>
+
+            <div class="analysis-sub-section">
+              <h4>匹配关键词</h4>
+              <div class="tags-wrapper">
+                <el-tag v-for="tag in analysisData.jdAnalysis.matchingKeywords" :key="tag" type="success"
+                  class="mr-2 mb-2">
+                  {{ tag }}
+                </el-tag>
+              </div>
+            </div>
+
+            <div class="analysis-sub-section" v-if="analysisData.jdAnalysis.missingKeywords?.length">
+              <h4>缺失/需加强关键词</h4>
+              <div class="tags-wrapper">
+                <el-tag v-for="tag in analysisData.jdAnalysis.missingKeywords" :key="tag" type="info" class="mr-2 mb-2">
+                  {{ tag }}
+                </el-tag>
+              </div>
+            </div>
+
+            <div class="analysis-sub-section bg-gray">
+              <h4>差距分析</h4>
+              <p>{{ analysisData.jdAnalysis.gapAnalysis }}</p>
+            </div>
+          </div>
+
+          <!-- Advice -->
+          <div v-if="analysisData.advice?.length" class="report-section">
+            <h3 class="section-title">改进建议</h3>
+            <ul class="advice-list">
+              <li v-for="(item, index) in analysisData.advice" :key="index">
+                {{ item }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div v-else-if="latestAnalysis" class="raw-json">
           <pre class="json-viewer">{{ formatAnalysis(latestAnalysis) }}</pre>
         </div>
+
         <el-empty v-else description="暂无分析记录，请先去简历分析页面进行分析" />
       </el-dialog>
 
@@ -120,7 +175,7 @@
             <div class="question-header">
               <el-tag>{{ currentQuestion.category || '综合' }}</el-tag>
               <el-tag :type="getDifficultyType(currentQuestion.difficulty)" class="ml-2">{{ currentQuestion.difficulty
-              }}</el-tag>
+                }}</el-tag>
               <span class="question-index">第 {{ currentQuestionIndex + 1 }} / {{ totalQuestions }} 题</span>
             </div>
           </template>
@@ -177,6 +232,24 @@ const currentQuestionIndex = ref(0);
 const userAnswer = ref('');
 
 // Computed
+const analysisData = computed(() => {
+  if (!latestAnalysis.value) return null;
+  try {
+    return typeof latestAnalysis.value === 'string'
+      ? JSON.parse(latestAnalysis.value)
+      : latestAnalysis.value;
+  } catch (e) {
+    console.error('Parse analysis error:', e);
+    return null;
+  }
+});
+
+const getScoreType = (score) => {
+  if (score >= 80) return 'success';
+  if (score >= 60) return 'warning';
+  return 'danger';
+};
+
 const currentQuestion = computed(() => {
   if (!currentSession.value || !currentSession.value.questions) return {};
   return currentSession.value.questions[currentQuestionIndex.value];
@@ -209,7 +282,7 @@ const fetchData = async () => {
   try {
     const [statsRes, analysisRes] = await Promise.all([
       axios.get(API_URLS.interview.stats, { headers: getHeaders() }),
-      axios.get('/api/interview/analysis/latest', { headers: getHeaders() }).catch(() => ({ data: null }))
+      axios.get(API_URLS.interview.latestAnalysis, { headers: getHeaders() }).catch(() => ({ data: null }))
     ]);
 
     stats.value = statsRes.data;
@@ -403,8 +476,8 @@ const formatAnalysis = (val) => {
 /* Orbit Cards */
 .orbit-card {
   position: absolute;
-  width: 220px;
-  height: 170px;
+  width: 250px;
+  height: 200px;
   background: white;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   display: flex;
@@ -431,29 +504,29 @@ const formatAnalysis = (val) => {
 
 /* Irregular Shapes */
 .card-top-left {
-  top: 10%;
-  left: 15%;
+  top: 5%;
+  left: 10%;
   border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
   background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
 }
 
 .card-top-right {
-  top: 10%;
-  right: 15%;
+  top: 5%;
+  right: 10%;
   border-radius: 60% 40% 30% 70% / 50% 40% 50% 60%;
   background: linear-gradient(135deg, #fff 0%, #f0fff4 100%);
 }
 
 .card-bottom-left {
-  bottom: 20%;
-  left: 15%;
+  bottom: 25%;
+  left: 10%;
   border-radius: 70% 30% 50% 50% / 60% 40% 60% 40%;
   background: linear-gradient(135deg, #fff 0%, #fff0f0 100%);
 }
 
 .card-bottom-right {
-  bottom: 20%;
-  right: 15%;
+  bottom: 25%;
+  right: 10%;
   border-radius: 30% 70% 60% 40% / 40% 60% 50% 50%;
   background: linear-gradient(135deg, #fff 0%, #fff9f0 100%);
 }
@@ -487,6 +560,80 @@ const formatAnalysis = (val) => {
 }
 
 /* Dialog Styles */
+.analysis-report {
+  padding: 10px;
+}
+
+.report-section {
+  margin-bottom: 24px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #ebeef5;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #303133;
+  border-left: 4px solid #409eff;
+  padding-left: 10px;
+}
+
+.summary-text {
+  line-height: 1.6;
+  color: #606266;
+  font-size: 15px;
+}
+
+.flex-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.flex-header .section-title {
+  margin-bottom: 0;
+}
+
+.analysis-sub-section {
+  margin-bottom: 16px;
+}
+
+.analysis-sub-section h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #303133;
+}
+
+.analysis-sub-section.bg-gray {
+  background: #f5f7fa;
+  padding: 12px;
+  border-radius: 4px;
+}
+
+.analysis-sub-section.bg-gray p {
+  margin: 0;
+  color: #606266;
+  font-size: 14px;
+}
+
+.advice-list {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.advice-list li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+  color: #606266;
+  list-style-type: disc;
+}
+
 .json-viewer {
   background: #f5f7fa;
   padding: 16px;
