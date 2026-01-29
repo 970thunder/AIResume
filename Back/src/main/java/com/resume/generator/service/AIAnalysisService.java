@@ -232,23 +232,24 @@ public class AIAnalysisService {
 
   private String buildInterviewQuestionPrompt(String techStack) {
     return """
-        Generate 10 technical interview questions based on the following technology stack or keywords.
-        Tech Stack: """ + techStack + """
+        请基于以下技术栈或关键词生成 10 道技术面试题。
+        技术栈: """ + techStack + """
 
-        Include a mix of Difficulty (EASY, MEDIUM, HARD) and Types (OPEN_ENDED, MULTIPLE_CHOICE).
-        For MULTIPLE_CHOICE, provide 4 options and the correct answer.
-        For OPEN_ENDED, provide a comprehensive reference answer.
+        请包含不同难度 (EASY, MEDIUM, HARD) 和类型 (OPEN_ENDED, MULTIPLE_CHOICE) 的题目。
+        对于 MULTIPLE_CHOICE (选择题)，请提供 4 个选项和正确答案。
+        对于 OPEN_ENDED (问答题)，请提供详尽的参考答案。
+        **所有问题、选项和答案必须使用中文。**
 
-        Return STRICTLY a JSON array of objects with the following structure:
+        请严格返回以下结构的 JSON 数组：
         [
             {
-                "content": "Question text here",
-                "type": "OPEN_ENDED", // or "MULTIPLE_CHOICE"
-                "options": ["Option A", "Option B", "Option C", "Option D"], // null if OPEN_ENDED
-                "referenceAnswer": "Detailed reference answer or correct option (e.g. Option A)",
+                "content": "此处填写题目内容",
+                "type": "OPEN_ENDED", // 或 "MULTIPLE_CHOICE"
+                "options": ["选项 A", "选项 B", "选项 C", "选项 D"], // 如果是 OPEN_ENDED 则为 null
+                "referenceAnswer": "详细的参考答案或正确选项 (例如：选项 A)",
                 "difficulty": "MEDIUM",
-                "category": "Java", // The specific tech category e.g. Java, Redis, React
-                "tags": "Java,Backend" // Comma separated tags
+                "category": "Java", // 具体的技术类别，例如 Java, Redis, React
+                "tags": "Java,Backend" // 逗号分隔的标签
             }
         ]
         """;
@@ -256,15 +257,17 @@ public class AIAnalysisService {
 
   private String buildEvaluationPrompt(String question, String answer) {
     return """
-        Evaluate the following interview answer.
-        Question: """ + question + """
-        User Answer: """ + answer + """
+        请评估以下面试回答。
+        题目: """ + question + """
+        用户回答: """ + answer + """
 
-        Return STRICTLY a JSON object:
+        **请使用中文进行评估。**
+
+        请严格返回一个 JSON 对象：
         {
-            "isCorrect": true, // or false. Be somewhat lenient for open ended, strictly check logic.
-            "evaluation": "Detailed feedback on what was right, what was wrong, and how to improve.",
-            "score": 85 // 0-100 score
+            "isCorrect": true, // 或 false。对于问答题请适当放宽标准，主要检查逻辑；对于选择题请严格判定。
+            "evaluation": "详细的反馈，指出回答中的正确之处、错误之处以及改进建议。",
+            "score": 85 // 0-100 分
         }
         """;
   }
@@ -274,45 +277,46 @@ public class AIAnalysisService {
     if (jobDescription != null && !jobDescription.trim().isEmpty()) {
       jdSection = """
 
-          Target Job Description (JD):
+          目标职位描述 (JD):
           """ + jobDescription + """
 
-          Please also compare the resume against the above Job Description.
+          请将简历与上述职位描述进行对比分析。
           """;
     }
 
     return """
-        Please analyze the following resume content and return a structured JSON object for career capability analysis.
-        The JSON object must strictly follow the format below.
+        请分析以下简历内容，并返回一个结构化的职业能力分析 JSON 对象。
+        JSON 对象必须严格遵循以下格式。
+        **所有分析内容（优势、劣势、建议、总结等）必须使用中文。**
         """
         + jdSection
         + """
 
-            Resume Content:
+            简历内容:
             """
         + extractedContent
         + """
 
-            Please return the analysis result strictly in the following JSON format. Do not include any text before or after the JSON object.
+            请严格按照以下 JSON 格式返回分析结果。不要在 JSON 对象前后包含任何文本。
             {
-              "score": 85, // Total score 0-100 based on general quality or JD match if provided
-              "radar": [ // 6 dimensions for radar chart
-                { "name": "Professional Skills", "value": 80, "max": 100 },
-                { "name": "Communication", "value": 90, "max": 100 },
-                { "name": "Leadership", "value": 70, "max": 100 },
-                { "name": "Experience", "value": 85, "max": 100 },
-                { "name": "Education", "value": 80, "max": 100 },
-                { "name": "Potential", "value": 75, "max": 100 }
+              "score": 85, // 总分 0-100，基于整体质量或 JD 匹配度（如果提供了 JD）
+              "radar": [ // 雷达图的 6 个维度
+                { "name": "专业技能", "value": 80, "max": 100 },
+                { "name": "沟通能力", "value": 90, "max": 100 },
+                { "name": "领导力", "value": 70, "max": 100 },
+                { "name": "工作经验", "value": 85, "max": 100 },
+                { "name": "教育背景", "value": 80, "max": 100 },
+                { "name": "发展潜力", "value": 75, "max": 100 }
               ],
-              "strengths": ["strength 1", "strength 2", "strength 3"], // At least 3 points
-              "weaknesses": ["weakness 1", "weakness 2", "weakness 3"], // At least 3 points
-              "advice": ["advice 1", "advice 2", "advice 3"], // Growth suggestions, at least 3 points
-              "summary": "Overall summary of the candidate's profile and job market competitiveness.",
-              "jdAnalysis": { // Only if JD is provided, otherwise null or empty object
-                "matchScore": 75, // Match score 0-100
-                "matchingKeywords": ["Java", "Spring Boot"], // Keywords present in both Resume and JD
-                "missingKeywords": ["AWS", "Docker"], // Keywords in JD but missing in Resume
-                "gapAnalysis": "Analysis of the gap between resume and JD"
+              "strengths": ["优势 1", "优势 2", "优势 3"], // 至少 3 点
+              "weaknesses": ["劣势 1", "劣势 2", "劣势 3"], // 至少 3 点
+              "advice": ["建议 1", "建议 2", "建议 3"], // 发展建议，至少 3 点
+              "summary": "候选人概况及就业市场竞争力的整体总结。",
+              "jdAnalysis": { // 仅在提供了 JD 时返回，否则为 null 或空对象
+                "matchScore": 75, // 匹配得分 0-100
+                "matchingKeywords": ["Java", "Spring Boot"], // 简历和 JD 中都出现的关键词
+                "missingKeywords": ["AWS", "Docker"], // JD 中有但简历中缺失的关键词
+                "gapAnalysis": "简历与 JD 之间的差距分析"
               }
             }
             """;
@@ -320,85 +324,86 @@ public class AIAnalysisService {
 
   private String buildAnalysisPrompt(String extractedContent) {
     return """
-        Please analyze the following resume content and return a comprehensive, structured JSON object.
-        The JSON object should conform to the schema provided below. Extract as much relevant information as possible.
-        If a particular piece of information is not available in the content, omit the key or set its value to null.
+        请分析以下简历内容，并返回一个全面、结构化的 JSON 对象。
+        JSON 对象应符合下文提供的 Schema。尽可能提取相关信息。
+        如果内容中不存在特定信息，请忽略该键或将其值设置为 null。
+        **所有提取的内容（如总结、职责描述等）必须使用中文（姓名、公司名、技术名词等专有名词除外）。**
 
-        Profile Content:
+        简历内容:
         """
         + extractedContent
         + """
 
-            Please return the analysis result strictly in the following JSON format. Do not include any text before or after the JSON object.
+            请严格按照以下 JSON 格式返回分析结果。不要在 JSON 对象前后包含任何文本。
             {
               "personalInfo": {
-                "fullName": "Full Name",
-                "jobTitle": "Target Job Title or Current Role",
+                "fullName": "姓名",
+                "jobTitle": "目标职位或当前职位",
                 "email": "email@example.com",
-                "phone": "Phone Number",
+                "phone": "电话号码",
                 "address": {
-                  "city": "City",
-                  "state": "State/Province",
-                  "country": "Country"
+                  "city": "城市",
+                  "state": "省/州",
+                  "country": "国家"
                 },
                 "links": {
-                  "linkedInUrl": "LinkedIn Profile URL",
-                  "githubUrl": "GitHub Profile URL",
-                  "portfolioUrl": "Personal Website/Portfolio URL"
+                  "linkedInUrl": "LinkedIn 个人资料 URL",
+                  "githubUrl": "GitHub 个人资料 URL",
+                  "portfolioUrl": "个人网站/作品集 URL"
                 }
               },
-              "summary": "A 2-4 sentence professional summary.",
+              "summary": "2-4 句的专业总结。",
               "experience": [
                 {
-                  "companyName": "Company Name",
-                  "jobTitle": "Position Held",
-                  "location": "City, State",
+                  "companyName": "公司名称",
+                  "jobTitle": "职位名称",
+                  "location": "城市, 省份",
                   "startDate": "YYYY-MM",
-                  "endDate": "YYYY-MM or Present",
+                  "endDate": "YYYY-MM 或 Present",
                   "responsibilities": [
-                    "Achievement or responsibility 1.",
-                    "Achievement or responsibility 2."
+                    "成就或职责 1。",
+                    "成就或职责 2。"
                   ]
                 }
               ],
               "education": [
                 {
-                  "institutionName": "University/College Name",
-                  "location": "City, State",
-                  "degree": "Degree (e.g., Bachelor of Science)",
-                  "major": "Field of Study (e.g., Computer Science)",
-                  "gpa": "Grade Point Average (if available)",
+                  "institutionName": "大学/学院名称",
+                  "location": "城市, 省份",
+                  "degree": "学位 (例如：理学学士)",
+                  "major": "专业 (例如：计算机科学)",
+                  "gpa": "平均绩点 (如果可用)",
                   "graduationDate": "YYYY-MM",
-                  "relevantCoursework": ["Course 1", "Course 2"],
-                  "honors": "Academic Honors (e.g., Dean's List)"
+                  "relevantCoursework": ["课程 1", "课程 2"],
+                  "honors": "学术荣誉 (例如：院长名单)"
                 }
               ],
               "skills": {
-                "technicalSkills": ["Skill A", "Skill B"],
-                "softSkills": ["Skill C", "Skill D"],
-                "tools": ["Tool E", "Tool F"]
+                "technicalSkills": ["技能 A", "技能 B"],
+                "softSkills": ["技能 C", "技能 D"],
+                "tools": ["工具 E", "工具 F"]
               },
               "projects": [
                 {
-                  "projectName": "Project Name",
-                  "description": "A brief description of the project.",
-                  "technologiesUsed": ["Tech 1", "Tech 2"],
-                  "projectUrl": "Live project URL",
-                  "repositoryUrl": "Source code URL"
+                  "projectName": "项目名称",
+                  "description": "项目简介。",
+                  "technologiesUsed": ["技术 1", "技术 2"],
+                  "projectUrl": "在线项目 URL",
+                  "repositoryUrl": "源代码 URL"
                 }
               ],
               "certifications": [
                 {
-                  "name": "Certification Name",
-                  "issuingOrganization": "Issuing Body",
+                  "name": "证书名称",
+                  "issuingOrganization": "发证机构",
                   "issueDate": "YYYY-MM",
-                  "credentialId": "ID or Code (if available)"
+                  "credentialId": "ID 或代码 (如果可用)"
                 }
               ],
               "languages": [
                 {
-                  "language": "Language (e.g., English)",
-                  "proficiency": "Proficiency Level (e.g., Native, Fluent, Conversational)"
+                  "language": "语言 (例如：英语)",
+                  "proficiency": "熟练程度 (例如：母语, 流利, 会话)"
                 }
               ]
             }
