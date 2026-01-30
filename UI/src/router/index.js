@@ -11,6 +11,7 @@ import TemplateStore from '../views/TemplateStore.vue';
 import UserProfile from '../views/UserProfile.vue';
 import ResumeEditor from '../views/ResumeEditor.vue';
 import TemplateCreator from '../views/TemplateCreator.vue';
+import TemplateDetail from '../views/TemplateDetail.vue';
 import InterviewPrep from '../views/InterviewPrep.vue';
 
 // Admin Views
@@ -36,6 +37,7 @@ const routes = [
             { path: 'profile', name: 'Profile', component: UserProfile },
             { path: 'editor/:id', name: 'Editor', component: ResumeEditor, props: true },
             { path: 'template/create', name: 'TemplateCreator', component: TemplateCreator },
+            { path: 'template/:id', name: 'TemplateDetail', component: TemplateDetail },
         ],
     },
     {
