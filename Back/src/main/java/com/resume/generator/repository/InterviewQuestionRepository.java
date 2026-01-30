@@ -13,9 +13,13 @@ public interface InterviewQuestionRepository extends JpaRepository<InterviewQues
 
     @Query(value = "SELECT * FROM interview_questions q WHERE q.id NOT IN (SELECT r.question_id FROM interview_records r WHERE r.user_id = :userId) ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<InterviewQuestion> findRandomQuestionsNotAnswered(@Param("userId") Long userId, @Param("limit") int limit);
-    
+
     @Query(value = "SELECT * FROM interview_questions q WHERE q.id NOT IN (SELECT r.question_id FROM interview_records r WHERE r.user_id = :userId) AND (q.tags LIKE %:keyword% OR q.category LIKE %:keyword%) ORDER BY RAND() LIMIT :limit", nativeQuery = true)
-    List<InterviewQuestion> findRandomQuestionsNotAnsweredWithKeyword(@Param("userId") Long userId, @Param("keyword") String keyword, @Param("limit") int limit);
+    List<InterviewQuestion> findRandomQuestionsNotAnsweredWithKeyword(@Param("userId") Long userId,
+            @Param("keyword") String keyword, @Param("limit") int limit);
+
+    @Query(value = "SELECT * FROM interview_questions q WHERE (q.tags LIKE %:keyword% OR q.category LIKE %:keyword%) ORDER BY RAND() LIMIT :limit", nativeQuery = true)
+    List<InterviewQuestion> findRandomQuestionsWithKeyword(@Param("keyword") String keyword, @Param("limit") int limit);
 
     @Query(value = "SELECT * FROM interview_questions q ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<InterviewQuestion> findRandomQuestions(@Param("limit") int limit);

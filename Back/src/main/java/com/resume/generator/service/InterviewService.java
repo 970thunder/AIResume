@@ -45,7 +45,9 @@ public class InterviewService {
 
         // 1. Get tech stack from latest resume analysis
         String techStack = "Java"; // Default fallback
-        String keyword = "Java";
+        List<String> searchKeywords = new ArrayList<>();
+        searchKeywords.add("Java"); // Default
+
         ResumeAnalysisResult analysis = analysisResultRepository.findTopByUserOrderByCreatedAtDesc(user);
 
         if (analysis != null && analysis.getContentJson() != null) {
@@ -58,11 +60,15 @@ public class InterviewService {
                     skillsNode.forEach(s -> skills.add(s.asText()));
                     techStack = String.join(", ", skills);
 
-                    // Use the first skill as keyword for DB search
-                    keyword = skills.get(0);
+                    // Use ALL skills as keywords for DB search
+                    searchKeywords.clear();
+                    for (String s : skills) {
+                        searchKeywords.add(s);
+                    }
                 } else if (root.has("jobTitle")) {
                     techStack = root.get("jobTitle").asText();
-                    keyword = techStack;
+                    searchKeywords.clear();
+                    searchKeywords.add(techStack);
                 }
             } catch (JsonProcessingException e) {
                 // Ignore parse error, use default
@@ -71,31 +77,71 @@ public class InterviewService {
 
         // 2. Fetch questions
         List<InterviewQuestion> questions = new ArrayList<>();
+        Set<Long> pickedIds = new HashSet<>();
         int targetQuestionCount = 20;
 
-        // Try with keyword
-        questions.addAll(
-                questionRepository.findRandomQuestionsNotAnsweredWithKeyword(userId, keyword, targetQuestionCount));
+        // Strategy: Iterate through keywords and try to find questions
+        // We try to distribute questions among keywords if possible, but for
+        // simplicity, we loop and fill
+        for (String k : searchKeywords) {
+            if (questions.size() >= targetQuestionCount)
+                break;
 
-        // If not enough, try generic unattempted
-        if (questions.size() < targetQuestionCount) {
-            int needed = targetQuestionCount - questions.size();
-            List<InterviewQuestion> generic = questionRepository.findRandomQuestionsNotAnswered(userId, needed);
-
-            Set<Long> pickedIds = questions.stream().map(InterviewQuestion::getId).collect(Collectors.toSet());
-            for (InterviewQuestion q : generic) {
-                if (!pickedIds.contains(q.getId())) {
+            // Try unattempted first
+            // We fetch a small batch for each keyword to encourage variety
+            List<InterviewQuestion> found = questionRepository.findRandomQuestionsNotAnsweredWithKeyword(userId, k, 5);
+            for (InterviewQuestion q : found) {
+                if (questions.size() >= targetQuestionCount)
+                    break;
+                if (pickedIds.add(q.getId())) {
                     questions.add(q);
-                    pickedIds.add(q.getId());
                 }
             }
         }
 
-        // 3. If still not enough, generate with AI
-        // Optimization: If we have at least 10 questions locally, we can start the
-        // session
-        // without waiting for AI generation, to improve user experience.
-        int minQuestionsRequired = 10;
+        // If not enough, try deeper search with keywords (more items)
+        if (questions.size() < targetQuestionCount) {
+            for (String k : searchKeywords) {
+                if (questions.size() >= targetQuestionCount)
+                    break;
+                int needed = targetQuestionCount - questions.size();
+                List<InterviewQuestion> found = questionRepository.findRandomQuestionsNotAnsweredWithKeyword(userId, k,
+                        needed);
+                for (InterviewQuestion q : found) {
+                    if (questions.size() >= targetQuestionCount)
+                        break;
+                    if (pickedIds.add(q.getId())) {
+                        questions.add(q);
+                    }
+                }
+            }
+        }
+
+        // 3. If still not enough, try to reuse ALREADY ANSWERED questions matching
+        // keywords
+        if (questions.size() < targetQuestionCount) {
+            for (String k : searchKeywords) {
+                if (questions.size() >= targetQuestionCount)
+                    break;
+                int needed = targetQuestionCount - questions.size();
+                // Use the new method that includes answered questions
+                List<InterviewQuestion> found = questionRepository.findRandomQuestionsWithKeyword(k, needed * 2);
+                for (InterviewQuestion q : found) {
+                    if (questions.size() >= targetQuestionCount)
+                        break;
+                    if (pickedIds.add(q.getId())) {
+                        questions.add(q);
+                    }
+                }
+            }
+        }
+
+        // REMOVED: Generic fallback (findRandomQuestionsNotAnswered without keyword)
+        // REMOVED: Global random fallback (findRandomQuestions without keyword)
+        // This ensures we ONLY return relevant questions.
+
+        // 4. Only if we have VERY few questions (e.g. empty DB), use AI
+        int minQuestionsRequired = 3;
 
         if (questions.size() < minQuestionsRequired) {
             // Retry loop to generate more questions
@@ -114,6 +160,7 @@ public class InterviewService {
                             break;
 
                         String content = (String) map.get("content");
+                        String kw = !searchKeywords.isEmpty() ? searchKeywords.get(0) : "General";
 
                         InterviewQuestion q = InterviewQuestion.builder()
                                 .content(content)
@@ -122,7 +169,7 @@ public class InterviewService {
                                 .referenceAnswer((String) map.get("referenceAnswer"))
                                 .difficulty((String) map.getOrDefault("difficulty", "MEDIUM"))
                                 .category((String) map.getOrDefault("category", "General"))
-                                .tags((String) map.getOrDefault("tags", keyword))
+                                .tags((String) map.getOrDefault("tags", kw))
                                 .build();
 
                         q = questionRepository.save(q);
@@ -153,15 +200,25 @@ public class InterviewService {
         // We hide reference answer for the frontend
         List<InterviewQuestionDTO> questionDTOs = questions.stream().map(q -> {
             try {
+                List<String> options = null;
+                if (q.getOptions() != null && !q.getOptions().equals("null") && !q.getOptions().trim().isEmpty()) {
+                    try {
+                        options = objectMapper.readValue(q.getOptions(), List.class);
+                    } catch (Exception e) {
+                        // ignore bad JSON in options
+                        options = Collections.emptyList();
+                    }
+                }
+
                 return InterviewQuestionDTO.builder()
                         .id(q.getId())
                         .content(q.getContent())
                         .type(q.getType())
-                        .options(objectMapper.readValue(q.getOptions(), List.class))
+                        .options(options)
                         .difficulty(q.getDifficulty())
                         .category(q.getCategory())
                         .build();
-            } catch (JsonProcessingException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }).collect(Collectors.toList());
@@ -335,15 +392,24 @@ public class InterviewService {
         // Convert to DTOs
         List<InterviewQuestionDTO> questionDTOs = allQuestions.stream().map(q -> {
             try {
+                List<String> options = null;
+                if (q.getOptions() != null && !q.getOptions().equals("null") && !q.getOptions().trim().isEmpty()) {
+                    try {
+                        options = objectMapper.readValue(q.getOptions(), List.class);
+                    } catch (Exception e) {
+                        options = Collections.emptyList();
+                    }
+                }
+
                 return InterviewQuestionDTO.builder()
                         .id(q.getId())
                         .content(q.getContent())
                         .type(q.getType())
-                        .options(objectMapper.readValue(q.getOptions(), List.class))
+                        .options(options)
                         .difficulty(q.getDifficulty())
                         .category(q.getCategory())
                         .build();
-            } catch (JsonProcessingException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }).collect(Collectors.toList());

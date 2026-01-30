@@ -7,9 +7,11 @@
                 <!-- Left Column: Preview -->
                 <el-col :xs="24" :md="14" :lg="16">
                     <div class="preview-wrapper">
-                        <div class="preview-scroll-container">
-                            <ShadowPreview v-if="template.html" class="template-preview" :content="template.html" />
-                            <el-empty v-else description="预览加载中..." />
+                        <div class="preview-scroll-container" ref="scrollContainer">
+                            <div class="preview-content-wrapper" :style="contentStyle">
+                                <ShadowPreview v-if="template.html" class="template-preview" :content="template.html" />
+                                <el-empty v-else description="预览加载中..." />
+                            </div>
                         </div>
                     </div>
                 </el-col>
@@ -55,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { ElNotification } from 'element-plus';
@@ -67,6 +69,27 @@ const route = useRoute();
 const router = useRouter();
 const template = ref(null);
 const loading = ref(false);
+const scrollContainer = ref(null);
+const scale = ref(1);
+
+const contentStyle = computed(() => ({
+    transform: `scale(${scale.value})`,
+    transformOrigin: 'top center',
+    width: '210mm',
+    minHeight: '297mm',
+}));
+
+const calculateScale = () => {
+    if (!scrollContainer.value) return;
+    const containerWidth = scrollContainer.value.clientWidth;
+    // 210mm in pixels is approx 794px. Add some padding (e.g. 40px)
+    const targetWidth = 794; 
+    const padding = 40;
+    const availableWidth = Math.max(containerWidth - padding, 300); // Minimum 300px
+    
+    // Calculate scale to fit width
+    scale.value = Math.min(availableWidth / targetWidth, 1); // Max scale 1
+};
 
 const goBack = () => {
     router.push('/store');
@@ -83,16 +106,6 @@ const fetchTemplateDetail = async () => {
 
     loading.value = true;
     try {
-        // We can reuse the same API endpoint if it supports getting by ID
-        // Assuming there is an endpoint like /api/templates/{id} or we have to fetch all and find
-        // Based on TemplateService.java: public Template getTemplateById(Long id)
-        // I need to check API_URLS if there is a specific endpoint for detail
-        // If not, I might need to add it or use the getAll endpoint (not efficient but works for now)
-        
-        // Let's assume there is a detail endpoint, or we construct it.
-        // Looking at api.js might be helpful, but I'll assume standard REST: /api/templates/{id}
-        // Wait, I should check api.js first to be sure or add it.
-        
         // Use the defined API endpoint for getting template by ID
         const response = await axios.get(API_URLS.templates.byId(id), {
             headers: getHeaders()
@@ -119,6 +132,8 @@ const fetchTemplateDetail = async () => {
         });
     } finally {
         loading.value = false;
+        // Recalculate scale after loading
+        setTimeout(calculateScale, 100);
     }
 };
 
@@ -136,6 +151,13 @@ const handleAction = () => {
 
 onMounted(() => {
     fetchTemplateDetail();
+    window.addEventListener('resize', calculateScale);
+    // Initial calculation
+    setTimeout(calculateScale, 100);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('resize', calculateScale);
 });
 </script>
 
@@ -172,16 +194,19 @@ onMounted(() => {
     overflow-x: hidden;
     display: flex;
     justify-content: center;
+    align-items: flex-start; /* Ensure top alignment */
+    padding-top: 20px; /* Add some top spacing */
+}
+
+.preview-content-wrapper {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    /* No margin-bottom compensation needed as scale is handled dynamically */
+    transition: transform 0.1s ease-out; /* Smooth scaling */
 }
 
 .template-preview {
-    width: 210mm;
-    min-height: 297mm;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transform: scale(0.65);
-    transform-origin: top center;
-    margin-bottom: -35%;
+    /* Styles are now handled by wrapper and dynamic binding */
 }
 
 .info-card {
