@@ -190,7 +190,7 @@
               <el-tag effect="dark" class="category-tag">{{ currentQuestion.category || '综合' }}</el-tag>
               <el-tag :type="getDifficultyType(currentQuestion.difficulty)" effect="plain" class="ml-2">{{
                 currentQuestion.difficulty
-              }}</el-tag>
+                }}</el-tag>
             </div>
             <span class="question-index">第 {{ currentQuestionIndex + 1 }} / {{ totalQuestions }} 题</span>
           </div>
@@ -414,16 +414,27 @@ const finishSession = () => {
 
 const exitSession = () => {
   ElMessageBox.confirm(
-    '确定要退出当前面试吗？进度将不会保存。',
+    '确定要退出当前面试吗？退出后将无法恢复，未作答题目将不计分。',
     '提示',
     {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning',
     }
-  ).then(() => {
+  ).then(async () => {
+    // Explicitly end session on backend
+    if (currentSession.value && (currentSession.value.id || currentSession.value.sessionId)) {
+      try {
+        const sid = currentSession.value.id || currentSession.value.sessionId;
+        await axios.post(API_URLS.interview.end(sid), {}, { headers: getHeaders() });
+      } catch (e) {
+        console.error('Failed to end session:', e);
+      }
+    }
+
     sessionActive.value = false;
-    fetchData();
+    currentSession.value = null; // Clear session data
+    fetchData(); // Refresh stats
   }).catch(() => { });
 };
 

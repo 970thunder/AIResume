@@ -245,6 +245,14 @@ public class InterviewService {
         int remaining = session.getTotalQuestions() - answeredQuestions.size();
         List<InterviewQuestion> newQuestions = new ArrayList<>();
 
+        if (remaining <= 0) {
+            if (!"COMPLETED".equals(session.getStatus())) {
+                session.setStatus("COMPLETED");
+                sessionRepository.save(session);
+            }
+            return null;
+        }
+
         if (remaining > 0) {
             // We need to find questions NOT answered by this user globally?
             // Or just not in this session?
@@ -295,6 +303,21 @@ public class InterviewService {
                         remaining - newQuestions.size());
                 for (InterviewQuestion q : generic) {
                     boolean alreadyPicked = newQuestions.stream().anyMatch(nq -> nq.getId().equals(q.getId()));
+                    if (!alreadyPicked)
+                        newQuestions.add(q);
+                }
+            }
+
+            // Fallback: If still not enough, pick ANY random questions (ignoring answered
+            // status)
+            if (newQuestions.size() < remaining) {
+                List<InterviewQuestion> anyRandom = questionRepository
+                        .findRandomQuestions(remaining - newQuestions.size());
+                for (InterviewQuestion q : anyRandom) {
+                    boolean alreadyPicked = newQuestions.stream().anyMatch(nq -> nq.getId().equals(q.getId()));
+                    // If we really run out, we might have duplicates in the list, but it's better
+                    // than empty.
+                    // However, we should try to avoid duplicates in the *current list*
                     if (!alreadyPicked)
                         newQuestions.add(q);
                 }
@@ -450,5 +473,13 @@ public class InterviewService {
             return null;
         ResumeAnalysisResult analysis = analysisResultRepository.findTopByUserOrderByCreatedAtDesc(user);
         return analysis != null ? analysis.getContentJson() : null;
+    }
+
+    @Transactional
+    public void endSession(Long sessionId) {
+        InterviewSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+        session.setStatus("COMPLETED");
+        sessionRepository.save(session);
     }
 }

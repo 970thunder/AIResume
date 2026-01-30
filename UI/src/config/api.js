@@ -58,6 +58,7 @@ export const API_URLS = {
         submit: `${API_BASE_URL}/interview/submit`,
         stats: `${API_BASE_URL}/interview/stats`,
         latestAnalysis: `${API_BASE_URL}/interview/analysis/latest`,
+        end: (id) => `${API_BASE_URL}/interview/${id}/end`,
     }
 };
 

@@ -77,4 +77,10 @@ public class InterviewController {
         }
         return ResponseEntity.ok(json);
     }
+
+    @PostMapping("/{sessionId}/end")
+    public ResponseEntity<Void> endSession(@PathVariable Long sessionId) {
+        interviewService.endSession(sessionId);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -16,4 +16,7 @@ public interface InterviewQuestionRepository extends JpaRepository<InterviewQues
     
     @Query(value = "SELECT * FROM interview_questions q WHERE q.id NOT IN (SELECT r.question_id FROM interview_records r WHERE r.user_id = :userId) AND (q.tags LIKE %:keyword% OR q.category LIKE %:keyword%) ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<InterviewQuestion> findRandomQuestionsNotAnsweredWithKeyword(@Param("userId") Long userId, @Param("keyword") String keyword, @Param("limit") int limit);
+
+    @Query(value = "SELECT * FROM interview_questions q ORDER BY RAND() LIMIT :limit", nativeQuery = true)
+    List<InterviewQuestion> findRandomQuestions(@Param("limit") int limit);
 }
