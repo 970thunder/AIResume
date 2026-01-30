@@ -35,10 +35,24 @@ public class InterviewController {
         return ResponseEntity.ok(session);
     }
 
+    @GetMapping("/pending")
+    public ResponseEntity<InterviewSessionDTO> getPendingSession(Principal principal) {
+        User user = getUserByPrincipal(principal);
+        InterviewSessionDTO session = interviewService.getPendingSession(user.getId());
+        if (session == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(session);
+    }
+
     @PostMapping("/submit")
     public ResponseEntity<InterviewRecordDTO> submitAnswer(
             @RequestBody Map<String, Object> payload) {
         // Expected payload: sessionId, questionId, answer
+        if (payload.get("sessionId") == null || payload.get("questionId") == null) {
+            throw new IllegalArgumentException("sessionId and questionId are required");
+        }
+
         Long sessionId = Long.valueOf(payload.get("sessionId").toString());
         Long questionId = Long.valueOf(payload.get("questionId").toString());
         String answer = (String) payload.get("answer");

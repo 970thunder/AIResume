@@ -170,12 +170,13 @@
       </el-dialog>
 
       <!-- Interview Session -->
-      <div v-if="sessionActive" class="interview-session">
+      <div class="interview-session">
         <div class="exit-btn-wrapper">
-          <el-button @click="exitSession" type="danger" plain circle>
-            <el-icon>
+          <el-button @click="exitSession" type="danger" plain round class="exit-btn">
+            <el-icon class="mr-1">
               <Close />
             </el-icon>
+            退出面试
           </el-button>
         </div>
 
@@ -183,18 +184,19 @@
           <el-progress :percentage="progressPercentage" :format="progressFormat" class="session-progress" />
         </div>
 
-        <el-card class="question-card" v-loading="submitting">
-          <template #header>
-            <div class="question-header">
-              <el-tag>{{ currentQuestion.category || '综合' }}</el-tag>
-              <el-tag :type="getDifficultyType(currentQuestion.difficulty)" class="ml-2">{{ currentQuestion.difficulty
+        <div class="question-container" v-loading="submitting">
+          <div class="question-header">
+            <div class="tags-group">
+              <el-tag effect="dark" class="category-tag">{{ currentQuestion.category || '综合' }}</el-tag>
+              <el-tag :type="getDifficultyType(currentQuestion.difficulty)" effect="plain" class="ml-2">{{
+                currentQuestion.difficulty
               }}</el-tag>
-              <span class="question-index">第 {{ currentQuestionIndex + 1 }} / {{ totalQuestions }} 题</span>
             </div>
-          </template>
+            <span class="question-index">第 {{ currentQuestionIndex + 1 }} / {{ totalQuestions }} 题</span>
+          </div>
 
           <div class="question-content">
-            <h3>{{ currentQuestion.content }}</h3>
+            <h3 class="question-title">{{ currentQuestion.content }}</h3>
 
             <!-- Multiple Choice Options -->
             <div v-if="currentQuestion.type === 'MULTIPLE_CHOICE'" class="options-list">
@@ -208,16 +210,16 @@
 
             <!-- Open Ended Input -->
             <div v-else class="text-answer">
-              <el-input v-model="userAnswer" :rows="6" type="textarea" placeholder="请输入您的回答..." />
+              <el-input v-model="userAnswer" :rows="8" type="textarea" placeholder="请输入您的回答..." resize="none" />
             </div>
           </div>
 
           <div class="question-footer">
-            <el-button type="primary" @click="submitAndNext" :disabled="!userAnswer" :loading="submitting">
+            <el-button type="primary" size="large" @click="submitAndNext" :loading="submitting" class="submit-btn">
               {{ isLastQuestion ? '提交并结束' : '提交并下一题' }}
             </el-button>
           </div>
-        </el-card>
+        </div>
       </div>
     </div>
   </div>
@@ -300,6 +302,30 @@ const fetchData = async () => {
 
     stats.value = statsRes.data;
     latestAnalysis.value = analysisRes.data;
+
+    // Check for pending session
+    try {
+      const pendingRes = await axios.get(API_URLS.interview.pending, { headers: getHeaders() });
+      if (pendingRes.status === 200 && pendingRes.data) {
+        currentSession.value = pendingRes.data;
+        // If the backend returns currentQuestionIndex, use it, otherwise default to 0
+        // Our backend update added this field
+        currentQuestionIndex.value = currentSession.value.currentQuestionIndex || 0;
+
+        // If all questions answered but status is still IN_PROGRESS (shouldn't happen ideally but just in case)
+        if (currentQuestionIndex.value >= currentSession.value.questions.length && currentSession.value.questions.length > 0) {
+          currentQuestionIndex.value = currentSession.value.questions.length - 1;
+        }
+
+        userAnswer.value = '';
+        sessionActive.value = true;
+        ElMessage.success('已恢复上次未完成的面试');
+      }
+    } catch (e) {
+      // No pending session or error, ignore
+      console.log('No pending session found');
+    }
+
   } catch (error) {
     console.error('Failed to fetch data:', error);
     ElMessage.error('获取数据失败');
@@ -325,30 +351,54 @@ const startInterview = async () => {
 };
 
 const submitAndNext = async () => {
-  if (!userAnswer.value) return;
+  // Check if answer is empty
+  if (!userAnswer.value || !userAnswer.value.trim()) {
+    try {
+      await ElMessageBox.confirm(
+        '当前题目未作答，确定跳过吗？跳过将记为0分。',
+        '提示',
+        {
+          confirmButtonText: '确定跳过',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+      );
+    } catch {
+      return;
+    }
+  }
 
   const payload = {
-    sessionId: currentSession.value.id,
+    sessionId: currentSession.value.id || currentSession.value.sessionId,
     questionId: currentQuestion.value.id,
-    answer: userAnswer.value
+    answer: userAnswer.value || ''
   };
 
-  submitting.value = true;
-  try {
-    await axios.post(API_URLS.interview.submit, payload, { headers: getHeaders() });
-
-    if (isLastQuestion.value) {
+  // If it's the last question, wait for completion to show finish dialog
+  if (isLastQuestion.value) {
+    submitting.value = true;
+    try {
+      await axios.post(API_URLS.interview.submit, payload, { headers: getHeaders() });
       finishSession();
-    } else {
-      currentQuestionIndex.value++;
-      userAnswer.value = '';
-      window.scrollTo(0, 0);
+    } catch (error) {
+      console.error('Failed to submit answer:', error);
+      ElMessage.error('提交失败，请重试');
+    } finally {
+      submitting.value = false;
     }
-  } catch (error) {
-    console.error('Failed to submit answer:', error);
-    ElMessage.error('提交失败，请重试');
-  } finally {
-    submitting.value = false;
+  } else {
+    // Intermediate questions: Fire and forget (Async)
+    // Don't set submitting=true to avoid UI freeze/loading spinner
+    axios.post(API_URLS.interview.submit, payload, { headers: getHeaders() })
+      .catch(error => {
+        console.error('Background submission failed:', error);
+        // Silent fail or small toast? Ideally retry queue, but for now just log
+      });
+
+    // Immediately switch to next question
+    currentQuestionIndex.value++;
+    userAnswer.value = '';
+    window.scrollTo(0, 0);
   }
 };
 
@@ -661,13 +711,25 @@ const formatAnalysis = (val) => {
   max-width: 800px;
   margin: 0 auto;
   position: relative;
+  /* Make space for header/progress */
 }
 
 .exit-btn-wrapper {
-  position: absolute;
-  top: -60px;
-  right: 0;
-  z-index: 10;
+  position: fixed;
+  top: 20px;
+  /* Adjust based on navbar height, assuming ~80px */
+  right: 20px;
+  z-index: 100;
+}
+
+.exit-btn {
+  box-shadow: 0 4px 12px rgba(245, 108, 108, 0.3);
+  transition: all 0.3s;
+}
+
+.exit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 108, 108, 0.4);
 }
 
 .question-card {
@@ -685,16 +747,29 @@ const formatAnalysis = (val) => {
   font-size: 14px;
 }
 
-.question-content {
-  padding: 20px 0;
-}
+.question-content {}
 
 /* Question Styles */
-.question-content h3 {
-  font-size: 20px;
+.question-container {
+  margin-top: 24px;
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.question-index {
+  color: #909399;
+  font-size: 14px;
+}
+
+.question-title {
+  font-size: 24px;
   color: #303133;
-  margin-bottom: 24px;
   line-height: 1.6;
+  font-weight: 600;
 }
 
 .options-list {
@@ -710,25 +785,49 @@ const formatAnalysis = (val) => {
   width: 100%;
 }
 
+/* Gradient Capsule Option Styles */
 .option-item {
   margin: 0 !important;
   width: 100%;
-  padding: 12px 16px;
-  border-radius: 8px;
-  transition: all 0.3s;
-  background: #f8fafc;
-  border: 1px solid transparent;
+  padding: 16px 24px;
+  border-radius: 50px;
+  /* Capsule shape */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #fff;
+  border: 1px solid #e4e7ed;
+  font-size: 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
 }
 
 .option-item:hover {
-  background: #f0f9ff;
-}
-
-.option-item.is-checked {
-  background: #ecf5ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.1);
   border-color: #409eff;
 }
 
+.option-item.is-checked {
+  background: linear-gradient(135deg, #66b1ff 0%, #409eff 100%);
+  border-color: transparent;
+  box-shadow: 0 4px 16px 0 rgba(64, 158, 255, 0.3);
+}
+
+.option-item.is-checked :deep(.el-radio__label) {
+  color: #fff !important;
+  font-weight: 500;
+}
+
+.option-item :deep(.el-radio__input.is-checked .el-radio__inner) {
+  border-color: #fff;
+  background: #fff;
+}
+
+.option-item :deep(.el-radio__input.is-checked .el-radio__inner::after) {
+  background-color: #409eff;
+}
+
+/* Text Area Styles */
 .text-answer {
   margin-top: 16px;
 }
@@ -736,9 +835,10 @@ const formatAnalysis = (val) => {
 .text-answer :deep(.el-textarea__inner) {
   background: #f8fafc;
   border: 1px solid transparent;
-  padding: 16px;
-  border-radius: 8px;
+  padding: 20px;
+  border-radius: 16px;
   font-size: 16px;
+  line-height: 1.6;
   transition: all 0.3s;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
@@ -746,14 +846,27 @@ const formatAnalysis = (val) => {
 .text-answer :deep(.el-textarea__inner):focus {
   background: #fff;
   border-color: #409eff;
-  box-shadow: 0 0 0 1px #409eff;
+  box-shadow: 0 0 0 1px #409eff, 0 4px 12px rgba(64, 158, 255, 0.1);
 }
 
 .question-footer {
-  margin-top: 32px;
+  margin-top: 16px;
   text-align: right;
-  border-top: 1px solid #ebeef5;
-  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 16px;
+}
+
+.submit-btn {
+  padding: 12px 36px;
+  border-radius: 50px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+  transition: all 0.3s;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4);
 }
 
 /* Loading */

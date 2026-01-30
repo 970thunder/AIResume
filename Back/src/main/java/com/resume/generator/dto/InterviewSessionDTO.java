@@ -9,10 +9,12 @@ import java.util.List;
 @Builder
 public class InterviewSessionDTO {
     private Long id;
+    private Long sessionId; // Alias for id
     private Long userId;
     private List<InterviewQuestionDTO> questions;
     private String status;
     private Integer totalQuestions;
+    private Integer currentQuestionIndex; // Added for resuming session
     private Integer score;
     private LocalDateTime createdAt;
 }

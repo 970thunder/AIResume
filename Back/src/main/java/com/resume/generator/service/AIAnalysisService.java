@@ -183,6 +183,15 @@ public class AIAnalysisService {
   }
 
   public Map<String, Object> evaluateAnswer(String question, String answer) {
+    // Check for empty answer and skip AI call
+    if (answer == null || answer.trim().isEmpty()) {
+      Map<String, Object> result = new HashMap<>();
+      result.put("isCorrect", false);
+      result.put("evaluation", "用户未作答");
+      result.put("score", 0);
+      return result;
+    }
+
     try {
       Map<String, Object> requestBody = new HashMap<>();
       requestBody.put("model", deepSeekConfig.getModel());

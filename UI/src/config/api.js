@@ -54,6 +54,7 @@ export const API_URLS = {
     },
     interview: {
         start: `${API_BASE_URL}/interview/start`,
+        pending: `${API_BASE_URL}/interview/pending`,
         submit: `${API_BASE_URL}/interview/submit`,
         stats: `${API_BASE_URL}/interview/stats`,
         latestAnalysis: `${API_BASE_URL}/interview/analysis/latest`,
