@@ -19,6 +19,7 @@ import AdminLogin from '../views/admin/AdminLogin.vue';
 import AdminDashboard from '../views/admin/Dashboard.vue';
 import TemplateAudit from '../views/admin/TemplateAudit.vue';
 import QuestionBank from '../views/admin/QuestionBank.vue';
+import UserManagement from '../views/admin/UserManagement.vue';
 
 const routes = [
     {
@@ -46,6 +47,7 @@ const routes = [
             { path: 'dashboard', name: 'AdminDashboard', component: AdminDashboard },
             { path: 'templates', name: 'TemplateAudit', component: TemplateAudit },
             { path: 'questions', name: 'QuestionBank', component: QuestionBank },
+            { path: 'users', name: 'UserManagement', component: UserManagement },
         ]
     },
     {

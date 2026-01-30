@@ -68,6 +68,8 @@ export const API_URLS = {
         auditTemplate: (id) => `${API_BASE_URL}/admin/templates/${id}/audit`,
         questions: `${API_BASE_URL}/admin/questions`,
         question: (id) => `${API_BASE_URL}/admin/questions/${id}`,
+        generateQuestions: `${API_BASE_URL}/admin/questions/generate`,
+        users: `${API_BASE_URL}/admin/users`,
     }
 };
 

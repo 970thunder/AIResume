@@ -85,7 +85,10 @@ const handleSubmit = async () => {
           // Actually better to clear password
           form.password = '';
         } else {
-          await authStore.login(form.username, form.password);
+          await authStore.login({
+            username: form.username,
+            password: form.password
+          });
           if (authStore.isAdmin) {
             ElMessage.success('登录成功');
             router.push('/admin/dashboard');

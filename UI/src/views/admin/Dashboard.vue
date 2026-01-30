@@ -134,6 +134,12 @@ const initCharts = () => {
   if (systemChartRef.value) {
     const chart = echarts.init(systemChartRef.value);
     chart.setOption({
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
       xAxis: {
         type: 'category',
         data: ['用户', '模板', '题目', '今日面试']
@@ -143,6 +149,7 @@ const initCharts = () => {
       },
       series: [
         {
+          name: '数量',
           data: [
             stats.value.totalUsers,
             stats.value.totalTemplates,

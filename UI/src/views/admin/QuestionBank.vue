@@ -4,7 +4,10 @@
       <template #header>
         <div class="header-actions">
           <h3>题库管理</h3>
-          <el-button type="primary" @click="handleAdd">新增题目</el-button>
+          <div>
+            <el-button type="success" @click="handleAiGenerate">AI 生成题目</el-button>
+            <el-button type="primary" @click="handleAdd">新增题目</el-button>
+          </div>
         </div>
       </template>
 
@@ -24,7 +27,17 @@
             <el-tag :type="getDifficultyType(scope.row.difficulty)">{{ scope.row.difficulty }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="category" label="分类" width="150" />
+        <el-table-column prop="category" label="分类" width="120" />
+        <el-table-column label="统计 (正确/总数)" width="150">
+          <template #default="scope">
+            <span>{{ scope.row.correctCount || 0 }} / {{ scope.row.totalAttempts || 0 }}</span>
+            <el-progress 
+              :percentage="calculateAccuracy(scope.row)" 
+              :status="getAccuracyStatus(scope.row)"
+              :stroke-width="6"
+            />
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="scope">
             <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
@@ -33,6 +46,27 @@
         </el-table-column>
       </el-table>
     </el-card>
+
+    <!-- AI Generate Dialog -->
+    <el-dialog v-model="aiDialogVisible" title="AI 批量生成题目" width="500px">
+      <el-form :model="aiForm" label-width="100px">
+        <el-form-item label="生成数量">
+          <el-input-number v-model="aiForm.count" :min="1" :max="20" />
+        </el-form-item>
+        <el-form-item label="技术/分类">
+          <el-input v-model="aiForm.category" placeholder="例如：Java, Redis, Spring Boot" />
+        </el-form-item>
+      </el-form>
+      <div class="ai-tip">
+        <el-alert title="AI 生成可能需要较长时间，请耐心等待。" type="info" show-icon :closable="false" />
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="aiDialogVisible = false">取消</el-button>
+          <el-button type="primary" :loading="aiLoading" @click="confirmAiGenerate">开始生成</el-button>
+        </span>
+      </template>
+    </el-dialog>
 
     <!-- Edit/Add Dialog -->
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑题目' : '新增题目'" width="600px">
@@ -93,6 +127,14 @@ const dialogVisible = ref(false);
 const isEdit = ref(false);
 const optionsJson = ref('[]');
 
+// AI Generate
+const aiDialogVisible = ref(false);
+const aiLoading = ref(false);
+const aiForm = reactive({
+  count: 5,
+  category: ''
+});
+
 const form = reactive({
   id: null,
   content: '',
@@ -122,6 +164,43 @@ const fetchQuestions = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const handleAiGenerate = () => {
+  aiForm.count = 5;
+  aiForm.category = '';
+  aiDialogVisible.value = true;
+};
+
+const confirmAiGenerate = async () => {
+  if (!aiForm.category) {
+    ElMessage.warning('请输入分类/技术栈');
+    return;
+  }
+  
+  aiLoading.value = true;
+  try {
+    await axios.post(API_URLS.admin.generateQuestions, aiForm, { headers: getHeaders() });
+    ElMessage.success('AI 生成题目成功');
+    aiDialogVisible.value = false;
+    fetchQuestions();
+  } catch (error) {
+    ElMessage.error('生成失败，请稍后重试');
+  } finally {
+    aiLoading.value = false;
+  }
+};
+
+const calculateAccuracy = (row) => {
+  if (!row.totalAttempts || row.totalAttempts === 0) return 0;
+  return Math.round((row.correctCount / row.totalAttempts) * 100);
+};
+
+const getAccuracyStatus = (row) => {
+  const acc = calculateAccuracy(row);
+  if (acc >= 80) return 'success';
+  if (acc >= 60) return 'warning';
+  return 'exception';
 };
 
 const handleAdd = () => {
@@ -203,5 +282,8 @@ const getDifficultyType = (diff) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+.ai-tip {
+  margin-bottom: 20px;
 }
 </style>

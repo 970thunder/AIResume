@@ -25,6 +25,10 @@
             <el-icon><List /></el-icon>
             <span>题库管理</span>
           </el-menu-item>
+          <el-menu-item index="/admin/users">
+            <el-icon><User /></el-icon>
+            <span>用户管理</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
       
@@ -68,7 +72,7 @@
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import { DataLine, Files, List, ArrowDown } from '@element-plus/icons-vue';
+import { DataLine, Files, List, ArrowDown, User } from '@element-plus/icons-vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -81,6 +85,7 @@ const currentRouteName = computed(() => {
     case '/admin/dashboard': return '数据大屏';
     case '/admin/templates': return '模板审核';
     case '/admin/questions': return '题库管理';
+    case '/admin/users': return '用户管理';
     default: return '管理后台';
   }
 });

@@ -1,5 +1,6 @@
 package com.resume.generator.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resume.generator.dto.AdminStatsDTO;
 import com.resume.generator.dto.RegisterRequest;
 import com.resume.generator.entity.*;
@@ -11,9 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +28,8 @@ public class AdminService {
     private final InterviewQuestionRepository questionRepository;
     private final InterviewSessionRepository sessionRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final AIAnalysisService aiAnalysisService;
+    
     public boolean isAdminInitialized() {
         return userRepository.existsByRoles_Name("ROLE_ADMIN");
     }
@@ -115,5 +119,36 @@ public class AdminService {
     @Transactional
     public void deleteQuestion(Long id) {
         questionRepository.deleteById(id);
+    }
+
+    @Transactional
+    public List<InterviewQuestion> generateQuestions(int count, String category) {
+        List<Map<String, Object>> generated = aiAnalysisService.generateBatchInterviewQuestions(count, category);
+        List<InterviewQuestion> saved = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+
+        for (Map<String, Object> map : generated) {
+            try {
+                String optionsJson = map.get("options") != null ? mapper.writeValueAsString(map.get("options")) : null;
+                InterviewQuestion q = InterviewQuestion.builder()
+                        .content((String) map.get("content"))
+                        .type((String) map.get("type"))
+                        .options(optionsJson)
+                        .referenceAnswer((String) map.get("referenceAnswer"))
+                        .difficulty((String) map.get("difficulty"))
+                        .category((String) map.get("category"))
+                        .tags((String) map.get("tags"))
+                        .build();
+                saved.add(questionRepository.save(q));
+            } catch (Exception e) {
+                // Ignore malformed questions
+            }
+        }
+        return saved;
+    }
+
+    // User Management
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 }

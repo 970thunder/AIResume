@@ -41,6 +41,12 @@ public class InterviewQuestion {
 
     private String tags;
 
+    @Builder.Default
+    private Long totalAttempts = 0L;
+
+    @Builder.Default
+    private Long correctCount = 0L;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;

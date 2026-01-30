@@ -420,6 +420,14 @@ public class InterviewService {
         record.setAiEvaluation(feedback);
         recordRepository.save(record);
 
+        // Update Question Stats
+        InterviewQuestion question = record.getQuestion();
+        question.setTotalAttempts(question.getTotalAttempts() + 1);
+        if (isCorrect) {
+            question.setCorrectCount(question.getCorrectCount() + 1);
+        }
+        questionRepository.save(question);
+
         // Update Session Score
         InterviewSession session = record.getSession();
         int currentScore = session.getScore() != null ? session.getScore() : 0;

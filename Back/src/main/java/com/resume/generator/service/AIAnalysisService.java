@@ -240,28 +240,76 @@ public class AIAnalysisService {
   }
 
   private String buildInterviewQuestionPrompt(String techStack) {
-    return """
-        请基于以下技术栈或关键词生成 10 道技术面试题。
-        技术栈: """ + techStack + """
+    return buildBatchInterviewQuestionPrompt(10, techStack);
+  }
 
-        请包含不同难度 (EASY, MEDIUM, HARD) 和类型 (OPEN_ENDED, MULTIPLE_CHOICE) 的题目。
-        对于 MULTIPLE_CHOICE (选择题)，请提供 4 个选项和正确答案。
-        对于 OPEN_ENDED (问答题)，请提供详尽的参考答案。
-        **所有问题、选项和答案必须使用中文。**
+  public List<Map<String, Object>> generateBatchInterviewQuestions(int count, String category) {
+    try {
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("model", deepSeekConfig.getModel());
 
-        请严格返回以下结构的 JSON 数组：
-        [
-            {
-                "content": "此处填写题目内容",
-                "type": "OPEN_ENDED", // 或 "MULTIPLE_CHOICE"
-                "options": ["选项 A", "选项 B", "选项 C", "选项 D"], // 如果是 OPEN_ENDED 则为 null
-                "referenceAnswer": "详细的参考答案或正确选项 (例如：选项 A)",
-                "difficulty": "MEDIUM",
-                "category": "Java", // 具体的技术类别，例如 Java, Redis, React
-                "tags": "Java,Backend" // 逗号分隔的标签
-            }
-        ]
-        """;
+      List<Map<String, String>> messages = new ArrayList<>();
+      Map<String, String> message = new HashMap<>();
+      message.put("role", "user");
+      message.put("content", buildBatchInterviewQuestionPrompt(count, category));
+      messages.add(message);
+
+      requestBody.put("messages", messages);
+      requestBody.put("temperature", 0.7);
+      requestBody.put("max_tokens", 3500); // Increased for batch
+
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_JSON);
+      headers.setBearerAuth(deepSeekConfig.getApiKey());
+
+      HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+      ResponseEntity<Map> response = restTemplate.postForEntity(
+          deepSeekConfig.getBaseUrl() + "/chat/completions",
+          entity,
+          Map.class);
+
+      if (response.getStatusCode() == HttpStatus.OK) {
+        Map<String, Object> responseBody = response.getBody();
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) responseBody.get("choices");
+        if (!choices.isEmpty()) {
+          Map<String, Object> firstChoice = choices.get(0);
+          Map<String, String> messageContent = (Map<String, String>) firstChoice.get("message");
+          String rawJson = messageContent.get("content");
+          String cleanedJson = rawJson.replaceAll("```json", "").replaceAll("```", "").trim();
+          try {
+            return objectMapper.readValue(cleanedJson, new TypeReference<>() {
+            });
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse AI response as JSON", e);
+          }
+        }
+      }
+      throw new RuntimeException("DeepSeek API call failed");
+    } catch (Exception e) {
+      throw new RuntimeException("Batch generation failed: " + e.getMessage(), e);
+    }
+  }
+
+  private String buildBatchInterviewQuestionPrompt(int count, String techStack) {
+    return "请基于以下技术栈或分类生成 " + count + " 道技术面试题。\n" +
+        "分类/技术栈: " + techStack + "\n\n" +
+        "请包含不同难度 (EASY, MEDIUM, HARD) 和类型 (OPEN_ENDED, MULTIPLE_CHOICE) 的题目。\n" +
+        "对于 MULTIPLE_CHOICE (选择题)，请提供 4 个选项和正确答案。\n" +
+        "对于 OPEN_ENDED (问答题)，请提供详尽的参考答案。\n" +
+        "**所有问题、选项和答案必须使用中文。**\n\n" +
+        "请严格返回以下结构的 JSON 数组：\n" +
+        "[\n" +
+        "    {\n" +
+        "        \"content\": \"此处填写题目内容\",\n" +
+        "        \"type\": \"OPEN_ENDED\", // 或 \"MULTIPLE_CHOICE\"\n" +
+        "        \"options\": [\"选项 A\", \"选项 B\", \"选项 C\", \"选项 D\"], // 如果是 OPEN_ENDED 则为 null\n" +
+        "        \"referenceAnswer\": \"详细的参考答案或正确选项 (例如：选项 A)\",\n" +
+        "        \"difficulty\": \"MEDIUM\",\n" +
+        "        \"category\": \"" + techStack + "\", // 请尽可能准确\n" +
+        "        \"tags\": \"" + techStack + "\" // 逗号分隔的标签\n" +
+        "    }\n" +
+        "]";
   }
 
   private String buildEvaluationPrompt(String question, String answer) {

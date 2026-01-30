@@ -5,6 +5,7 @@ import com.resume.generator.dto.AdminStatsDTO;
 import com.resume.generator.dto.RegisterRequest;
 import com.resume.generator.entity.InterviewQuestion;
 import com.resume.generator.entity.Template;
+import com.resume.generator.entity.User;
 import com.resume.generator.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -89,5 +90,21 @@ public class AdminController {
     public ResponseEntity<?> deleteQuestion(@PathVariable Long id) {
         adminService.deleteQuestion(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/questions/generate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<InterviewQuestion>> generateQuestions(
+            @RequestBody Map<String, Object> body) {
+        int count = (Integer) body.getOrDefault("count", 10);
+        String category = (String) body.getOrDefault("category", "Java");
+        return ResponseEntity.ok(adminService.generateQuestions(count, category));
+    }
+
+    // User Management
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(adminService.getAllUsers());
     }
 }
