@@ -43,6 +43,8 @@ public class Template {
     @Column(length = 20)
     private TemplateStatus status = TemplateStatus.PENDING;
 
+    private String auditComment;
+
     @Column(name = "created_at", updatable = false)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;

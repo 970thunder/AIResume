@@ -59,6 +59,15 @@ export const API_URLS = {
         stats: `${API_BASE_URL}/interview/stats`,
         latestAnalysis: `${API_BASE_URL}/interview/analysis/latest`,
         end: (id) => `${API_BASE_URL}/interview/${id}/end`,
+    },
+    admin: {
+        checkInit: `${API_BASE_URL}/admin/check-init`,
+        init: `${API_BASE_URL}/admin/init`,
+        stats: `${API_BASE_URL}/admin/stats`,
+        pendingTemplates: `${API_BASE_URL}/admin/templates/pending`,
+        auditTemplate: (id) => `${API_BASE_URL}/admin/templates/${id}/audit`,
+        questions: `${API_BASE_URL}/admin/questions`,
+        question: (id) => `${API_BASE_URL}/admin/questions/${id}`,
     }
 };
 

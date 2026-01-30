@@ -12,8 +12,13 @@ import UserProfile from '../views/UserProfile.vue';
 import ResumeEditor from '../views/ResumeEditor.vue';
 import TemplateCreator from '../views/TemplateCreator.vue';
 import InterviewPrep from '../views/InterviewPrep.vue';
-import HyperAdmin from '../views/HyperAdmin.vue';
-import HyperTemplateAuditor from '../views/HyperTemplateAuditor.vue';
+
+// Admin Views
+import AdminLayout from '../views/admin/AdminLayout.vue';
+import AdminLogin from '../views/admin/AdminLogin.vue';
+import AdminDashboard from '../views/admin/Dashboard.vue';
+import TemplateAudit from '../views/admin/TemplateAudit.vue';
+import QuestionBank from '../views/admin/QuestionBank.vue';
 
 const routes = [
     {
@@ -33,15 +38,20 @@ const routes = [
         ],
     },
     {
-        path: '/hyper',
-        name: 'HyperAdmin',
-        component: HyperAdmin,
+        path: '/admin',
+        component: AdminLayout,
+        meta: { requiresAdmin: true },
+        children: [
+            { path: '', redirect: '/admin/dashboard' },
+            { path: 'dashboard', name: 'AdminDashboard', component: AdminDashboard },
+            { path: 'templates', name: 'TemplateAudit', component: TemplateAudit },
+            { path: 'questions', name: 'QuestionBank', component: QuestionBank },
+        ]
     },
     {
-        path: '/hyper/template/:id',
-        name: 'HyperTemplateAuditor',
-        component: HyperTemplateAuditor,
-        meta: { requiresAdmin: true }
+        path: '/admin/login',
+        name: 'AdminLogin',
+        component: AdminLogin
     },
     {
         path: '/login',
@@ -75,11 +85,11 @@ router.beforeEach((to, from, next) => {
         next({ name: 'Login' });
     } else if (requiresAdmin && !authStore.isAdmin) {
         // if trying to access admin page without being an admin, redirect to admin login
-        next({ name: 'HyperAdmin' });
+        next({ name: 'AdminLogin' });
     }
     else {
         next();
     }
 });
 
-export default router; 
+export default router;

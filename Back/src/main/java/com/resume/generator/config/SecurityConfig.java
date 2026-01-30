@@ -29,6 +29,10 @@ public class SecurityConfig {
                                                 "/api/auth/**",
                                                 "/api/templates/**", // <-- 请确保这一行存在
                                                 "/api/visits/**",
+                                                "/api/files/**",
+                                                "/api/payment/notify",
+                                                "/api/admin/check-init",
+                                                "/api/admin/init",
                                                 "/",
                                                 "/index.html",
                                                 "/assets/**",

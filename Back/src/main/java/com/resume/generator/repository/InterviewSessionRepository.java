@@ -11,4 +11,6 @@ public interface InterviewSessionRepository extends JpaRepository<InterviewSessi
     List<InterviewSession> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     InterviewSession findFirstByUserIdAndStatusOrderByCreatedAtDesc(Long userId, String status);
+
+    long countByCreatedAtAfter(java.time.LocalDateTime date);
 }

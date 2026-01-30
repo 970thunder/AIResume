@@ -12,4 +12,6 @@ public interface TemplateRepository extends JpaRepository<Template, Long> {
     List<Template> findByType(String type);
 
     List<Template> findByStatus(TemplateStatus status);
+
+    long countByStatus(TemplateStatus status);
 }
