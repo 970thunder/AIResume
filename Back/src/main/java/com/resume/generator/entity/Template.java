@@ -32,9 +32,9 @@ public class Template {
 
     private String previewImage;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id")
-    @JsonBackReference
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("templates")
     private User author;
 
     private Integer likes = 0;

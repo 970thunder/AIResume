@@ -33,7 +33,7 @@
                         <div class="meta-info">
                             <div class="meta-item">
                                 <span class="label">作者:</span>
-                                <span class="value">{{ template.author?.username || '未知' }}</span>
+                                <span class="value">{{ template.author ? template.author.username : '未知' }}</span>
                             </div>
                             <div class="meta-item">
                                 <span class="label">更新时间:</span>
@@ -179,9 +179,9 @@ onMounted(() => {
     min-height: 297mm;
     background: white;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    /* Scale down slightly to fit if needed, or keep 1:1 with scroll */
+    transform: scale(0.65);
     transform-origin: top center;
-    /* Let's try to fit it nicely or just show it naturally */
+    margin-bottom: -35%;
 }
 
 .info-card {
