@@ -107,4 +107,17 @@ public class AdminController {
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(adminService.getAllUsers());
     }
+
+    @PutMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+        return ResponseEntity.ok(adminService.updateUser(id, user));
+    }
+
+    @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        adminService.deleteUser(id);
+        return ResponseEntity.ok().build();
+    }
 }

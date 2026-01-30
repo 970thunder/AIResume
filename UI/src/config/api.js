@@ -70,6 +70,7 @@ export const API_URLS = {
         question: (id) => `${API_BASE_URL}/admin/questions/${id}`,
         generateQuestions: `${API_BASE_URL}/admin/questions/generate`,
         users: `${API_BASE_URL}/admin/users`,
+        user: (id) => `${API_BASE_URL}/admin/users/${id}`,
     }
 };
 

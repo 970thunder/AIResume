@@ -38,8 +38,8 @@
                                     <el-empty v-else description="预览加载中..." :image-size="60" />
                                 </div>
                                 <div class="preview-overlay">
-                                    <el-button type="primary" @click="useTemplate(template)">
-                                        立即使用
+                                    <el-button type="primary" @click="viewTemplateDetail(template)">
+                                        查看详情
                                     </el-button>
                                 </div>
                             </div>
@@ -52,7 +52,7 @@
                                     </el-tag>
                                 </div>
                                 <p class="description" :title="template.description">{{ template.description || '暂无描述'
-                                }}</p>
+                                    }}</p>
                             </div>
                         </el-card>
                     </el-col>
@@ -180,16 +180,8 @@ const filterTemplates = async (filter) => {
 };
 
 // 使用模板
-const useTemplate = (template) => {
-    if (template.type === 'free') {
-        router.push('/resume-generator');
-    } else {
-        ElNotification({
-            title: '提示',
-            message: '付费功能即将上线，敬请期待！',
-            type: 'info',
-        });
-    }
+const viewTemplateDetail = (template) => {
+    router.push(`/template/${template.id}`);
 };
 
 onMounted(() => {

@@ -8,5 +8,6 @@ public class TemplateCreateRequest {
     private String name;
     private String description;
     private String htmlContent;
+    private java.math.BigDecimal price;
 
 }

@@ -49,9 +49,16 @@ public class TemplateService {
         template.setHtmlContent(request.getHtmlContent());
         template.setAuthor(author);
 
-        // FIX: Set default values for required fields that were missed
-        template.setType("premium"); // Default type for user-submitted templates
-        template.setPrice(BigDecimal.ZERO); // Default price is 0
+        // Determine price and type
+        BigDecimal price = request.getPrice() != null ? request.getPrice() : BigDecimal.ZERO;
+        template.setPrice(price);
+        
+        if (price.compareTo(BigDecimal.ZERO) > 0) {
+            template.setType("premium");
+        } else {
+            template.setType("free");
+        }
+        
         template.setPreviewImage("default_preview.png"); // Placeholder for preview image
 
         // Status and likes have default values in the entity, no need to set here

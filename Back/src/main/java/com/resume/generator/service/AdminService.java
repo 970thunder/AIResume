@@ -174,4 +174,37 @@ public class AdminService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    @Transactional
+    public User updateUser(Long id, User updatedUser) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        // Update email
+        user.setEmail(updatedUser.getEmail());
+
+        // Update Roles if provided
+        if (updatedUser.getRoles() != null && !updatedUser.getRoles().isEmpty()) {
+            // In a real app, you'd fetch roles from RoleRepository to ensure they exist and
+            // are persistent
+            // Here assuming updatedUser.getRoles() contains valid role entities or at least
+            // names to look up
+            // For simplicity, let's look up roles by name or ID if passed
+            java.util.Set<Role> newRoles = new HashSet<>();
+            for (Role r : updatedUser.getRoles()) {
+                roleRepository.findByName(r.getName())
+                        .ifPresent(newRoles::add);
+            }
+            if (!newRoles.isEmpty()) {
+                user.setRoles(newRoles);
+            }
+        }
+
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        // Prevent deleting self or super admin if needed, but for now simple delete
+        userRepository.deleteById(id);
+    }
 }

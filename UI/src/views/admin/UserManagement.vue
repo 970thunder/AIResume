@@ -29,17 +29,48 @@
         </el-table-column>
       </el-table>
     </el-card>
+
+    <!-- Edit User Dialog -->
+    <el-dialog v-model="editDialogVisible" title="编辑用户" width="500px">
+      <el-form :model="editForm" label-width="80px">
+        <el-form-item label="用户名">
+          <el-input v-model="editForm.username" disabled />
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="editForm.email" />
+        </el-form-item>
+        <el-form-item label="角色">
+          <el-radio-group v-model="editForm.role">
+            <el-radio label="ROLE_USER">普通用户</el-radio>
+            <el-radio label="ROLE_ADMIN">管理员</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="editDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="saveUser">保存</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios';
 import { API_URLS, getHeaders } from '@/config/api';
 import { ElMessage, ElMessageBox } from 'element-plus';
 
 const users = ref([]);
 const loading = ref(false);
+const editDialogVisible = ref(false);
+const editForm = reactive({
+  id: null,
+  username: '',
+  email: '',
+  role: 'ROLE_USER'
+});
 
 onMounted(() => {
   fetchUsers();
@@ -58,7 +89,35 @@ const fetchUsers = async () => {
 };
 
 const handleEdit = (row) => {
-  ElMessage.info('编辑功能开发中');
+  editForm.id = row.id;
+  editForm.username = row.username;
+  editForm.email = row.email;
+  // Determine primary role
+  const roles = row.roles ? row.roles.map(r => r.name) : [];
+  if (roles.includes('ROLE_ADMIN')) {
+    editForm.role = 'ROLE_ADMIN';
+  } else {
+    editForm.role = 'ROLE_USER';
+  }
+  editDialogVisible.value = true;
+};
+
+const saveUser = async () => {
+  try {
+    // Map single role back to object structure expected by backend
+    const payload = {
+        id: editForm.id,
+        username: editForm.username,
+        email: editForm.email,
+        roles: [{ name: editForm.role }]
+    };
+    await axios.put(API_URLS.admin.user(editForm.id), payload, { headers: getHeaders() });
+    ElMessage.success('更新成功');
+    editDialogVisible.value = false;
+    fetchUsers();
+  } catch (error) {
+    ElMessage.error('更新失败');
+  }
 };
 
 const handleDelete = (row) => {
@@ -71,10 +130,13 @@ const handleDelete = (row) => {
       type: 'warning',
     }
   ).then(async () => {
-    // Add delete API call here when backend supports it
-    // await axios.delete(`${API_URLS.admin.users}/${row.id}`, { headers: getHeaders() });
-    ElMessage.success('删除成功');
-    fetchUsers();
+    try {
+      await axios.delete(API_URLS.admin.user(row.id), { headers: getHeaders() });
+      ElMessage.success('删除成功');
+      fetchUsers();
+    } catch (error) {
+      ElMessage.error('删除失败');
+    }
   }).catch(() => {});
 };
 </script>

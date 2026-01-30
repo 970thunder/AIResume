@@ -35,6 +35,7 @@
               :percentage="calculateAccuracy(scope.row)" 
               :status="getAccuracyStatus(scope.row)"
               :stroke-width="6"
+              :show-text="false"
             />
           </template>
         </el-table-column>

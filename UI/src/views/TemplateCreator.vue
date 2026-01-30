@@ -43,6 +43,13 @@
                 <el-input v-model="publishForm.description" type="textarea" :rows="3"
                     placeholder="简单描述下模板的特点和适用场景"></el-input>
             </el-form-item>
+            <el-form-item label="价格 (元)" required>
+                <el-input-number v-model="publishForm.price" :min="0" :precision="2" :step="1"
+                    placeholder="0.00"></el-input-number>
+                <div style="font-size: 12px; color: #909399; margin-top: 5px;">
+                    输入 0 表示免费模板
+                </div>
+            </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
@@ -57,7 +64,7 @@
 
 <script setup>
 import { ref, reactive, shallowRef, onMounted, onUnmounted, computed } from 'vue';
-import { ElButton, ElTag, ElDialog, ElForm, ElFormItem, ElInput, ElNotification } from 'element-plus';
+import { ElButton, ElTag, ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElNotification } from 'element-plus';
 
 // Debug check
 console.log('TemplateCreator loaded. computed type:', typeof computed);
@@ -146,7 +153,7 @@ const sampleData = {
 
 const publishDialogVisible = ref(false);
 const isPublishing = ref(false);
-const publishForm = reactive({ name: '', description: '' });
+const publishForm = reactive({ name: '', description: '', price: 0 });
 const authStore = useAuthStore(); // Initialize auth store
 
 // --- Zoom & Pan State ---
@@ -267,6 +274,7 @@ const clearPreview = () => {
 const promptPublishInfo = () => {
     publishForm.name = '';
     publishForm.description = '';
+    publishForm.price = 0;
     publishDialogVisible.value = true;
 };
 
