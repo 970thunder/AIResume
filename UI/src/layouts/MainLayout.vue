@@ -327,7 +327,7 @@ const handleCommand = (command) => {
 
 .content-area {
     padding: 0;
-    overflow: hidden;
+    overflow-y: auto;
     height: 100%;
     background: radial-gradient(circle at 50% 0%, #e0f2fe 0%, #f1f5f9 100%);
 }
