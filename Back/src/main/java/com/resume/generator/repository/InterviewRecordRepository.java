@@ -21,4 +21,7 @@ public interface InterviewRecordRepository extends JpaRepository<InterviewRecord
     
     @Query("SELECT r FROM InterviewRecord r WHERE r.user.id = :userId AND r.isCorrect = false ORDER BY r.createdAt DESC")
     List<InterviewRecord> findWrongAnswersByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT r.question.id, COUNT(r), SUM(CASE WHEN r.isCorrect = true THEN 1 ELSE 0 END) FROM InterviewRecord r GROUP BY r.question.id")
+    List<Object[]> getQuestionStatistics();
 }

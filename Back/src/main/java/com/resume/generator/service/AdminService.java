@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +28,10 @@ public class AdminService {
     private final TemplateRepository templateRepository;
     private final InterviewQuestionRepository questionRepository;
     private final InterviewSessionRepository sessionRepository;
+    private final InterviewRecordRepository recordRepository;
     private final PasswordEncoder passwordEncoder;
     private final AIAnalysisService aiAnalysisService;
-    
+
     public boolean isAdminInitialized() {
         return userRepository.existsByRoles_Name("ROLE_ADMIN");
     }
@@ -44,7 +46,7 @@ public class AdminService {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new RuntimeException("Username already exists");
         }
-        
+
         // Check if email already exists
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
@@ -81,7 +83,7 @@ public class AdminService {
     public void auditTemplate(Long templateId, boolean approved, String reason) {
         Template template = templateRepository.findById(templateId)
                 .orElseThrow(() -> new RuntimeException("Template not found"));
-        
+
         if (approved) {
             template.setStatus(TemplateStatus.APPROVED);
             template.setAuditComment(null); // Clear previous rejection reason if approved
@@ -94,7 +96,28 @@ public class AdminService {
 
     // Question Management
     public List<InterviewQuestion> getAllQuestions() {
-        return questionRepository.findAll();
+        List<InterviewQuestion> questions = questionRepository.findAll();
+        List<Object[]> stats = recordRepository.getQuestionStatistics();
+
+        Map<Long, Long[]> statsMap = new HashMap<>();
+        for (Object[] row : stats) {
+            Long qId = (Long) row[0];
+            Long total = ((Number) row[1]).longValue();
+            Long correct = row[2] == null ? 0L : ((Number) row[2]).longValue();
+            statsMap.put(qId, new Long[] { total, correct });
+        }
+
+        for (InterviewQuestion q : questions) {
+            if (statsMap.containsKey(q.getId())) {
+                Long[] s = statsMap.get(q.getId());
+                q.setTotalAttempts(s[0]);
+                q.setCorrectCount(s[1]);
+            } else {
+                q.setTotalAttempts(0L);
+                q.setCorrectCount(0L);
+            }
+        }
+        return questions;
     }
 
     @Transactional

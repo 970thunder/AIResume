@@ -19,6 +19,9 @@ const useAuthStore = defineStore('auth', {
     },
     actions: {
         async login(credentials) {
+            // Clear existing token first
+            this.logout();
+            
             const response = await axios.post(API_URLS.auth.login, credentials, {
                 headers: getHeaders()
             });

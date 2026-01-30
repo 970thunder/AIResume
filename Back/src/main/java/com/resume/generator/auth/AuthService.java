@@ -43,12 +43,15 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        // Try to find user by username or email
+        User user = userRepository.findByUsername(request.getUsername())
+                .or(() -> userRepository.findByEmail(request.getUsername()))
+                .orElseThrow(() -> new IllegalArgumentException("用户名或密码无效"));
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
+                        user.getUsername(), // Must use the actual username for authentication
                         request.getPassword()));
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("用户名或密码无效"));
 
         String jwtToken = jwtService.generateToken(user);
 

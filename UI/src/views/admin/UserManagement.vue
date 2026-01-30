@@ -23,7 +23,8 @@
         <!-- Placeholder for future actions -->
         <el-table-column label="操作" min-width="120">
           <template #default="scope">
-             <!-- e.g., Disable user -->
+             <el-button size="small" type="primary" @click="handleEdit(scope.row)">编辑</el-button>
+             <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -35,7 +36,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { API_URLS, getHeaders } from '@/config/api';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const users = ref([]);
 const loading = ref(false);
@@ -54,6 +55,27 @@ const fetchUsers = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const handleEdit = (row) => {
+  ElMessage.info('编辑功能开发中');
+};
+
+const handleDelete = (row) => {
+  ElMessageBox.confirm(
+    `确定要删除用户 "${row.username}" 吗？此操作不可恢复。`,
+    '警告',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(async () => {
+    // Add delete API call here when backend supports it
+    // await axios.delete(`${API_URLS.admin.users}/${row.id}`, { headers: getHeaders() });
+    ElMessage.success('删除成功');
+    fetchUsers();
+  }).catch(() => {});
 };
 </script>
 

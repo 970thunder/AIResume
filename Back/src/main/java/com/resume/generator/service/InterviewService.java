@@ -422,10 +422,15 @@ public class InterviewService {
 
         // Update Question Stats
         InterviewQuestion question = record.getQuestion();
-        question.setTotalAttempts(question.getTotalAttempts() + 1);
+        long newTotal = (question.getTotalAttempts() == null ? 0 : question.getTotalAttempts()) + 1;
+        long newCorrect = (question.getCorrectCount() == null ? 0 : question.getCorrectCount());
+
         if (isCorrect) {
-            question.setCorrectCount(question.getCorrectCount() + 1);
+            newCorrect += 1;
         }
+
+        question.setTotalAttempts(newTotal);
+        question.setCorrectCount(newCorrect);
         questionRepository.save(question);
 
         // Update Session Score
