@@ -190,7 +190,7 @@
               <el-tag effect="dark" class="category-tag">{{ currentQuestion.category || '综合' }}</el-tag>
               <el-tag :type="getDifficultyType(currentQuestion.difficulty)" effect="plain" class="ml-2">{{
                 currentQuestion.difficulty
-                }}</el-tag>
+              }}</el-tag>
             </div>
             <span class="question-index">第 {{ currentQuestionIndex + 1 }} / {{ totalQuestions }} 题</span>
           </div>
@@ -726,10 +726,9 @@ const formatAnalysis = (val) => {
 }
 
 .exit-btn-wrapper {
-  position: fixed;
-  top: 20px;
-  /* Adjust based on navbar height, assuming ~80px */
-  right: 20px;
+  position: absolute;
+  top: -60px;
+  right: 0;
   z-index: 100;
 }
 
