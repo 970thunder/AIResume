@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 一份简历，无限可能。
+
 本项目是一个功能强大、体验友好的全栈AI简历生成器，旨在帮助用户通过AI技术，快速、智能地创建专业、美观的个人简历。用户只需上传现有的简历文件，AI将自动提取关键信息并填充至在线编辑器中。随后，用户可以选择心仪的模板，通过所见即所得的编辑器进行二次创作，最终一键生成精美简历并下载为高清PDF。
 
 ## 📷 项目截图
@@ -69,7 +70,7 @@
 │   │   │   ├── repository  # 数据访问层
 │   │   │   └── service     # 业务逻辑层
 │   │   └── resources
-│   │       ├── application.yml # 核心配置文件
+│   │       ├── application.yml # 核心配置文件 (需从example复制)
 │   │       └── schema.sql      # 数据库初始化脚本
 │   └── pom.xml
 ├── UI/                   # 前端 Vue 项目
@@ -85,41 +86,7 @@
 └── README.md
 ```
 
-## ⚙️ 环境配置
-
-### 后端
-在 `Back/src/main/resources/application.yml` 文件中，你需要配置以下信息：
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/resume_generator?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: YOUR_DATABASE_USERNAME
-    password: YOUR_DATABASE_PASSWORD
-  jpa:
-    hibernate:
-      ddl-auto: update # 在开发环境中建议使用update，会自动同步表结构
-
-# DeepSeek API Key
-deepseek:
-  api-key: "YOUR_DEEPSEEK_API_KEY"
-```
-
-### 前端
-前端项目通过 Vite 的代理功能与后端进行通信，通常无需单独配置。请确保 `vite.config.js` 文件中的代理目标地址与你的后端服务地址一致。
-
-```javascript
-// UI/vite.config.js
-server: {
-  proxy: {
-    '/api': {
-      target: 'http://localhost:9090', // 确认此地址为你的后端地址
-      changeOrigin: true,
-    }
-  }
-}
-```
-
-## 🚀 快速开始
+## 🚀 快速开始 (Quick Start)
 
 请确保您的本地环境已安装以下软件：
 *   Java 21
@@ -127,80 +94,118 @@ server: {
 *   Node.js v18.x 或更高版本
 *   MySQL 8.x
 
-### 1. 数据库配置
-1.  在您的MySQL服务中创建一个新的数据库，例如 `resume_generator`。
-2.  **重要**: 建议将 `application.yml` 中的 `spring.jpa.hibernate.ddl-auto` 设置为 `update`。这将使程序启动时自动根据实体类更新表结构，无需手动执行SQL。
-3.  **如果需要手动初始化**: 请向 `templates` 表中插入模板数据。注意，`html_content` 字段需要包含完整的HTML代码。
-    ```sql
-    -- 由于html_content内容过长，此处仅为示例。请确保将真实的HTML模板内容插入。
-    INSERT INTO `templates` (`id`, `name`, `type`, `description`, `price`, `template_path`, `html_content`) VALUES
-    (1, '经典商务', 'free', '适合传统行业和商务场合', NULL, '/templates/classic.html', '<!DOCTYPE html>...'),
-    (2, '现代简约', 'free', '简洁现代，适合各种职位', NULL, '/templates/modern.html', '<!DOCTYPE html>...'),
-    (6, '学术研究', 'free', '适合学术界和研究人员', NULL, '/templates/academic.html', '<!DOCTYPE html>...');
-    ```
+### 1. 后端配置与启动 (Back)
 
-### 2. 后端启动
-1.  检查并完成 **环境配置** 部分的 `application.yml` 设置。
-2.  在项目根目录 `Back/` 下运行命令：
-    ```bash
-    mvn clean spring-boot:run
-    ```
-3.  后端服务将启动在 `http://localhost:9090`。
+#### 1.1 数据库准备
+在您的 MySQL 服务中创建一个新的数据库，例如 `resume_generator`。
+```sql
+CREATE DATABASE resume_generator CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
-### 3. 前端启动
-1.  进入前端项目目录： `cd UI`
-2.  安装项目依赖： `npm install`
-3.  启动开发服务器： `npm run dev`
-4.  前端服务将启动在 `http://localhost:5173` (或终端提示的其他端口)。在浏览器中打开该地址即可访问。
+#### 1.2 配置文件设置
+1.  进入后端资源目录：`Back/src/main/resources/`
+2.  **复制** `application.yml.example` 文件并重命名为 `application.yml`。
+3.  打开 `application.yml`，修改以下关键配置：
 
+```yaml
+spring:
+  datasource:
+    # 修改数据库地址、用户名和密码
+    url: jdbc:mysql://localhost:3306/resume_generator?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: YOUR_DB_USERNAME  # 例如 root
+    password: YOUR_DB_PASSWORD  # 例如 123456
+
+  mail:
+    # 邮箱服务配置 (用于发送验证码等)
+    host: smtp.qq.com
+    username: your_email@qq.com
+    password: your_smtp_password # 注意：通常是邮箱的授权码，而非登录密码
+
+deepseek:
+  # 配置 DeepSeek API Key (用于简历分析)
+  api-key: your_deepseek_api_key
+
+application:
+  security:
+    jwt:
+      # 设置一个安全的密钥字符串
+      secret-key: your_jwt_secret_key_change_this_to_something_secure
+```
+
+#### 1.3 启动后端
+在项目根目录 `Back/` 下运行 Maven 命令：
+```bash
+mvn clean spring-boot:run
+```
+或者在 IDE (如 IntelliJ IDEA) 中直接运行 `ResumeGeneratorApplication` 类。
+
+后端服务启动成功后，默认运行在 `http://localhost:9090`。
+
+### 2. 前端配置与启动 (UI)
+
+#### 2.1 安装依赖
+进入前端项目目录并安装依赖：
+```bash
+cd UI
+npm install
+```
+
+#### 2.2 启动开发服务器
+```bash
+npm run dev
+```
+
+前端服务将启动在 `http://localhost:5173` (或其他端口，视终端提示而定)。
+在浏览器中打开该地址即可访问应用。
+
+*注意：前端默认配置了代理 (`vite.config.js`) 将 `/api` 请求转发到 `http://localhost:9090`。如果您的后端端口不同，请同步修改 `vite.config.js`。*
 
 ## 📦 部署指南
 
-### 后端
-1.  在 `Back/` 目录下执行Maven打包命令：
+### 后端部署
+1.  在 `Back/` 目录下打包：
     ```bash
     mvn clean package -DskipTests
     ```
-2.  打包完成后，会在 `Back/target/` 目录下生成一个 `.jar` 文件（例如 `generator-0.0.1-SNAPSHOT.jar`）。
-3.  将此 `jar` 文件上传到您的服务器，并使用java命令运行它：
+2.  生成的 `.jar` 文件位于 `Back/target/` 目录。
+3.  服务器运行：
     ```bash
     java -jar generator-0.0.1-SNAPSHOT.jar
     ```
 
-### 前端
-1.  在 `UI/` 目录下执行打包命令：
+### 前端部署
+1.  在 `UI/` 目录下构建：
     ```bash
     npm run build
     ```
-2.  打包完成后，会在 `UI/` 目录下生成一个 `dist` 文件夹。
-3.  将 `dist` 文件夹内的所有内容部署到您的Web服务器（如 Nginx）的网站根目录。
-4.  **重要**: 配置Nginx反向代理，将所有 `/api` 的请求转发到您后端服务的地址。示例配置如下：
+2.  构建产物位于 `UI/dist/` 目录。
+3.  将 `dist` 目录部署到 Nginx 或其他 Web 服务器。
+4.  **Nginx 配置示例** (确保 `/api` 转发正确)：
     ```nginx
-    location /api/ {
-        proxy_pass http://localhost:9090/; # 后端服务地址
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    server {
+        listen 80;
+        server_name your_domain.com;
+
+        location / {
+            root /path/to/dist;
+            index index.html;
+            try_files $uri $uri/ /index.html; # 支持 Vue Router history 模式
+        }
+
+        location /api/ {
+            proxy_pass http://localhost:9090/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+        }
     }
     ```
 
-
-## 📝 API 接口
+## 📝 API 接口概览
 
 | 方法 | URL | 权限 | 描述 |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Public | 接收用户名、邮箱、密码进行注册 |
-| `POST` | `/api/auth/login` | Public | 接收用户名和密码，成功后返回JWT |
-| `GET` | `/api/templates` | Public | 获取所有可用模板的列表 |
-| `POST` | `/api/files/upload` | Authenticated | 上传简历文件，返回文件ID供后续分析 |
-| `POST` | `/api/resume/generate` | Authenticated | 基于文件ID和模板ID，由AI生成新简历 |
-| `GET` | `/api/resumes` | Authenticated | 获取当前认证用户的所有简历历史 |
-| `GET` | `/api/resume/{id}` | Authenticated | 获取单个简历的详细信息，用于编辑器加载 |
-| `PUT` | `/api/resume/{id}` | Authenticated | 接收简历完整JSON数据，保存修改 |
-| `PUT` | `/api/resume/{id}/title`| Authenticated | 仅修改指定简历的标题 |
-| `DELETE`| `/api/resume/{id}` | Authenticated | 删除指定的简历 |
-
-
-## 📄 开源许可证
-
-本项目采用 [MIT License](https://opensource.org/licenses/MIT) 开源许可证。
+| `POST` | `/api/auth/register` | Public | 用户注册 |
+| `POST` | `/api/auth/login` | Public | 用户登录 |
+| `POST` | `/api/files/upload` | Auth | 上传简历文件 |
+| `POST` | `/api/resume/generate` | Auth | AI生成简历 |
+| `GET` | `/api/resumes` | Auth | 获取简历列表 |
