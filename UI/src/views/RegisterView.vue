@@ -1,43 +1,101 @@
 <template>
     <div class="auth-container">
-        <form class="form">
-            <div class="title">创建账户<br><span>加入我们，开始您的简历之旅</span></div>
-            <el-form :model="registerForm" :rules="rules" ref="registerFormRef">
-                <el-form-item prop="username">
-                    <el-input v-model="registerForm.username" placeholder="请输入用户名" :prefix-icon="User" class="input" />
-                </el-form-item>
+        <!-- Background Animation Elements -->
+        <div class="circles">
+            <div class="circle circle-1"></div>
+            <div class="circle circle-2"></div>
+            <div class="circle circle-3"></div>
+        </div>
 
-                <el-form-item prop="email">
-                    <el-input v-model="registerForm.email" placeholder="请输入电子邮箱" :prefix-icon="Message" class="input" />
-                </el-form-item>
+        <div class="glass-card">
+            <div class="card-content">
+                <div class="title-section">
+                    <p class="sub-title">加入我们，开启智能简历之旅</p>
+                </div>
+                
+                <el-form :model="registerForm" :rules="rules" ref="registerFormRef" class="custom-form">
+                    <el-form-item prop="username">
+                        <div class="input-wrapper">
+                            <el-input 
+                                v-model="registerForm.username" 
+                                placeholder="用户名" 
+                                :prefix-icon="User" 
+                                class="custom-input" 
+                            />
+                        </div>
+                    </el-form-item>
 
-                <el-form-item prop="verificationCode" class="verification-group">
-                    <el-input v-model="registerForm.verificationCode" placeholder="请输入验证码" :prefix-icon="Key"
-                        class="input" />
-                    <el-button @click="sendVerificationCode" :loading="sending"
-                        :disabled="cooldown > 0 || !registerForm.email" class="verification-btn">
-                        {{ cooldown > 0 ? `${cooldown}秒` : '获取验证码' }}
-                    </el-button>
-                </el-form-item>
+                    <el-form-item prop="email">
+                        <div class="input-wrapper">
+                            <el-input 
+                                v-model="registerForm.email" 
+                                placeholder="电子邮箱" 
+                                :prefix-icon="Message" 
+                                class="custom-input" 
+                            />
+                        </div>
+                    </el-form-item>
 
-                <el-form-item prop="password">
-                    <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" :prefix-icon="Lock"
-                        show-password class="input" />
-                </el-form-item>
+                    <el-form-item prop="verificationCode" class="verification-group">
+                        <div class="verify-row">
+                            <div class="input-wrapper">
+                                <el-input 
+                                    v-model="registerForm.verificationCode" 
+                                    placeholder="验证码" 
+                                    :prefix-icon="Key"
+                                    class="custom-input" 
+                                />
+                            </div>
+                            <el-button 
+                                @click="sendVerificationCode" 
+                                :loading="sending"
+                                :disabled="cooldown > 0 || !registerForm.email" 
+                                class="verify-btn"
+                            >
+                                {{ cooldown > 0 ? `${cooldown}秒` : '获取验证码' }}
+                            </el-button>
+                        </div>
+                    </el-form-item>
 
-                <el-form-item prop="confirmPassword">
-                    <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码"
-                        :prefix-icon="Lock" show-password class="input" />
-                </el-form-item>
+                    <el-form-item prop="password">
+                        <div class="input-wrapper">
+                            <el-input 
+                                v-model="registerForm.password" 
+                                type="password" 
+                                placeholder="密码" 
+                                :prefix-icon="Lock"
+                                show-password 
+                                class="custom-input" 
+                            />
+                        </div>
+                    </el-form-item>
 
-                <el-button @click="handleRegister" :loading="loading" class="button-confirm">
-                    {{ loading ? '注册中...' : '注册 →' }}
-                </el-button>
-            </el-form>
-            <div class="switch-auth">
-                已有账户？ <router-link to="/login">返回登录</router-link>
+                    <el-form-item prop="confirmPassword">
+                        <div class="input-wrapper">
+                            <el-input 
+                                v-model="registerForm.confirmPassword" 
+                                type="password" 
+                                placeholder="确认密码"
+                                :prefix-icon="Lock" 
+                                show-password 
+                                class="custom-input" 
+                            />
+                        </div>
+                    </el-form-item>
+
+                    <div class="actions">
+                        <el-button @click="handleRegister" :loading="loading" class="register-btn">
+                            {{ loading ? '注册中...' : '注 册' }}
+                            <span class="btn-glow"></span>
+                        </el-button>
+                    </div>
+                </el-form>
+
+                <div class="footer">
+                    <p>已有账户？ <router-link to="/login" class="link">立即登录</router-link></p>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
 </template>
 
@@ -143,7 +201,6 @@ const sendVerificationCode = async () => {
         await registerFormRef.value.validateField('email');
         sending.value = true;
 
-        // 检查邮箱是否已注册
         const checkResponse = await axios.get(API_URLS.auth.checkEmail, {
             params: { email: registerForm.email },
             headers: getHeaders()
@@ -154,7 +211,6 @@ const sendVerificationCode = async () => {
             return;
         }
 
-        // 开始倒计时
         startCooldown();
 
         await axios.post(API_URLS.auth.sendVerificationCode, null, {
@@ -199,184 +255,276 @@ const handleRegister = async () => {
 </script>
 
 <style scoped>
+/* Container & Background - Shared with Login */
 .auth-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background-color: #f5f5f5;
-    padding: 0;
-    /* 移除内边距 */
+    background: #0f172a;
     overflow: hidden;
-    /* 隐藏溢出内容 */
+    font-family: 'Inter', sans-serif;
 }
 
-.form {
-    --input-focus: #2d8cf0;
-    --font-color: #060606;
-    --font-color-sub: #383838;
-    --bg-color: #fff;
-    --main-color: #09465d;
-    padding: 20px;
-    margin-top: -40px;
-    background: rgb(220, 244, 251);
+.circles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: float 20s infinite ease-in-out;
+}
+
+.circle-1 {
+    width: 500px;
+    height: 500px;
+    background: #4f46e5;
+    top: -100px;
+    right: -100px;
+    animation-delay: 0s;
+}
+
+.circle-2 {
+    width: 400px;
+    height: 400px;
+    background: #ec4899;
+    bottom: -50px;
+    left: -50px;
+    animation-delay: -5s;
+}
+
+.circle-3 {
+    width: 300px;
+    height: 300px;
+    background: #06b6d4;
+    top: 40%;
+    left: 40%;
+    animation-delay: -10s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+/* Glass Card */
+.glass-card {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 440px;
+    padding: 1.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: cardEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.title-section {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.main-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(to right, #fff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.sub-title {
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+/* Form Styling */
+.custom-form {
     display: flex;
     flex-direction: column;
+    gap: 1rem;
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+:deep(.verification-group .verify-row) {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 20px;
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    box-shadow: 4px 4px var(--main-color);
-    width: 330px;
-}
-
-.title {
-    color: var(--font-color);
-    font-weight: 900;
-    font-size: 20px;
-    margin-bottom: 25px;
-    text-align: center;
-}
-
-.title span {
-    color: var(--font-color-sub);
-    font-weight: 600;
-    font-size: 17px;
-    display: block;
-    margin-top: 8px;
-}
-
-:deep(.el-form) {
+    gap: 12px;
     width: 100%;
 }
 
-:deep(.el-form-item) {
-    margin-bottom: 15px;
-}
-
-:deep(.el-input__wrapper) {
-    width: 100%;
-    height: 40px;
-    border-radius: 5px !important;
-    border: 2px solid var(--main-color) !important;
-    background-color: var(--bg-color) !important;
-    box-shadow: 4px 4px var(--main-color) !important;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--font-color);
-    padding: 5px 10px;
-    outline: none;
-}
-
-:deep(.el-input__wrapper.is-focus) {
-    border: 2px solid var(--input-focus) !important;
-}
-
-.verification-group {
-    display: flex;
-    gap: 12px;
-}
-
-.verification-group :deep(.el-form-item__content) {
-    display: flex;
-    gap: 12px;
-}
-
-.verification-group :deep(.el-input) {
-    width: 60%;
-}
-
-.verification-btn {
-    height: 40px;
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    background-color: var(--bg-color);
-    box-shadow: 4px 4px var(--main-color);
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--font-color);
-    cursor: pointer;
-    white-space: nowrap;
-    min-width: 100px;
-    padding: 0 12px;
+:deep(.verification-group .verify-row .input-wrapper) {
     flex: 1;
 }
 
-.verification-btn:active {
-    box-shadow: 0px 0px var(--main-color);
-    transform: translate(3px, 3px);
+:deep(.custom-input .el-input__wrapper) {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+    border-radius: 12px;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+    height: 42px;
 }
 
-.login-with {
-    display: flex;
-    gap: 20px;
-    margin: 20px 0;
+:deep(.custom-input .el-input__wrapper:hover) {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(15, 23, 42, 0.8) !important;
 }
 
-.button-log {
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    border-radius: 100%;
-    border: 2px solid var(--main-color);
-    background-color: var(--bg-color);
-    box-shadow: 4px 4px var(--main-color);
-    color: var(--font-color);
-    font-size: 25px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+:deep(.custom-input .el-input__wrapper.is-focus) {
+    border-color: #6366f1 !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.5) !important;
 }
 
-.icon {
-    width: 24px;
-    height: 24px;
-    fill: var(--main-color);
+:deep(.custom-input .el-input__inner) {
+    color: #fff !important;
+    font-size: 1rem;
+    height: 100%;
 }
 
-.button-log:active {
-    box-shadow: 0px 0px var(--main-color);
-    transform: translate(3px, 3px);
+:deep(.custom-input .el-input__prefix) {
+    color: #94a3b8;
+    margin-right: 10px;
 }
 
-.button-confirm {
-    margin: 15px auto 0 auto;
-    width: 120px;
-    height: 40px;
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    background-color: var(--bg-color);
-    box-shadow: 4px 4px var(--main-color);
-    font-size: 17px;
+/* Verification Button */
+.verify-btn {
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
     font-weight: 600;
-    color: var(--font-color);
-    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 100px;
 }
 
-.button-confirm:active {
-    box-shadow: 0px 0px var(--main-color);
-    transform: translate(3px, 3px);
+.verify-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
-.switch-auth {
+.verify-btn:disabled {
+    background: rgba(255, 255, 255, 0.05);
+    color: #64748b;
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Register Button */
+.actions {
+    margin-top: 0.5rem;
+}
+
+.register-btn {
+    width: 100%;
+    height: 48px;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.register-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -10px rgba(79, 70, 229, 0.5);
+}
+
+.register-btn:active {
+    transform: translateY(1px);
+}
+
+.btn-glow {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.register-btn:hover .btn-glow {
+    left: 100%;
+    transition: 0.5s;
+}
+
+/* Footer */
+.footer {
     text-align: center;
-    margin-top: 15px;
-    color: var(--font-color-sub);
+    margin-top: 1.5rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
 }
 
-.switch-auth a {
-    color: var(--input-focus);
+.link {
+    color: #818cf8;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
+    transition: color 0.2s;
 }
 
-.switch-auth a:hover {
-    opacity: 0.8;
+.link:hover {
+    color: #a5b4fc;
+    text-decoration: underline;
+}
+
+/* Element Plus Overrides */
+:deep(.el-form-item) {
+    margin-bottom: 0;
 }
 
 :deep(.el-form-item__error) {
-    color: #ff4949;
-    font-weight: 500;
+    padding-top: 4px;
+    color: #f87171;
+    font-size: 0.85rem;
 }
 </style>

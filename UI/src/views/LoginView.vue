@@ -1,25 +1,59 @@
 <template>
     <div class="auth-container">
-        <form class="form">
-            <div class="title">欢迎回来<br><span>登录您的账户</span></div>
-            <el-form :model="loginForm" :rules="rules" ref="loginFormRef" @submit.prevent="handleLogin">
-                <el-form-item prop="username">
-                    <el-input v-model="loginForm.username" placeholder="用户名/邮箱" :prefix-icon="User"
-                        class="input"></el-input>
-                </el-form-item>
-                <el-form-item prop="password">
-                    <el-input v-model="loginForm.password" type="password" placeholder="密码" :prefix-icon="Lock"
-                        show-password class="input" style="margin-top: 2vh;"></el-input>
-                </el-form-item>
+        <!-- Background Animation Elements -->
+        <div class="circles">
+            <div class="circle circle-1"></div>
+            <div class="circle circle-2"></div>
+            <div class="circle circle-3"></div>
+        </div>
 
-                <el-button @click="handleLogin" :loading="loading" class="button-confirm">
-                    {{ loading ? '登录中...' : '登录 →' }}
-                </el-button>
-            </el-form>
-            <div class="switch-auth">
-                没有账户？ <router-link to="/register">立即注册</router-link>
+        <div class="glass-card">
+            <div class="card-content">
+                <div class="title-section">
+                    <h1 class="main-title">欢迎回来</h1>
+                    <p class="sub-title">登录您的 AI 简历账户</p>
+                </div>
+                
+                <el-form :model="loginForm" :rules="rules" ref="loginFormRef" @submit.prevent="handleLogin" class="custom-form">
+                    <el-form-item prop="username">
+                        <div class="input-wrapper">
+                            <el-input 
+                                v-model="loginForm.username" 
+                                placeholder="用户名 / 邮箱" 
+                                :prefix-icon="User"
+                                class="custom-input"
+                            />
+                            <div class="input-highlight"></div>
+                        </div>
+                    </el-form-item>
+                    
+                    <el-form-item prop="password">
+                        <div class="input-wrapper">
+                            <el-input 
+                                v-model="loginForm.password" 
+                                type="password" 
+                                placeholder="密码" 
+                                :prefix-icon="Lock"
+                                show-password 
+                                class="custom-input" 
+                            />
+                            <div class="input-highlight"></div>
+                        </div>
+                    </el-form-item>
+
+                    <div class="actions">
+                        <el-button @click="handleLogin" :loading="loading" class="login-btn">
+                            {{ loading ? '登录中...' : '登 录' }}
+                            <span class="btn-glow"></span>
+                        </el-button>
+                    </div>
+                </el-form>
+
+                <div class="footer">
+                    <p>还没有账户？ <router-link to="/register" class="link">立即注册</router-link></p>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
 </template>
 
@@ -58,17 +92,18 @@ const handleLogin = async () => {
                 const token = response.data.token;
                 const user = response.data.user;
 
-                // 存储token和用户信息
+                // Store token and user info
                 localStorage.setItem('token', token);
                 localStorage.setItem('user', JSON.stringify(user));
 
-                // 设置后续请求的Authorization header
+                // Set Authorization header for subsequent requests
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
                 ElNotification({
                     title: '成功',
-                    message: '登录成功，欢迎回来！',
-                    closeIcon: Loading
+                    message: '登录成功！',
+                    type: 'success',
+                    duration: 3000
                 });
                 router.push('/');
             } catch (error) {
@@ -86,167 +121,242 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
+/* Container & Background */
 .auth-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background-color: #f5f5f5;
+    background: #0f172a; /* Dark slate background */
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
 }
 
-.form {
-    --input-focus: #2d8cf0;
-    --font-color: #000000;
-    --font-color-sub: #394056;
-    --bg-color: #fff;
-    --main-color: #09465d;
-    padding: 20px;
-    background: rgb(220, 244, 251);
+/* Animated Background Circles */
+.circles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: float 20s infinite ease-in-out;
+}
+
+.circle-1 {
+    width: 500px;
+    height: 500px;
+    background: #4f46e5; /* Indigo */
+    top: -100px;
+    left: -100px;
+    animation-delay: 0s;
+}
+
+.circle-2 {
+    width: 400px;
+    height: 400px;
+    background: #ec4899; /* Pink */
+    bottom: -50px;
+    right: -50px;
+    animation-delay: -5s;
+}
+
+.circle-3 {
+    width: 300px;
+    height: 300px;
+    background: #06b6d4; /* Cyan */
+    bottom: 20%;
+    left: 20%;
+    animation-delay: -10s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+/* Glass Card */
+.glass-card {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 420px;
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: cardEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Content Styling */
+.title-section {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.main-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+    background: linear-gradient(to right, #fff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.sub-title {
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+/* Form Styling */
+.custom-form {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 20px;
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    box-shadow: 4px 4px var(--main-color);
-    min-width: 320px;
+    gap: 1.5rem;
 }
 
-.title {
-    color: var(--font-color);
-    font-weight: 900;
-    font-size: 20px;
-    margin-bottom: 25px;
+.input-wrapper {
+    position: relative;
+    width: 100%;
 }
 
-.title span {
-    color: var(--font-color-sub);
+:deep(.custom-input .el-input__wrapper) {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+    border-radius: 12px;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+    height: 50px;
+}
+
+:deep(.custom-input .el-input__wrapper:hover) {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(15, 23, 42, 0.8) !important;
+}
+
+:deep(.custom-input .el-input__wrapper.is-focus) {
+    border-color: #6366f1 !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.5) !important;
+}
+
+:deep(.custom-input .el-input__inner) {
+    color: #fff !important;
+    font-size: 1rem;
+    height: 100%;
+}
+
+:deep(.custom-input .el-input__prefix) {
+    color: #94a3b8;
+    margin-right: 10px;
+}
+
+/* Button Styling */
+.actions {
+    margin-top: 1rem;
+}
+
+.login-btn {
+    width: 100%;
+    height: 54px;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
     font-weight: 600;
-    font-size: 17px;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    z-index: 1;
 }
 
-:deep(.el-input__wrapper) {
-    width: 250px;
-    height: 40px;
-    border-radius: 5px !important;
-    border: 2px solid var(--main-color) !important;
-    background-color: var(--bg-color) !important;
-    box-shadow: 4px 4px var(--main-color) !important;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--font-color);
-    padding: 5px 10px;
-    outline: none;
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -10px rgba(79, 70, 229, 0.5);
 }
 
-:deep(.el-input__wrapper.is-focus) {
-    border: 2px solid var(--input-focus) !important;
+.login-btn:active {
+    transform: translateY(1px);
 }
 
-.login-with {
-    display: flex;
-    gap: 20px;
-    margin: 20px 0;
+.btn-glow {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
 }
 
-.button-log {
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    border-radius: 100%;
-    border: 2px solid var(--main-color);
-    background-color: var(--bg-color);
-    box-shadow: 4px 4px var(--main-color);
-    color: var(--font-color);
-    font-size: 25px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.login-btn:hover .btn-glow {
+    left: 100%;
+    transition: 0.5s;
 }
 
-.icon {
-    width: 24px;
-    height: 24px;
-    fill: var(--main-color);
-}
-
-.button-log:active {
-    box-shadow: 0px 0px var(--main-color);
-    transform: translate(3px, 3px);
-}
-
-.button-confirm {
-    margin: 20px auto 0 auto;
-    width: 120px;
-    height: 40px;
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    background-color: var(--bg-color);
-    box-shadow: 4px 4px var(--main-color);
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--font-color);
-    cursor: pointer;
-}
-
-.button-confirm:active {
-    box-shadow: 0px 0px var(--main-color);
-    transform: translate(3px, 3px);
-}
-
-.switch-auth {
+/* Footer Styling */
+.footer {
     text-align: center;
-    margin-top: 16px;
-    color: var(--font-color-sub);
+    margin-top: 2rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
 }
 
-.switch-auth a {
-    color: var(--input-focus);
+.link {
+    color: #818cf8;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
+    transition: color 0.2s;
 }
 
-.switch-auth a:hover {
-    opacity: 0.8;
+.link:hover {
+    color: #a5b4fc;
+    text-decoration: underline;
 }
 
+/* Element Plus Overrides */
 :deep(.el-form-item) {
     margin-bottom: 0;
 }
 
 :deep(.el-form-item__error) {
-    color: #ff4949;
-    font-weight: 500;
-}
-
-/* 添加全局样式 */
-:deep(.custom-notification) {
-    background: rgb(220, 244, 251);
-    border: 2px solid var(--main-color);
-    box-shadow: 4px 4px var(--main-color);
-    padding: 10px 15px;
-}
-
-:deep(.custom-notification .el-notification__icon) {
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
-    margin-right: 10px;
-}
-
-:deep(.custom-notification .el-notification__title) {
-    color: var(--font-color);
-    font-weight: 600;
-}
-
-:deep(.custom-notification .el-notification__content) {
-    color: var(--font-color-sub);
-}
-
-:deep(.loader) {
-    width: 24px;
-    height: 24px;
-    margin-right: 10px;
+    padding-top: 6px;
+    color: #f87171;
+    font-size: 0.85rem;
 }
 </style>
