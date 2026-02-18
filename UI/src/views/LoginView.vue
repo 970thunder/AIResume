@@ -13,30 +13,21 @@
                     <h1 class="main-title">欢迎回来</h1>
                     <p class="sub-title">登录您的 AI 简历账户</p>
                 </div>
-                
-                <el-form :model="loginForm" :rules="rules" ref="loginFormRef" @submit.prevent="handleLogin" class="custom-form">
+
+                <el-form :model="loginForm" :rules="rules" ref="loginFormRef" @submit.prevent="handleLogin"
+                    class="custom-form">
                     <el-form-item prop="username">
                         <div class="input-wrapper">
-                            <el-input 
-                                v-model="loginForm.username" 
-                                placeholder="用户名 / 邮箱" 
-                                :prefix-icon="User"
-                                class="custom-input"
-                            />
+                            <el-input v-model="loginForm.username" placeholder="用户名 / 邮箱" :prefix-icon="User"
+                                class="custom-input" />
                             <div class="input-highlight"></div>
                         </div>
                     </el-form-item>
-                    
+
                     <el-form-item prop="password">
                         <div class="input-wrapper">
-                            <el-input 
-                                v-model="loginForm.password" 
-                                type="password" 
-                                placeholder="密码" 
-                                :prefix-icon="Lock"
-                                show-password 
-                                class="custom-input" 
-                            />
+                            <el-input v-model="loginForm.password" type="password" placeholder="密码" :prefix-icon="Lock"
+                                show-password class="custom-input" />
                             <div class="input-highlight"></div>
                         </div>
                     </el-form-item>
@@ -129,7 +120,8 @@ const handleLogin = async () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #0f172a; /* Dark slate background */
+    background: #0f172a;
+    /* Dark slate background */
     overflow: hidden;
     font-family: 'Inter', sans-serif;
 }
@@ -156,7 +148,8 @@ const handleLogin = async () => {
 .circle-1 {
     width: 500px;
     height: 500px;
-    background: #4f46e5; /* Indigo */
+    background: #4f46e5;
+    /* Indigo */
     top: -100px;
     left: -100px;
     animation-delay: 0s;
@@ -165,7 +158,8 @@ const handleLogin = async () => {
 .circle-2 {
     width: 400px;
     height: 400px;
-    background: #ec4899; /* Pink */
+    background: #ec4899;
+    /* Pink */
     bottom: -50px;
     right: -50px;
     animation-delay: -5s;
@@ -174,16 +168,27 @@ const handleLogin = async () => {
 .circle-3 {
     width: 300px;
     height: 300px;
-    background: #06b6d4; /* Cyan */
+    background: #06b6d4;
+    /* Cyan */
     bottom: 20%;
     left: 20%;
     animation-delay: -10s;
 }
 
 @keyframes float {
-    0%, 100% { transform: translate(0, 0); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
 }
 
 /* Glass Card */
@@ -207,6 +212,7 @@ const handleLogin = async () => {
         opacity: 0;
         transform: translateY(30px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -315,12 +321,10 @@ const handleLogin = async () => {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.2),
-        transparent
-    );
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent);
     transition: 0.5s;
 }
 

@@ -630,30 +630,27 @@ const generateAndPreview = async () => {
 
 <style scoped>
 .pixel-generator {
-    --main-color: #09465d;
-    --bg-color: #fff;
-    --font-color: #060606;
-    --font-color-sub: #383838;
-    --input-focus: #2d8cf0;
-    --card-bg: rgb(220, 244, 251);
-    --success-color: #67c23a;
+    --main-color: #0ea5e9;
+    --bg-color: rgba(13, 22, 36, 0.72);
+    --font-color: #e6edf3;
+    --font-color-sub: #b6c2cf;
+    --input-focus: #22d3ee;
+    --card-bg: rgba(255, 255, 255, 0.08);
+    --success-color: #22c55e;
 
     height: 100%;
-    background: radial-gradient(circle at 50% 0%, #e0f2fe 0%, #f1f5f9 100%);
-    padding: 10px;
+    background: radial-gradient(1200px 600px at 20% -20%, #0b1220 40%, #0f172a 100%);
+    padding: 16px;
     position: relative;
     overflow-y: auto;
     overflow-x: hidden;
     box-sizing: border-box;
     scrollbar-width: none;
-    /* Firefox */
     -ms-overflow-style: none;
-    /* IE 10+ */
 }
 
 .pixel-generator::-webkit-scrollbar {
     display: none;
-    /* Chrome/Safari */
 }
 
 /* 像素化背景装饰 */
@@ -663,15 +660,25 @@ const generateAndPreview = async () => {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image:
-        radial-gradient(circle at 15% 25%, var(--main-color) 2px, transparent 2px),
-        radial-gradient(circle at 85% 15%, var(--input-focus) 1px, transparent 1px),
-        radial-gradient(circle at 70% 75%, var(--main-color) 1px, transparent 1px),
-        radial-gradient(circle at 30% 85%, var(--input-focus) 1.5px, transparent 1.5px);
-    background-size: 120px 120px, 180px 180px, 100px 100px, 140px 140px;
-    opacity: 0.08;
+    background:
+        radial-gradient(700px 300px at 10% 20%, rgba(14, 165, 233, 0.25), transparent 70%),
+        radial-gradient(600px 280px at 80% 10%, rgba(34, 211, 238, 0.22), transparent 70%),
+        radial-gradient(650px 320px at 50% 80%, rgba(56, 189, 248, 0.18), transparent 75%);
+    filter: blur(40px);
+    opacity: 0.6;
     pointer-events: none;
     z-index: 0;
+    animation: aurora 18s infinite alternate ease-in-out;
+}
+
+@keyframes aurora {
+    0% {
+        transform: translateY(-10px) scale(1);
+    }
+
+    100% {
+        transform: translateY(10px) scale(1.05);
+    }
 }
 
 .pixel-header {
@@ -682,14 +689,13 @@ const generateAndPreview = async () => {
 }
 
 .pixel-main-title {
-    font-size: 2em;
-    color: var(--main-color);
+    font-size: 2.2em;
     font-weight: 900;
-    margin: 0 0 5px 0;
-    text-shadow:
-        2px 2px 0 #fff,
-        4px 4px 0 rgba(9, 70, 93, 0.3);
-    letter-spacing: -1px;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+    background: linear-gradient(120deg, #0ea5e9, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .pixel-header-subtitle {
@@ -703,10 +709,11 @@ const generateAndPreview = async () => {
     max-width: 1200px;
     margin: 0 auto;
     background: var(--card-bg);
-    border: 2px solid var(--main-color);
-    border-radius: 12px;
-    box-shadow: 6px 6px 0 var(--main-color);
-    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(16px);
+    padding: 16px;
     position: relative;
     z-index: 1;
 }
@@ -729,33 +736,33 @@ const generateAndPreview = async () => {
 }
 
 .step-number {
-    width: 32px;
-    height: 32px;
-    border: 2px solid var(--font-color-sub);
-    background: var(--bg-color);
-    border-radius: 4px;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(34, 211, 238, 0.2));
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
     font-size: 14px;
-    color: var(--font-color-sub);
-    box-shadow: 2px 2px 0 rgba(9, 70, 93, 0.2);
+    color: var(--font-color);
+    box-shadow: 0 8px 18px rgba(14, 165, 233, 0.15);
     transition: all 0.3s ease;
 }
 
 .step-item.active .step-number {
-    border-color: var(--input-focus);
-    background: var(--input-focus);
-    color: white;
-    box-shadow: 2px 2px 0 rgba(45, 140, 240, 0.3);
+    border-color: rgba(34, 211, 238, 0.6);
+    background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+    color: #0b1220;
+    box-shadow: 0 12px 24px rgba(34, 211, 238, 0.35);
 }
 
 .step-item.completed .step-number {
-    border-color: var(--success-color);
-    background: var(--success-color);
-    color: white;
-    box-shadow: 2px 2px 0 rgba(103, 194, 58, 0.3);
+    border-color: rgba(34, 197, 94, 0.6);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #0b1220;
+    box-shadow: 0 12px 24px rgba(34, 197, 94, 0.35);
 }
 
 .step-label {
@@ -774,19 +781,19 @@ const generateAndPreview = async () => {
 }
 
 .step-connector {
-    width: 60px;
+    width: 64px;
     height: 4px;
-    background: var(--font-color-sub);
-    opacity: 0.3;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(14, 165, 233, 0.25));
+    opacity: 0.6;
     margin: 0 10px;
     border-radius: 2px;
     transition: all 0.3s ease;
 }
 
 .step-connector.active {
-    background: var(--input-focus);
+    background: linear-gradient(90deg, #0ea5e9, #22d3ee);
     opacity: 1;
-    box-shadow: 0 2px 4px rgba(45, 140, 240, 0.3);
+    box-shadow: 0 6px 16px rgba(34, 211, 238, 0.35);
 }
 
 .pixel-step-content {
@@ -796,10 +803,11 @@ const generateAndPreview = async () => {
 
 .pixel-content-card {
     background: var(--bg-color);
-    border: 2px solid var(--main-color);
-    border-radius: 8px;
-    box-shadow: 4px 4px 0 var(--main-color);
-    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(12px);
+    padding: 24px;
     max-width: 800px;
     width: 100%;
     text-align: center;
@@ -810,10 +818,12 @@ const generateAndPreview = async () => {
 }
 
 .pixel-step-title {
-    font-size: 1.5em;
-    color: var(--main-color);
-    font-weight: 700;
+    font-size: 1.6em;
+    font-weight: 800;
     margin: 0 0 10px 0;
+    background: linear-gradient(120deg, #0ea5e9, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .pixel-subtitle {
@@ -829,19 +839,20 @@ const generateAndPreview = async () => {
 }
 
 :deep(.pixel-upload .el-upload-dragger) {
-    border: 3px dashed var(--main-color) !important;
-    border-radius: 8px !important;
-    background: var(--bg-color) !important;
-    box-shadow: 4px 4px 0 rgba(9, 70, 93, 0.2) !important;
+    border: 1px dashed rgba(255, 255, 255, 0.22) !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35) !important;
     transition: all 0.3s ease !important;
     padding: 30px !important;
+    backdrop-filter: blur(10px) !important;
 }
 
 :deep(.pixel-upload .el-upload-dragger:hover) {
-    border-color: var(--input-focus) !important;
-    background: rgba(220, 244, 251, 0.5) !important;
-    transform: translate(-2px, -2px) !important;
-    box-shadow: 6px 6px 0 rgba(9, 70, 93, 0.3) !important;
+    border-color: rgba(34, 211, 238, 0.6) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 18px 48px rgba(34, 211, 238, 0.25) !important;
 }
 
 .upload-content {
@@ -853,7 +864,8 @@ const generateAndPreview = async () => {
 
 .upload-icon {
     font-size: 3em;
-    opacity: 0.7;
+    opacity: 0.85;
+    color: var(--input-focus);
 }
 
 .upload-text .primary-text {
@@ -875,12 +887,13 @@ const generateAndPreview = async () => {
 
 /* 文件列表 */
 .pixel-file-list {
-    background: rgba(220, 244, 251, 0.5);
-    border: 2px solid rgba(9, 70, 93, 0.2);
-    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
     padding: 20px;
     margin: 30px 0;
     text-align: left;
+    backdrop-filter: blur(10px);
 }
 
 .file-list-title {
@@ -900,13 +913,14 @@ const generateAndPreview = async () => {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: var(--bg-color);
-    border: 2px solid var(--main-color);
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
     padding: 8px 12px;
-    box-shadow: 2px 2px 0 var(--main-color);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
     font-weight: 600;
     color: var(--font-color);
+    backdrop-filter: blur(8px);
 }
 
 .file-icon {
@@ -926,35 +940,36 @@ const generateAndPreview = async () => {
 }
 
 .pixel-template-card {
-    background: var(--bg-color);
-    border: 2px solid var(--main-color);
-    border-radius: 8px;
-    box-shadow: 4px 4px 0 var(--main-color);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
     cursor: pointer;
     transition: all 0.3s ease;
     overflow: hidden;
+    backdrop-filter: blur(12px);
 }
 
 .pixel-template-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 var(--main-color);
+    transform: translateY(-4px);
+    box-shadow: 0 28px 70px rgba(14, 165, 233, 0.25);
 }
 
 .pixel-template-card.selected {
-    border-color: var(--input-focus);
-    box-shadow: 4px 4px 0 var(--input-focus);
+    border-color: rgba(34, 211, 238, 0.6);
+    box-shadow: 0 28px 70px rgba(34, 211, 238, 0.25);
 }
 
 .pixel-template-card.selected:hover {
-    box-shadow: 6px 6px 0 var(--input-focus);
+    box-shadow: 0 36px 90px rgba(34, 211, 238, 0.35);
 }
 
 .template-preview-container {
     position: relative;
     height: 200px;
     overflow: hidden;
-    background: #f9f9f9;
-    border-bottom: 2px solid var(--main-color);
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .template-preview-wrapper {
@@ -974,7 +989,7 @@ const generateAndPreview = async () => {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(45, 140, 240, 0.1);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(34, 211, 238, 0.25));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -989,16 +1004,16 @@ const generateAndPreview = async () => {
 .select-indicator {
     width: 50px;
     height: 50px;
-    background: var(--input-focus);
-    border: 3px solid white;
+    background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+    border: 3px solid rgba(255, 255, 255, 0.8);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #0b1220;
     font-size: 24px;
     font-weight: bold;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 12px 28px rgba(14, 165, 233, 0.35);
 }
 
 .template-info {
@@ -1009,7 +1024,7 @@ const generateAndPreview = async () => {
 .template-name {
     font-weight: 700;
     font-size: 1.1em;
-    color: var(--main-color);
+    color: var(--font-color);
     margin-bottom: 8px;
 }
 
@@ -1048,13 +1063,14 @@ const generateAndPreview = async () => {
 
 /* 预览容器 */
 .pixel-preview-container {
-    background: #f9f9f9;
-    border: 2px solid var(--main-color);
-    border-radius: 6px;
-    padding: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 24px;
     margin: 30px 0;
     overflow: auto;
     max-height: 600px;
+    backdrop-filter: blur(10px);
 }
 
 .final-resume-container {
@@ -1084,65 +1100,68 @@ const generateAndPreview = async () => {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 20px;
-    border: 2px solid var(--main-color);
-    border-radius: 6px;
+    padding: 12px 22px;
+    border: 0;
+    border-radius: 12px;
     font-weight: 700;
     font-size: 15px;
     cursor: pointer;
-    transition: all 0.1s ease;
+    transition: all 0.3s ease;
     text-decoration: none;
-    background: var(--bg-color);
-    color: var(--main-color);
-    box-shadow: 4px 4px 0 var(--main-color);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06));
+    color: var(--font-color);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
     min-width: 140px;
+    position: relative;
+    overflow: hidden;
 }
 
 .pixel-btn.primary {
-    background: var(--main-color);
-    color: white;
+    background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+    color: #0b1220;
+    box-shadow: 0 18px 44px rgba(14, 165, 233, 0.45);
 }
 
 .pixel-btn.secondary {
-    background: var(--bg-color);
-    color: var(--main-color);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06));
+    color: var(--font-color);
 }
 
 .pixel-btn.success {
-    background: var(--success-color);
-    color: white;
-    border-color: var(--success-color);
-    box-shadow: 4px 4px 0 var(--success-color);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #0b1220;
+    box-shadow: 0 18px 44px rgba(34, 197, 94, 0.45);
 }
 
 .pixel-btn:hover:not(:disabled) {
-    transform: translate(1px, 1px);
+    transform: translateY(-2px);
+    box-shadow: 0 24px 60px rgba(14, 165, 233, 0.35);
 }
 
-.pixel-btn.primary:hover:not(:disabled) {
-    box-shadow: 3px 3px 0 var(--main-color);
+.pixel-btn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transition: 0.5s;
 }
 
-.pixel-btn.secondary:hover:not(:disabled) {
-    box-shadow: 3px 3px 0 var(--main-color);
-}
-
-.pixel-btn.success:hover:not(:disabled) {
-    box-shadow: 3px 3px 0 var(--success-color);
+.pixel-btn:hover::after {
+    left: 120%;
 }
 
 .pixel-btn:active:not(:disabled) {
-    transform: translate(4px, 4px);
-    box-shadow: 0 0 0;
+    transform: translateY(1px);
 }
 
 .pixel-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: #ccc;
-    border-color: #999;
-    color: #666;
-    box-shadow: 4px 4px 0 #999;
+    background: #7a7b7d;
+    color: #202225;
 }
 
 .btn-icon {
@@ -1220,7 +1239,7 @@ const generateAndPreview = async () => {
 
 /* Loading 样式覆盖 */
 :deep(.el-loading-spinner .el-loading-text) {
-    color: var(--main-color) !important;
+    color: var(--font-color) !important;
     font-size: 16px !important;
     font-weight: 600 !important;
     margin-top: 10px !important;

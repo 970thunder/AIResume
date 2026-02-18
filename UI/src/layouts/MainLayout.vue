@@ -4,7 +4,7 @@
             <div class="sidebar-header">
                 <div v-if="!isCollapsed" class="logo-container">
                     <div class="logo-wrapper">
-                        <GradientText :colors="['#3b82f6', '#06b6d4', '#0ea5e9', '#3b82f6']" :animationSpeed="6"
+                        <GradientText :colors="['#0ea5e9', '#22d3ee', '#38bdf8', '#0ea5e9']" :animationSpeed="6"
                             :showBorder="false" customClass="app-title">
                             Hyper 简生
                         </GradientText>
@@ -85,7 +85,7 @@
                 <div class="user-info">
                     <el-dropdown @command="handleCommand">
                         <span class="el-dropdown-link">
-                            <el-avatar :size="32" class="user-avatar" :style="{ backgroundColor: '#3b82f6' }">
+                            <el-avatar :size="32" class="user-avatar" :style="{ backgroundColor: '#0ea5e9' }">
                                 {{ authStore.user?.username?.charAt(0)?.toUpperCase() || 'U' }}
                             </el-avatar>
                             <span class="username">欢迎, {{ authStore.user?.username }}</span>
@@ -143,19 +143,20 @@ const handleCommand = (command) => {
 <style scoped>
 .main-layout {
     height: 100vh;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    background-color: #f3f4f6;
+    font-family: 'Plus Jakarta Sans', 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    background: radial-gradient(1200px 600px at 20% -20%, #0b1220 40%, #0f172a 100%);
 }
 
 .sidebar {
-    background-color: #ffffff;
-    border-right: 1px solid #e5e7eb;
+    background: var(--card);
+    border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     transition: width 0.3s ease;
     z-index: 10;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
     overflow-x: hidden;
+    backdrop-filter: blur(14px);
 }
 
 .sidebar-header {
@@ -163,7 +164,7 @@ const handleCommand = (command) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--border);
 }
 
 .logo-container {
@@ -174,7 +175,7 @@ const handleCommand = (command) => {
 
 .app-title {
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: -0.5px;
 }
 
@@ -197,27 +198,43 @@ const handleCommand = (command) => {
     background-color: transparent;
 }
 
+:deep(.el-menu) {
+    background: transparent;
+    border-right: none;
+}
+
 :deep(.el-menu-item) {
-    border-radius: 8px;
-    margin-bottom: 4px;
+    border-radius: 12px;
+    margin-bottom: 6px;
     height: 48px;
     line-height: 48px;
-    color: #4b5563;
+    color: #e2e8f0 !important;
+    /* Force light color for visibility */
+    transition: all 0.3s ease;
+    background: transparent;
 }
 
 :deep(.el-menu-item.is-active) {
-    background-color: #eff6ff;
-    color: #3b82f6;
-    font-weight: 600;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(34, 211, 238, 0.15));
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+    border: 1px solid rgba(14, 165, 233, 0.3);
 }
 
 :deep(.el-menu-item:hover) {
-    background-color: #f9fafb;
-    color: #111827;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff !important;
 }
 
-:deep(.el-menu-item.is-active:hover) {
-    background-color: #eff6ff;
+:deep(.el-menu-item .el-icon) {
+    color: #cbd5e1 !important;
+    /* Light grey icon */
+}
+
+:deep(.el-menu-item.is-active .el-icon) {
+    color: #38bdf8 !important;
+    /* Active icon blue */
 }
 
 :deep(.el-icon) {
@@ -226,7 +243,7 @@ const handleCommand = (command) => {
 
 .sidebar-footer {
     padding: 16px;
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -250,14 +267,14 @@ const handleCommand = (command) => {
 }
 
 .beian-info a {
-    color: #9ca3af;
+    color: var(--muted);
     text-decoration: none;
     font-size: 12px;
     transition: color 0.2s;
 }
 
 .beian-info a:hover {
-    color: #6b7280;
+    color: var(--fg);
 }
 
 .sidebar-toggle {
@@ -267,14 +284,14 @@ const handleCommand = (command) => {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #6b7280;
-    border-radius: 6px;
+    color: var(--muted);
+    border-radius: 8px;
     transition: all 0.2s;
 }
 
 .sidebar-toggle:hover {
-    background-color: #f3f4f6;
-    color: #374151;
+    background-color: rgba(255, 255, 255, 0.06);
+    color: var(--fg);
 }
 
 .content-container {
@@ -289,8 +306,8 @@ const handleCommand = (command) => {
 .main-header {
     height: 64px !important;
     width: 100% !important;
-    background-color: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
     padding: 0 24px;
     display: flex !important;
     justify-content: flex-end !important;
@@ -298,6 +315,8 @@ const handleCommand = (command) => {
     box-sizing: border-box;
     flex-shrink: 0;
     flex-direction: row !important;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
 }
 
 .user-info {
@@ -312,13 +331,13 @@ const handleCommand = (command) => {
     align-items: center;
     gap: 8px;
     cursor: pointer;
-    color: #374151;
-    font-weight: 500;
+    color: var(--fg);
+    font-weight: 600;
 }
 
 .user-avatar {
-    font-weight: 600;
-    color: #ffffff;
+    font-weight: 700;
+    color: #0b1220;
 }
 
 .username {
@@ -329,7 +348,7 @@ const handleCommand = (command) => {
     padding: 0;
     overflow-y: auto;
     height: 100%;
-    background: radial-gradient(circle at 50% 0%, #e0f2fe 0%, #f1f5f9 100%);
+    background: transparent;
 }
 
 @media (max-width: 768px) {
