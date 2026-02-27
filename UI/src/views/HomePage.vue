@@ -105,15 +105,6 @@
                     <h3>模拟面试</h3>
                     <p>基于简历生成面试题，提前演练</p>
                 </div>
-                <div class="feature-item">
-                    <div class="feature-icon-box">
-                        <el-icon>
-                            <Download />
-                        </el-icon>
-                    </div>
-                    <h3>多端导出</h3>
-                    <p>支持 PDF/PNG/Markdown 多种格式</p>
-                </div>
             </div>
         </section>
 
@@ -195,6 +186,8 @@ h3,
 h4 {
     margin: 0;
     line-height: 1.2;
+    color: #ffffff;
+    /* Force white for all headings */
 }
 
 /* Hero Section */
@@ -206,6 +199,8 @@ h4 {
     padding: 0 8%;
     position: relative;
     overflow: hidden;
+    color: #ffffff;
+    /* Default text color for hero */
 }
 
 .hero-content {
@@ -225,15 +220,16 @@ h4 {
     border-radius: 20px;
     margin-bottom: 24px;
     font-size: 13px;
-    color: var(--accent);
+    color: #38bdf8;
+    /* Light blue instead of accent variable */
 }
 
 .badge-dot {
     width: 6px;
     height: 6px;
-    background: var(--accent);
+    background: #38bdf8;
     border-radius: 50%;
-    box-shadow: 0 0 8px var(--accent);
+    box-shadow: 0 0 8px #38bdf8;
 }
 
 .hero-title {
@@ -245,14 +241,16 @@ h4 {
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%);
+    background: linear-gradient(135deg, #38bdf8 0%, #a5f3fc 100%);
+    /* Brighter gradient */
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .hero-subtitle {
     font-size: 1.1rem;
-    color: var(--muted);
+    color: #cbd5e1;
+    /* Light grey instead of muted variable */
     margin-bottom: 40px;
     line-height: 1.6;
 }
@@ -280,7 +278,7 @@ h4 {
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: #38bdf8;
     color: #000;
     box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
 }
@@ -477,19 +475,22 @@ h4 {
 /* Features Section */
 .features-section {
     padding: 100px 8%;
-    background: rgba(0, 0, 0, 0.2);
+    background: transparent;
+    /* Remove dark overlay if it clashes */
     text-align: center;
 }
 
 .section-header h2 {
     font-size: 2.5rem;
-    color: #ffffff;
+    color: #ffffff !important;
     margin-bottom: 16px;
 }
 
 .section-header p {
-    color: var(--muted);
+    color: #cbd5e1 !important;
+    /* Light grey */
     margin-bottom: 60px;
+    font-size: 1.1rem;
 }
 
 .feature-strip {
@@ -499,39 +500,44 @@ h4 {
 }
 
 .feature-item {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.05);
+    /* Slightly lighter background */
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 32px;
     border-radius: 16px;
     transition: all 0.3s ease;
 }
 
 .feature-item:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.1);
     transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .feature-icon-box {
     width: 56px;
     height: 56px;
-    background: rgba(14, 165, 233, 0.1);
+    background: rgba(56, 189, 248, 0.15);
+    /* Brighter blue bg */
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    color: var(--accent);
+    color: #38bdf8;
+    /* Brighter blue icon */
     margin: 0 auto 20px;
 }
 
 .feature-item h3 {
-    color: #ffffff;
+    color: #ffffff !important;
     font-size: 1.25rem;
     margin-bottom: 12px;
 }
 
 .feature-item p {
-    color: var(--muted);
+    color: #cbd5e1 !important;
+    /* Light grey */
     font-size: 0.95rem;
     line-height: 1.5;
 }
@@ -539,8 +545,9 @@ h4 {
 /* Workflow Section */
 .workflow-section {
     padding: 100px 8%;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .workflow-container {
@@ -560,25 +567,28 @@ h4 {
 .step-number {
     font-size: 3rem;
     font-weight: 800;
-    color: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.15);
+    /* More visible number */
     display: block;
     margin-bottom: 8px;
 }
 
 .workflow-step h4 {
     font-size: 1.2rem;
-    color: #ffffff;
+    color: #ffffff !important;
     margin-bottom: 8px;
 }
 
 .workflow-step p {
     font-size: 0.9rem;
-    color: var(--muted);
+    color: #cbd5e1 !important;
+    /* Light grey */
 }
 
 .step-arrow {
     font-size: 24px;
-    color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.3);
+    /* More visible arrow */
 }
 
 /* CTA Section */
@@ -598,12 +608,13 @@ h4 {
 
 .cta-content h2 {
     font-size: 3rem;
-    color: #ffffff;
+    color: #ffffff !important;
     margin-bottom: 24px;
 }
 
 .cta-content p {
-    color: var(--muted);
+    color: #cbd5e1 !important;
+    /* Light grey */
     margin-bottom: 40px;
     font-size: 1.1rem;
 }
@@ -650,18 +661,22 @@ h4 {
 }
 
 .footer-links a {
-    color: var(--muted);
+    color: #cbd5e1 !important;
+    /* Force light grey */
     text-decoration: none;
     font-size: 0.9rem;
     transition: color 0.2s;
 }
 
 .footer-links a:hover {
-    color: #ffffff;
+    color: #ffffff !important;
+    /* Force white on hover */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
 .footer-copyright {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.4) !important;
+    /* Ensure copyright is visible */
     font-size: 0.85rem;
 }
 

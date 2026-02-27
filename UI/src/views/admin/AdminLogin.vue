@@ -113,36 +113,106 @@ const handleSubmit = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f0f2f5;
-  background-image: radial-gradient(#e6e6e6 1px, transparent 1px);
+  background: radial-gradient(1200px 600px at 20% -20%, rgba(14, 165, 233, 0.12) 40%, var(--bg-primary) 100%);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
 .login-card {
-  width: 400px;
-  background: white;
+  width: 420px;
+  background: var(--glass-bg);
   padding: 40px;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border-radius: 20px;
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 }
 
 .header h2 {
-  font-size: 24px;
-  color: #303133;
+  font-size: 28px;
+  color: var(--fg-primary);
   margin-bottom: 10px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header p {
-  color: #909399;
+  color: var(--fg-muted);
+  font-size: 14px;
+}
+
+/* Form Styles */
+:deep(.el-form-item__label) {
+  color: var(--fg-primary) !important;
+  font-weight: 500;
+}
+
+:deep(.el-input__wrapper) {
+  background: rgba(15, 23, 42, 0.6) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: none !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.el-input__wrapper:hover) {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+}
+
+:deep(.el-input__inner) {
+  color: var(--fg-primary) !important;
+}
+
+:deep(.el-input__inner::placeholder) {
+  color: var(--fg-muted) !important;
 }
 
 .submit-btn {
   width: 100%;
   margin-top: 20px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+  border: none !important;
+  color: var(--bg-primary) !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  height: 48px !important;
+  font-size: 16px !important;
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.35) !important;
+  transition: all 0.3s ease !important;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(14, 165, 233, 0.45) !important;
+}
+
+.submit-btn:active {
+  transform: translateY(1px);
 }
 </style>

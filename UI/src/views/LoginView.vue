@@ -148,8 +148,8 @@ const handleLogin = async () => {
 .circle-1 {
     width: 500px;
     height: 500px;
-    background: #4f46e5;
-    /* Indigo */
+    background: var(--accent-primary);
+    /* Sky Blue */
     top: -100px;
     left: -100px;
     animation-delay: 0s;
@@ -158,8 +158,8 @@ const handleLogin = async () => {
 .circle-2 {
     width: 400px;
     height: 400px;
-    background: #ec4899;
-    /* Pink */
+    background: var(--accent-secondary);
+    /* Cyan */
     bottom: -50px;
     right: -50px;
     animation-delay: -5s;
@@ -168,8 +168,8 @@ const handleLogin = async () => {
 .circle-3 {
     width: 300px;
     height: 300px;
-    background: #06b6d4;
-    /* Cyan */
+    background: #6366f1;
+    /* Indigo */
     bottom: 20%;
     left: 20%;
     animation-delay: -10s;
@@ -269,9 +269,9 @@ const handleLogin = async () => {
 }
 
 :deep(.custom-input .el-input__wrapper.is-focus) {
-    border-color: #6366f1 !important;
+    border-color: var(--accent-primary) !important;
     background: rgba(15, 23, 42, 0.9) !important;
-    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2) !important;
 }
 
 :deep(.custom-input .el-input__inner) {
@@ -293,10 +293,10 @@ const handleLogin = async () => {
 .login-btn {
     width: 100%;
     height: 54px;
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
     border: none;
     border-radius: 12px;
-    color: #fff;
+    color: var(--bg-primary);
     font-size: 1rem;
     font-weight: 600;
     letter-spacing: 0.5px;
@@ -304,11 +304,12 @@ const handleLogin = async () => {
     overflow: hidden;
     transition: all 0.3s ease;
     z-index: 1;
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
 }
 
 .login-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px -10px rgba(79, 70, 229, 0.5);
+    box-shadow: 0 0 30px rgba(14, 165, 233, 0.5);
 }
 
 .login-btn:active {
@@ -342,14 +343,14 @@ const handleLogin = async () => {
 }
 
 .link {
-    color: #818cf8;
+    color: var(--accent-primary);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s;
 }
 
 .link:hover {
-    color: #a5b4fc;
+    color: var(--accent-secondary);
     text-decoration: underline;
 }
 

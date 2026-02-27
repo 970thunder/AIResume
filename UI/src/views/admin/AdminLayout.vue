@@ -9,9 +9,6 @@
           :default-active="activeMenu"
           class="el-menu-vertical"
           router
-          background-color="#001529"
-          text-color="#a6adb4"
-          active-text-color="#1890ff"
         >
           <el-menu-item index="/admin/dashboard">
             <el-icon><DataLine /></el-icon>
@@ -31,7 +28,7 @@
           </el-menu-item>
         </el-menu>
       </el-aside>
-      
+
       <el-container>
         <el-header class="admin-header">
           <div class="header-left">
@@ -55,7 +52,7 @@
             </el-dropdown>
           </div>
         </el-header>
-        
+
         <el-main class="admin-main">
           <router-view v-slot="{ Component }">
             <transition name="fade" mode="out-in">
@@ -101,13 +98,21 @@ const handleCommand = (command) => {
 </script>
 
 <style scoped>
+.admin-layout {
+  background: radial-gradient(1200px 600px at 20% -20%, var(--bg-primary) 40%, var(--bg-secondary) 100%);
+  min-height: 100vh;
+}
+
 .h-screen {
   height: 100vh;
 }
 
 .admin-sidebar {
-  background-color: #001529;
-  color: white;
+  background: var(--glass-bg);
+  border-right: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
   display: flex;
   flex-direction: column;
 }
@@ -117,38 +122,63 @@ const handleCommand = (command) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #002140;
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .logo h2 {
-  color: white;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
   font-size: 18px;
+  font-weight: 700;
 }
 
 .el-menu-vertical {
   border-right: none;
   flex: 1;
+  background: transparent !important;
 }
 
 .admin-header {
-  background-color: white;
-  border-bottom: 1px solid #e6e6e6;
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
+  height: 60px;
+}
+
+.header-left :deep(.el-breadcrumb__item) {
+  color: var(--fg-secondary);
+}
+
+.header-left :deep(.el-breadcrumb__inner) {
+  color: var(--fg-secondary);
+}
+
+.header-left :deep(.el-breadcrumb__inner:hover) {
+  color: var(--accent-primary);
 }
 
 .el-dropdown-link {
   cursor: pointer;
   display: flex;
   align-items: center;
-  color: #606266;
+  color: var(--fg-secondary);
+  transition: color 0.2s;
+}
+
+.el-dropdown-link:hover {
+  color: var(--fg-primary);
 }
 
 .admin-main {
-  background-color: #f0f2f5;
+  background: transparent;
   padding: 24px;
 }
 

@@ -290,7 +290,7 @@ const handleRegister = async () => {
 .circle-1 {
     width: 500px;
     height: 500px;
-    background: #4f46e5;
+    background: var(--accent-primary);
     top: -100px;
     right: -100px;
     animation-delay: 0s;
@@ -299,7 +299,7 @@ const handleRegister = async () => {
 .circle-2 {
     width: 400px;
     height: 400px;
-    background: #ec4899;
+    background: var(--accent-secondary);
     bottom: -50px;
     left: -50px;
     animation-delay: -5s;
@@ -308,7 +308,7 @@ const handleRegister = async () => {
 .circle-3 {
     width: 300px;
     height: 300px;
-    background: #06b6d4;
+    background: #6366f1;
     top: 40%;
     left: 40%;
     animation-delay: -10s;
@@ -406,9 +406,9 @@ const handleRegister = async () => {
 }
 
 :deep(.custom-input .el-input__wrapper.is-focus) {
-    border-color: #6366f1 !important;
+    border-color: var(--accent-primary) !important;
     background: rgba(15, 23, 42, 0.9) !important;
-    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2) !important;
 }
 
 :deep(.custom-input .el-input__inner) {
@@ -455,10 +455,10 @@ const handleRegister = async () => {
 .register-btn {
     width: 100%;
     height: 48px;
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
     border: none;
     border-radius: 12px;
-    color: #fff;
+    color: var(--bg-primary);
     font-size: 1rem;
     font-weight: 600;
     letter-spacing: 0.5px;
@@ -466,11 +466,12 @@ const handleRegister = async () => {
     overflow: hidden;
     transition: all 0.3s ease;
     z-index: 1;
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
 }
 
 .register-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px -10px rgba(79, 70, 229, 0.5);
+    box-shadow: 0 0 30px rgba(14, 165, 233, 0.5);
 }
 
 .register-btn:active {
@@ -506,14 +507,14 @@ const handleRegister = async () => {
 }
 
 .link {
-    color: #818cf8;
+    color: var(--accent-primary);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s;
 }
 
 .link:hover {
-    color: #a5b4fc;
+    color: var(--accent-secondary);
     text-decoration: underline;
 }
 

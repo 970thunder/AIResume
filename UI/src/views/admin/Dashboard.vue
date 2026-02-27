@@ -104,8 +104,18 @@ const initCharts = () => {
   if (templateChartRef.value) {
     const chart = echarts.init(templateChartRef.value);
     chart.setOption({
-      tooltip: { trigger: 'item' },
-      legend: { top: '5%', left: 'center' },
+      backgroundColor: 'transparent',
+      tooltip: {
+        trigger: 'item',
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        borderColor: 'rgba(255, 255, 255, 0.12)',
+        textStyle: { color: '#e6edf3' }
+      },
+      legend: {
+        top: '5%',
+        left: 'center',
+        textStyle: { color: '#94a3b8' }
+      },
       series: [
         {
           name: '模板状态',
@@ -114,17 +124,17 @@ const initCharts = () => {
           avoidLabelOverlap: false,
           itemStyle: {
             borderRadius: 10,
-            borderColor: '#fff',
+            borderColor: 'rgba(255, 255, 255, 0.1)',
             borderWidth: 2
           },
           label: { show: false, position: 'center' },
           emphasis: {
-            label: { show: true, fontSize: 20, fontWeight: 'bold' }
+            label: { show: true, fontSize: 20, fontWeight: 'bold', color: '#e6edf3' }
           },
           labelLine: { show: false },
           data: [
-            { value: stats.value.pendingTemplates, name: '待审核' },
-            { value: stats.value.totalTemplates - stats.value.pendingTemplates, name: '已发布' } // Approximate
+            { value: stats.value.pendingTemplates, name: '待审核', itemStyle: { color: '#f59e0b' } },
+            { value: stats.value.totalTemplates - stats.value.pendingTemplates, name: '已发布', itemStyle: { color: '#0ea5e9' } }
           ]
         }
       ]
@@ -134,18 +144,25 @@ const initCharts = () => {
   if (systemChartRef.value) {
     const chart = echarts.init(systemChartRef.value);
     chart.setOption({
+      backgroundColor: 'transparent',
       tooltip: {
         trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        }
+        axisPointer: { type: 'shadow' },
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        borderColor: 'rgba(255, 255, 255, 0.12)',
+        textStyle: { color: '#e6edf3' }
       },
       xAxis: {
         type: 'category',
-        data: ['用户', '模板', '题目', '今日面试']
+        data: ['用户', '模板', '题目', '今日面试'],
+        axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.12)' } },
+        axisLabel: { color: '#94a3b8' }
       },
       yAxis: {
-        type: 'value'
+        type: 'value',
+        axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.12)' } },
+        axisLabel: { color: '#94a3b8' },
+        splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.06)' } }
       },
       series: [
         {
@@ -159,13 +176,13 @@ const initCharts = () => {
           type: 'bar',
           showBackground: true,
           backgroundStyle: {
-            color: 'rgba(180, 180, 180, 0.2)'
+            color: 'rgba(255, 255, 255, 0.05)'
           },
           itemStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: '#83bff6' },
-              { offset: 0.5, color: '#188df0' },
-              { offset: 1, color: '#188df0' }
+              { offset: 0, color: '#22d3ee' },
+              { offset: 0.5, color: '#0ea5e9' },
+              { offset: 1, color: '#0284c7' }
             ])
           }
         }
@@ -176,6 +193,10 @@ const initCharts = () => {
 </script>
 
 <style scoped>
+.dashboard-container {
+  animation: fadeInUp 0.5s ease-out;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -185,17 +206,28 @@ const initCharts = () => {
 .card-value {
   font-size: 28px;
   font-weight: bold;
-  color: #303133;
+  color: var(--fg-primary);
   margin-top: 10px;
 }
 
 .sub-value {
   font-size: 14px;
-  color: #909399;
+  color: var(--fg-muted);
   margin-top: 5px;
 }
 
 .mt-4 {
   margin-top: 24px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

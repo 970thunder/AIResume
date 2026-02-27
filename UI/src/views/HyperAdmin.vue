@@ -165,34 +165,227 @@ onMounted(() => {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(to right, #6dd5ed, #2193b0);
+    background: radial-gradient(1200px 600px at 20% -20%, rgba(14, 165, 233, 0.15) 40%, var(--bg-primary) 100%);
+    padding: 24px;
+    box-sizing: border-box;
 }
 
 .login-wrapper {
-    width: 380px;
+    width: 400px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .login-card {
-    border-radius: 15px;
+    border-radius: 20px !important;
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+}
+
+:deep(.el-card__header) {
+    border-bottom: 1px solid var(--glass-border) !important;
+    padding: 24px !important;
+}
+
+:deep(.el-card__body) {
+    padding: 32px 24px !important;
 }
 
 .card-header h2 {
     text-align: center;
-    color: #2193b0;
+    color: var(--fg-primary);
+    font-weight: 700;
+    margin: 0;
+}
+
+.card-header h1 {
+    color: var(--fg-primary);
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Form Styles */
+:deep(.el-form-item) {
+    margin-bottom: 20px;
+}
+
+:deep(.el-input__wrapper) {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: none !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+}
+
+:deep(.el-input__wrapper:hover) {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+}
+
+:deep(.el-input__inner) {
+    color: var(--fg-primary) !important;
+}
+
+:deep(.el-input__inner::placeholder) {
+    color: var(--fg-muted) !important;
+}
+
+:deep(.el-input__prefix) {
+    color: var(--fg-muted) !important;
 }
 
 .login-button {
     width: 100%;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+    border: none !important;
+    color: var(--bg-primary) !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    height: 48px !important;
+    font-size: 16px !important;
+    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.35) !important;
+    transition: all 0.3s ease !important;
+}
+
+.login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.45) !important;
 }
 
 .admin-panel {
     width: 90%;
     max-width: 1400px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.admin-panel :deep(.el-card) {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--glass-shadow) !important;
+    backdrop-filter: var(--glass-blur) !important;
 }
 
 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.card-header :deep(.el-button--danger) {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    color: #f87171 !important;
+}
+
+.card-header :deep(.el-button--danger:hover) {
+    background: rgba(239, 68, 68, 0.25) !important;
+    border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+/* Table Styles */
+:deep(.el-table) {
+    background: transparent !important;
+    --el-table-bg-color: transparent !important;
+    --el-table-tr-bg-color: transparent !important;
+    --el-table-header-bg-color: rgba(255, 255, 255, 0.04) !important;
+    --el-table-header-text-color: var(--fg-primary) !important;
+    --el-table-text-color: var(--fg-secondary) !important;
+    --el-table-row-hover-bg-color: rgba(255, 255, 255, 0.06) !important;
+    --el-table-border-color: var(--glass-border) !important;
+}
+
+:deep(.el-table th.el-table__cell) {
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: var(--fg-primary) !important;
+    font-weight: 600 !important;
+}
+
+:deep(.el-table td.el-table__cell) {
+    color: var(--fg-secondary) !important;
+}
+
+:deep(.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell) {
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Table Buttons */
+:deep(.el-table .el-button--primary) {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+    border: none !important;
+    color: var(--bg-primary) !important;
+}
+
+:deep(.el-table .el-button--success) {
+    background: rgba(34, 197, 94, 0.15) !important;
+    border: 1px solid rgba(34, 197, 94, 0.3) !important;
+    color: #4ade80 !important;
+}
+
+:deep(.el-table .el-button--danger) {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    color: #f87171 !important;
+}
+
+:deep(.el-table .el-button--warning) {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    color: #fbbf24 !important;
+}
+
+/* Tags */
+:deep(.el-tag--success.el-tag--dark) {
+    background: rgba(34, 197, 94, 0.2) !important;
+    border-color: rgba(34, 197, 94, 0.3) !important;
+    color: #4ade80 !important;
+}
+
+:deep(.el-tag--warning.el-tag--dark) {
+    background: rgba(245, 158, 11, 0.2) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+    color: #fbbf24 !important;
+}
+
+:deep(.el-tag--danger.el-tag--dark) {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #f87171 !important;
+}
+
+:deep(.el-tag--info.el-tag--dark) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: var(--glass-border) !important;
+    color: var(--fg-secondary) !important;
+}
+
+/* Loading */
+:deep(.el-loading-mask) {
+    background: rgba(11, 18, 32, 0.8) !important;
+}
+
+:deep(.el-loading-spinner .el-loading-text) {
+    color: var(--fg-primary) !important;
+}
+
+:deep(.el-loading-spinner .path) {
+    stroke: var(--accent-primary) !important;
 }
 </style>

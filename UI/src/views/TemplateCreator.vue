@@ -333,32 +333,32 @@ onUnmounted(() => {
     display: flex;
     height: 100%;
     overflow: hidden;
+    background: radial-gradient(1200px 600px at 20% -20%, rgba(14, 165, 233, 0.08) 40%, var(--bg-primary) 100%);
 }
 
 .editor-pane {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    border-right: 1px solid #dcdfe6;
+    padding: 16px;
+    border-right: 1px solid var(--glass-border);
     overflow-y: auto;
     min-width: 0;
-    /* 确保flex子元素可以收缩 */
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .preview-pane {
     flex: 1;
     overflow: hidden;
     height: 100%;
-    background-color: #f0f2f5;
-    padding: 10px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(11, 18, 32, 0.98) 100%);
+    padding: 16px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
     min-width: 0;
-    /* 确保flex子元素可以收缩 */
 }
 
 .preview-viewport {
@@ -369,14 +369,14 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: radial-gradient(#dfe2e5 1px, transparent 1px);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
     background-size: 20px 20px;
-    border: 1px solid #dcdfe6;
-    border-radius: 4px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.3);
 }
 
 .preview-content {
-    /* 这里的样式由Vue动态控制transform */
     will-change: transform;
 }
 
@@ -384,9 +384,10 @@ onUnmounted(() => {
     width: 210mm;
     height: 297mm;
     background-color: white;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     position: relative;
     overflow: hidden;
+    border-radius: 4px;
 }
 
 .preview-iframe {
@@ -403,23 +404,22 @@ onUnmounted(() => {
     width: 100%;
     height: 100%;
     z-index: 10;
-    /* 确保在iframe之上 */
     background: transparent;
 }
 
 .zoom-controls {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
     margin-left: auto;
-    /* 推到右边 */
 }
 
 .zoom-text {
-    font-size: 12px;
-    color: #606266;
-    min-width: 40px;
+    font-size: 13px;
+    color: var(--fg-secondary);
+    min-width: 45px;
     text-align: center;
+    font-weight: 500;
 }
 
 /* Hide scrollbar for all panes */
@@ -435,7 +435,7 @@ onUnmounted(() => {
 }
 
 .toolbar {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -445,14 +445,20 @@ onUnmounted(() => {
 .tag-button {
     cursor: pointer;
     transition: all 0.2s;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--fg-primary) !important;
 }
 
 .tag-button:hover {
-    transform: scale(1.1);
+    transform: scale(1.08);
+    background: rgba(14, 165, 233, 0.15) !important;
+    border-color: var(--accent-primary) !important;
+    color: var(--accent-primary) !important;
 }
 
 .preview-toolbar {
-    margin-bottom: 15px;
+    margin-bottom: 16px;
     display: flex;
     gap: 10px;
     flex-shrink: 0;
@@ -460,9 +466,192 @@ onUnmounted(() => {
     justify-content: center;
 }
 
-/* Old preview styles removed */
+/* Button Styles */
+.preview-toolbar :deep(.el-button--primary) {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+    border: none !important;
+    color: var(--bg-primary) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35) !important;
+    transition: all 0.3s ease !important;
+}
 
-/* 响应式调整 - 简化，主要依靠JavaScript动态调整 */
+.preview-toolbar :deep(.el-button--primary:hover) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(14, 165, 233, 0.45) !important;
+}
+
+.preview-toolbar :deep(.el-button--warning) {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    color: #fbbf24 !important;
+    font-weight: 600 !important;
+}
+
+.preview-toolbar :deep(.el-button--warning:hover) {
+    background: rgba(245, 158, 11, 0.25) !important;
+    border-color: rgba(245, 158, 11, 0.5) !important;
+}
+
+.preview-toolbar :deep(.el-button--success) {
+    background: rgba(34, 197, 94, 0.15) !important;
+    border: 1px solid rgba(34, 197, 94, 0.3) !important;
+    color: #4ade80 !important;
+    font-weight: 600 !important;
+}
+
+.preview-toolbar :deep(.el-button--success:hover) {
+    background: rgba(34, 197, 94, 0.25) !important;
+    border-color: rgba(34, 197, 94, 0.5) !important;
+}
+
+.preview-toolbar :deep(.el-button.is-circle) {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--fg-primary) !important;
+}
+
+.preview-toolbar :deep(.el-button.is-circle:hover) {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: var(--accent-primary) !important;
+    color: var(--accent-primary) !important;
+}
+
+.preview-toolbar :deep(.el-button:not(.el-button--primary):not(.el-button--warning):not(.el-button--success):not(.is-circle)) {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--fg-primary) !important;
+}
+
+/* Dialog Styles */
+:deep(.el-dialog) {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: var(--glass-blur) !important;
+}
+
+:deep(.el-dialog__header) {
+    border-bottom: 1px solid var(--glass-border) !important;
+    padding: 20px 24px !important;
+}
+
+:deep(.el-dialog__title) {
+    color: var(--fg-primary) !important;
+    font-weight: 600 !important;
+}
+
+:deep(.el-dialog__headerbtn .el-dialog__close) {
+    color: var(--fg-muted) !important;
+}
+
+:deep(.el-dialog__headerbtn:hover .el-dialog__close) {
+    color: var(--accent-primary) !important;
+}
+
+:deep(.el-dialog__body) {
+    padding: 24px !important;
+    color: var(--fg-secondary) !important;
+}
+
+:deep(.el-dialog__footer) {
+    border-top: 1px solid var(--glass-border) !important;
+    padding: 16px 24px !important;
+}
+
+:deep(.el-form-item__label) {
+    color: var(--fg-primary) !important;
+    font-weight: 500;
+}
+
+:deep(.el-input__wrapper) {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: none !important;
+    border-radius: 10px !important;
+}
+
+:deep(.el-input__wrapper:hover) {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+}
+
+:deep(.el-input__inner) {
+    color: var(--fg-primary) !important;
+}
+
+:deep(.el-input__inner::placeholder) {
+    color: var(--fg-muted) !important;
+}
+
+:deep(.el-textarea__inner) {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 10px !important;
+    color: var(--fg-primary) !important;
+}
+
+:deep(.el-textarea__inner:hover) {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+:deep(.el-textarea__inner:focus) {
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+}
+
+:deep(.el-input-number) {
+    background: rgba(15, 23, 42, 0.6) !important;
+}
+
+:deep(.el-input-number .el-input__wrapper) {
+    background: transparent !important;
+}
+
+:deep(.el-input-number__decrease),
+:deep(.el-input-number__increase) {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: var(--glass-border) !important;
+    color: var(--fg-secondary) !important;
+}
+
+:deep(.el-input-number__decrease:hover),
+:deep(.el-input-number__increase:hover) {
+    color: var(--accent-primary) !important;
+}
+
+/* Dialog Footer Buttons */
+:deep(.dialog-footer .el-button:not(.el-button--primary)) {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--fg-primary) !important;
+}
+
+:deep(.dialog-footer .el-button--primary) {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+    border: none !important;
+    color: var(--bg-primary) !important;
+    font-weight: 600 !important;
+}
+
+/* CodeMirror Editor Container */
+:deep(.cm-editor) {
+    background: rgba(15, 23, 42, 0.8) !important;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+}
+
+:deep(.cm-scroller) {
+    background: transparent !important;
+}
+
+/* 响应式调整 */
 @media (max-width: 1200px) {
     .template-creator-container {
         flex-direction: column;
@@ -474,13 +663,13 @@ onUnmounted(() => {
         flex: none;
         height: 45vh;
         border-right: none;
-        border-bottom: 1px solid #dcdfe6;
+        border-bottom: 1px solid var(--glass-border);
     }
 
     .preview-pane {
         flex: none;
         height: 55vh;
-        padding: 8px;
+        padding: 12px;
     }
 }
 
@@ -490,16 +679,20 @@ onUnmounted(() => {
     }
 
     .preview-pane {
-        padding: 5px;
+        padding: 8px;
     }
 
     .toolbar {
-        gap: 4px;
+        gap: 6px;
     }
 
     .tag-button {
         font-size: 12px;
-        padding: 2px 6px;
+        padding: 2px 8px;
+    }
+
+    .preview-toolbar {
+        flex-wrap: wrap;
     }
 }
 </style>

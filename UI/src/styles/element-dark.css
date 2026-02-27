@@ -1,0 +1,783 @@
+/* ============================================
+   Element Plus Dark Theme Override
+   ============================================ */
+
+/* === Root Fallback Variables === */
+/* These ensure colors work even if main variables.css fails to load */
+:root {
+    --fg-primary-fallback: #e6edf3;
+    --fg-secondary-fallback: #cbd5e1;
+    --fg-muted-fallback: #94a3b8;
+    --accent-primary-fallback: #0ea5e9;
+    --accent-secondary-fallback: #22d3ee;
+    --bg-primary-fallback: #0b1220;
+    --bg-secondary-fallback: #0f172a;
+    --glass-bg-fallback: rgba(255, 255, 255, 0.06);
+    --glass-border-fallback: rgba(255, 255, 255, 0.12);
+}
+
+/* === Cards === */
+.el-card {
+    --el-card-bg-color: var(--glass-bg, rgba(255, 255, 255, 0.06));
+    --el-card-border-color: var(--glass-border, rgba(255, 255, 255, 0.12));
+    background: var(--glass-bg, rgba(255, 255, 255, 0.06)) !important;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12)) !important;
+    backdrop-filter: var(--glass-blur, blur(14px));
+    -webkit-backdrop-filter: var(--glass-blur, blur(14px));
+    border-radius: var(--radius-lg, 16px) !important;
+    color: var(--fg-primary, #e6edf3) !important;
+}
+
+/* === Inputs === */
+.el-input__wrapper {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12)) !important;
+    box-shadow: none !important;
+    border-radius: var(--radius-md, 12px) !important;
+    transition: all var(--transition-normal, 0.3s ease) !important;
+}
+
+.el-input__wrapper:hover {
+    border-color: var(--glass-border-hover, rgba(255, 255, 255, 0.2)) !important;
+}
+
+.el-input__wrapper.is-focus {
+    border-color: var(--accent-primary, #0ea5e9) !important;
+    box-shadow: 0 0 0 3px var(--accent-glow, rgba(14, 165, 233, 0.4)) !important;
+}
+
+.el-input__inner {
+    color: var(--fg-primary, #e6edf3) !important;
+}
+
+.el-input__inner::placeholder {
+    color: var(--fg-muted, #94a3b8) !important;
+}
+
+.el-input__prefix,
+.el-input__suffix {
+    color: var(--fg-muted, #94a3b8) !important;
+}
+
+.el-input.is-disabled .el-input__wrapper {
+    background: rgba(15, 23, 42, 0.3) !important;
+    border-color: var(--glass-border, rgba(255, 255, 255, 0.12)) !important;
+}
+
+.el-input.is-disabled .el-input__inner {
+    color: var(--fg-disabled, #64748b) !important;
+    -webkit-text-fill-color: var(--fg-disabled, #64748b) !important;
+}
+
+/* === Buttons === */
+.el-button {
+    font-weight: 600 !important;
+    transition: all var(--transition-normal) !important;
+    border-radius: var(--radius-md) !important;
+}
+
+.el-button--primary {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+    border: none !important;
+    box-shadow: var(--shadow-accent) !important;
+    color: var(--bg-primary) !important;
+}
+
+.el-button--primary:hover {
+    box-shadow: var(--shadow-accent-lg) !important;
+    transform: translateY(-2px);
+}
+
+.el-button--primary:active {
+    transform: translateY(0);
+}
+
+.el-button--primary.is-disabled,
+.el-button--primary.is-disabled:hover {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.5), rgba(34, 211, 238, 0.5)) !important;
+    box-shadow: none !important;
+}
+
+.el-button--success {
+    background: linear-gradient(135deg, var(--success), var(--success-light)) !important;
+    border: none !important;
+    box-shadow: var(--shadow-success) !important;
+    color: white !important;
+}
+
+.el-button--danger {
+    background: linear-gradient(135deg, var(--danger), var(--danger-light)) !important;
+    border: none !important;
+    box-shadow: var(--shadow-danger) !important;
+    color: white !important;
+}
+
+.el-button--warning {
+    background: linear-gradient(135deg, var(--warning), var(--warning-light)) !important;
+    border: none !important;
+    color: var(--bg-primary) !important;
+}
+
+.el-button--info {
+    background: linear-gradient(135deg, var(--info), var(--info-light)) !important;
+    border: none !important;
+    box-shadow: var(--info-glow) 0 0 20px !important;
+    color: white !important;
+}
+
+.el-button.is-text {
+    color: var(--fg-secondary) !important;
+}
+
+.el-button.is-text:hover {
+    color: var(--accent-primary) !important;
+    background: var(--glass-bg) !important;
+}
+
+.el-button.is-link {
+    color: var(--accent-primary) !important;
+}
+
+/* Default/Secondary Button */
+.el-button:not(.el-button--primary):not(.el-button--success):not(.el-button--danger):not(.el-button--warning):not(.el-button--info):not(.is-text):not(.is-link) {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--fg-primary) !important;
+}
+
+.el-button:not(.el-button--primary):not(.el-button--success):not(.el-button--danger):not(.el-button--warning):not(.el-button--info):not(.is-text):not(.is-link):hover {
+    background: var(--glass-bg-hover) !important;
+    border-color: var(--glass-border-hover) !important;
+}
+
+/* === Tables === */
+.el-table {
+    --el-table-bg-color: transparent !important;
+    --el-table-tr-bg-color: transparent !important;
+    --el-table-header-bg-color: rgba(255, 255, 255, 0.03) !important;
+    --el-table-row-hover-bg-color: rgba(255, 255, 255, 0.06) !important;
+    --el-table-border-color: var(--glass-border) !important;
+    --el-table-text-color: var(--fg-primary) !important;
+    --el-table-header-text-color: var(--fg-secondary) !important;
+    background: transparent !important;
+}
+
+.el-table th.el-table__cell {
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: var(--fg-secondary) !important;
+    font-weight: 600 !important;
+}
+
+.el-table td.el-table__cell {
+    border-bottom: 1px solid var(--glass-border) !important;
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.el-table__body tr:hover > td.el-table__cell {
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.el-table__empty-text {
+    color: var(--fg-muted) !important;
+}
+
+/* === Dialogs === */
+.el-dialog {
+    --el-dialog-bg-color: var(--bg-secondary, #0f172a) !important;
+    --el-dialog-border-radius: var(--radius-xl, 24px) !important;
+    background: var(--bg-secondary, #0f172a) !important;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12)) !important;
+    border-radius: var(--radius-xl, 24px) !important;
+}
+
+.el-dialog__header {
+    border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12)) !important;
+    padding: var(--space-lg, 24px) var(--space-xl, 32px) !important;
+}
+
+.el-dialog__title {
+    color: var(--fg-primary, #e6edf3) !important;
+    font-weight: 600 !important;
+}
+
+.el-dialog__headerbtn .el-dialog__close {
+    color: var(--fg-muted, #94a3b8) !important;
+}
+
+.el-dialog__headerbtn:hover .el-dialog__close {
+    color: var(--fg-primary, #e6edf3) !important;
+}
+
+.el-dialog__body {
+    color: var(--fg-secondary, #cbd5e1) !important;
+    padding: var(--space-xl, 32px) !important;
+}
+
+.el-dialog__footer {
+    border-top: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12)) !important;
+    padding: var(--space-lg, 24px) var(--space-xl, 32px) !important;
+}
+
+.el-overlay {
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(4px);
+}
+
+/* === Tags === */
+.el-tag {
+    border-radius: var(--radius-sm) !important;
+    border: 1px solid transparent !important;
+}
+
+.el-tag--success {
+    background: rgba(34, 197, 94, 0.15) !important;
+    border-color: rgba(34, 197, 94, 0.3) !important;
+    color: var(--success) !important;
+}
+
+.el-tag--warning {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+    color: var(--warning) !important;
+}
+
+.el-tag--danger {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: var(--danger) !important;
+}
+
+.el-tag--info {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+    color: var(--info) !important;
+}
+
+.el-tag--primary {
+    background: rgba(14, 165, 233, 0.15) !important;
+    border-color: rgba(14, 165, 233, 0.3) !important;
+    color: var(--accent-primary) !important;
+}
+
+.el-tag {
+    background: var(--glass-bg) !important;
+    border-color: var(--glass-border) !important;
+    color: var(--fg-secondary) !important;
+}
+
+/* === Progress === */
+.el-progress {
+    --el-progress-default-color: var(--accent-primary) !important;
+}
+
+.el-progress__text {
+    color: var(--fg-primary) !important;
+}
+
+.el-progress-bar__outer {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* === Menu === */
+.el-menu {
+    background: transparent !important;
+    border: none !important;
+}
+
+.el-menu-item {
+    color: var(--fg-secondary) !important;
+    border-radius: var(--radius-md) !important;
+    margin: 4px 8px !important;
+    transition: all var(--transition-normal) !important;
+}
+
+.el-menu-item:hover {
+    background: var(--glass-bg-hover) !important;
+    color: var(--fg-primary) !important;
+}
+
+.el-menu-item.is-active {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(34, 211, 238, 0.15)) !important;
+    color: var(--fg-primary) !important;
+    font-weight: 600 !important;
+    border: 1px solid rgba(14, 165, 233, 0.3) !important;
+}
+
+.el-sub-menu__title {
+    color: var(--fg-secondary) !important;
+}
+
+.el-sub-menu__title:hover {
+    background: var(--glass-bg-hover) !important;
+    color: var(--fg-primary) !important;
+}
+
+/* === Dropdown === */
+.el-dropdown-menu {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--glass-border) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: var(--radius-md) !important;
+    padding: var(--space-xs) !important;
+}
+
+.el-dropdown-menu__item {
+    color: var(--fg-secondary) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 8px 16px !important;
+}
+
+.el-dropdown-menu__item:hover {
+    background: var(--glass-bg-hover) !important;
+    color: var(--fg-primary) !important;
+}
+
+/* === Forms === */
+.el-form-item__label {
+    color: var(--fg-secondary) !important;
+    font-weight: 500 !important;
+}
+
+.el-form-item__error {
+    color: var(--danger) !important;
+}
+
+/* === Select === */
+.el-select .el-input__wrapper {
+    background: rgba(15, 23, 42, 0.6) !important;
+}
+
+.el-select-dropdown {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--glass-border) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.el-select-dropdown__item {
+    color: var(--fg-secondary) !important;
+}
+
+.el-select-dropdown__item:hover {
+    background: var(--glass-bg-hover) !important;
+}
+
+.el-select-dropdown__item.is-selected {
+    color: var(--accent-primary) !important;
+    font-weight: 600 !important;
+}
+
+/* === Pagination === */
+.el-pagination {
+    --el-pagination-bg-color: var(--glass-bg) !important;
+    --el-pagination-button-bg-color: var(--glass-bg) !important;
+    --el-pagination-hover-color: var(--accent-primary) !important;
+    --el-pagination-text-color: var(--fg-secondary) !important;
+    --el-pagination-button-disabled-bg-color: transparent !important;
+}
+
+.el-pagination .el-pager li {
+    background: var(--glass-bg) !important;
+    color: var(--fg-secondary) !important;
+    border-radius: var(--radius-sm) !important;
+}
+
+.el-pagination .el-pager li:hover {
+    color: var(--accent-primary) !important;
+}
+
+.el-pagination .el-pager li.is-active {
+    background: var(--accent-primary) !important;
+    color: var(--bg-primary) !important;
+}
+
+/* === Notification & Message === */
+.el-notification {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--glass-border) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.el-notification__title {
+    color: var(--fg-primary) !important;
+}
+
+.el-notification__content {
+    color: var(--fg-secondary) !important;
+}
+
+.el-message {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--glass-border) !important;
+}
+
+.el-message__content {
+    color: var(--fg-primary) !important;
+}
+
+/* === Skeleton === */
+.el-skeleton__item {
+    background: linear-gradient(90deg, var(--glass-bg) 25%, var(--glass-bg-hover) 37%, var(--glass-bg) 63%) !important;
+    background-size: 200% 100% !important;
+    animation: shimmer 1.5s ease-in-out infinite !important;
+}
+
+/* === Empty State === */
+.el-empty__description {
+    color: var(--fg-muted) !important;
+}
+
+.el-empty__image svg {
+    fill: var(--fg-muted) !important;
+}
+
+/* === Collapse === */
+.el-collapse {
+    --el-collapse-bg-color: transparent !important;
+    --el-collapse-header-bg-color: var(--glass-bg, rgba(255, 255, 255, 0.06)) !important;
+    --el-collapse-border-color: var(--glass-border, rgba(255, 255, 255, 0.12)) !important;
+    border: none !important;
+}
+
+.el-collapse-item__header {
+    color: var(--fg-primary, #e6edf3) !important;
+    background: var(--glass-bg, rgba(255, 255, 255, 0.06)) !important;
+    border-radius: var(--radius-md, 12px) !important;
+    padding: var(--space-md, 16px) var(--space-lg, 24px) !important;
+    margin-bottom: var(--space-xs, 4px) !important;
+}
+
+.el-collapse-item__header:hover {
+    background: var(--glass-bg-hover, rgba(255, 255, 255, 0.1)) !important;
+}
+
+.el-collapse-item__wrap {
+    background: transparent !important;
+    border: none !important;
+}
+
+.el-collapse-item__content {
+    color: var(--fg-secondary, #cbd5e1) !important;
+    padding: var(--space-md, 16px) var(--space-lg, 24px) !important;
+}
+
+/* === Radio & Checkbox === */
+.el-radio__label,
+.el-checkbox__label {
+    color: var(--fg-secondary, #cbd5e1) !important;
+}
+
+.el-radio__input.is-checked .el-radio__inner {
+    background: var(--accent-primary, #0ea5e9) !important;
+    border-color: var(--accent-primary, #0ea5e9) !important;
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner {
+    background: var(--accent-primary, #0ea5e9) !important;
+    border-color: var(--accent-primary, #0ea5e9) !important;
+}
+
+.el-radio__inner:hover,
+.el-checkbox__inner:hover {
+    border-color: var(--accent-primary, #0ea5e9) !important;
+}
+
+/* === Textarea === */
+.el-textarea__inner {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12)) !important;
+    border-radius: var(--radius-md, 12px) !important;
+    color: var(--fg-primary, #e6edf3) !important;
+    transition: all var(--transition-normal, 0.3s ease) !important;
+}
+
+.el-textarea__inner:hover {
+    border-color: var(--glass-border-hover, rgba(255, 255, 255, 0.2)) !important;
+}
+
+.el-textarea__inner:focus {
+    border-color: var(--accent-primary, #0ea5e9) !important;
+    box-shadow: 0 0 0 3px var(--accent-glow, rgba(14, 165, 233, 0.4)) !important;
+}
+
+.el-textarea__inner::placeholder {
+    color: var(--fg-muted, #94a3b8) !important;
+}
+
+/* === Upload === */
+.el-upload-dragger {
+    background: var(--glass-bg) !important;
+    border: 2px dashed var(--glass-border) !important;
+    border-radius: var(--radius-lg) !important;
+    transition: all var(--transition-normal) !important;
+}
+
+.el-upload-dragger:hover {
+    border-color: var(--accent-primary) !important;
+    background: var(--glass-bg-hover) !important;
+}
+
+.el-upload__text {
+    color: var(--fg-secondary) !important;
+}
+
+.el-upload__text em {
+    color: var(--accent-primary) !important;
+}
+
+.el-upload-list__item {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--fg-primary) !important;
+}
+
+/* === Loading === */
+.el-loading-mask {
+    background: rgba(11, 18, 32, 0.85) !important;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.el-loading-spinner .el-loading-text {
+    color: var(--fg-primary) !important;
+}
+
+.el-loading-spinner .path {
+    stroke: var(--accent-primary) !important;
+}
+
+/* === Tooltip === */
+.el-tooltip__popper {
+    background: var(--bg-tertiary) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--fg-primary) !important;
+}
+
+.el-tooltip__popper[data-popper-placement^="top"] .el-popper__arrow::before {
+    border-top-color: var(--bg-tertiary) !important;
+}
+
+/* === Steps === */
+.el-step__title {
+    color: var(--fg-secondary) !important;
+}
+
+.el-step__title.is-finish {
+    color: var(--accent-primary) !important;
+}
+
+.el-step__title.is-process {
+    color: var(--fg-primary) !important;
+    font-weight: 600 !important;
+}
+
+.el-step__icon {
+    background: var(--glass-bg) !important;
+    border: 2px solid var(--glass-border) !important;
+    color: var(--fg-muted) !important;
+}
+
+.el-step__icon.is-finish {
+    border-color: var(--accent-primary) !important;
+    color: var(--accent-primary) !important;
+}
+
+.el-step__icon.is-process {
+    background: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: var(--bg-primary) !important;
+}
+
+.el-step__line {
+    background: var(--glass-border) !important;
+}
+
+.el-step__line.is-finish {
+    background: var(--accent-primary) !important;
+}
+
+/* === Tabs === */
+.el-tabs__item {
+    color: var(--fg-muted) !important;
+}
+
+.el-tabs__item:hover {
+    color: var(--fg-primary) !important;
+}
+
+.el-tabs__item.is-active {
+    color: var(--accent-primary) !important;
+    font-weight: 600 !important;
+}
+
+.el-tabs__active-bar {
+    background: var(--accent-primary) !important;
+}
+
+.el-tabs__nav-wrap::after {
+    background-color: var(--glass-border) !important;
+}
+
+/* === Descriptions === */
+.el-descriptions {
+    --el-descriptions-item-bordered-label-background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.el-descriptions__label {
+    color: var(--fg-muted) !important;
+}
+
+.el-descriptions__content {
+    color: var(--fg-primary) !important;
+}
+
+/* === Switch === */
+.el-switch.is-checked .el-switch__core {
+    background: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+}
+
+/* === Date Picker === */
+.el-date-editor .el-input__wrapper {
+    background: rgba(15, 23, 42, 0.6) !important;
+}
+
+.el-picker-panel {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--glass-border) !important;
+}
+
+.el-date-picker__header-label {
+    color: var(--fg-secondary) !important;
+}
+
+.el-date-table th {
+    color: var(--fg-muted) !important;
+}
+
+.el-date-table td.available .el-date-table-cell__text {
+    color: var(--fg-secondary) !important;
+}
+
+.el-date-table td.today .el-date-table-cell__text {
+    color: var(--accent-primary) !important;
+}
+
+.el-date-table td.current .el-date-table-cell__text {
+    background: var(--accent-primary) !important;
+    color: var(--bg-primary) !important;
+}
+
+.el-date-table td:hover .el-date-table-cell__text {
+    color: var(--accent-primary) !important;
+}
+
+/* === Global Text Color Fixes === */
+.el-card__header {
+    color: var(--fg-primary) !important;
+}
+
+.el-card__body {
+    color: var(--fg-secondary) !important;
+}
+
+.el-progress__text {
+    color: var(--fg-primary) !important;
+}
+
+.el-breadcrumb__inner,
+.el-breadcrumb__inner a {
+    color: var(--fg-secondary) !important;
+}
+
+.el-breadcrumb__inner:hover,
+.el-breadcrumb__inner a:hover {
+    color: var(--accent-primary) !important;
+}
+
+.el-breadcrumb__separator {
+    color: var(--fg-muted) !important;
+}
+
+/* Radio & Checkbox in option lists */
+.el-radio {
+    color: var(--fg-primary) !important;
+}
+
+.el-radio__input.is-checked + .el-radio__label {
+    color: var(--bg-primary) !important;
+}
+
+.el-checkbox {
+    color: var(--fg-primary) !important;
+}
+
+/* Fix for description lists */
+.el-descriptions__body {
+    background: transparent !important;
+}
+
+.el-descriptions__table {
+    border-color: var(--glass-border) !important;
+}
+
+.el-descriptions__cell {
+    border-color: var(--glass-border) !important;
+}
+
+/* Avatar */
+.el-avatar {
+    background: var(--glass-bg) !important;
+    color: var(--fg-primary) !important;
+}
+
+/* Badge */
+.el-badge__content {
+    background: var(--accent-primary) !important;
+    border-color: var(--bg-primary) !important;
+}
+
+/* Result */
+.el-result__title {
+    color: var(--fg-primary) !important;
+}
+
+.el-result__subtitle {
+    color: var(--fg-secondary) !important;
+}
+
+/* Alert */
+.el-alert {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+}
+
+.el-alert__title {
+    color: var(--fg-primary) !important;
+}
+
+.el-alert__description {
+    color: var(--fg-secondary) !important;
+}
+
+.el-alert--success {
+    border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+.el-alert--warning {
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.el-alert--error {
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.el-alert--info {
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
