@@ -397,27 +397,153 @@
 
 /* === Notification & Message === */
 .el-notification {
-    background: var(--bg-secondary) !important;
-    border: 1px solid var(--glass-border) !important;
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
+    background: rgba(15, 23, 42, 0.95) !important;
+    border: 1px solid rgba(148, 163, 184, 0.15) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+    padding: 16px 20px 16px 16px !important;
+    border-left: 4px solid var(--accent-primary, #0ea5e9) !important;
+}
+
+.el-notification.el-notification--success {
+    border-left-color: #10b981 !important;
+}
+
+.el-notification.el-notification--warning {
+    border-left-color: #f59e0b !important;
+}
+
+.el-notification.el-notification--error {
+    border-left-color: #ef4444 !important;
+}
+
+.el-notification.el-notification--info {
+    border-left-color: #0ea5e9 !important;
 }
 
 .el-notification__title {
-    color: var(--fg-primary) !important;
+    color: #e2e8f0 !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    margin-bottom: 6px !important;
 }
 
 .el-notification__content {
-    color: var(--fg-secondary) !important;
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
 }
 
+.el-notification__icon {
+    font-size: 24px !important;
+    height: 24px !important;
+    width: 24px !important;
+}
+
+.el-notification.el-notification--success .el-notification__icon {
+    color: #34d399 !important;
+}
+
+.el-notification.el-notification--warning .el-notification__icon {
+    color: #fbbf24 !important;
+}
+
+.el-notification.el-notification--error .el-notification__icon {
+    color: #f87171 !important;
+}
+
+.el-notification.el-notification--info .el-notification__icon {
+    color: #22d3ee !important;
+}
+
+.el-notification__closeBtn {
+    color: #64748b !important;
+    top: 18px !important;
+    right: 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+.el-notification__closeBtn:hover {
+    color: #e2e8f0 !important;
+}
+
+/* Message */
 .el-message {
-    background: var(--bg-secondary) !important;
-    border: 1px solid var(--glass-border) !important;
+    background: rgba(15, 23, 42, 0.95) !important;
+    border: 1px solid rgba(148, 163, 184, 0.15) !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    padding: 12px 20px !important;
 }
 
 .el-message__content {
-    color: var(--fg-primary) !important;
+    color: #e2e8f0 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+.el-message.el-message--success .el-message__icon {
+    color: #34d399 !important;
+}
+
+.el-message.el-message--warning .el-message__icon {
+    color: #fbbf24 !important;
+}
+
+.el-message.el-message--error .el-message__icon {
+    color: #f87171 !important;
+}
+
+.el-message.el-message--info .el-message__icon {
+    color: #22d3ee !important;
+}
+
+.el-message__icon {
+    font-size: 18px !important;
+    margin-right: 10px !important;
+}
+
+/* MessageBox */
+.el-message-box {
+    background: rgba(15, 23, 42, 0.95) !important;
+    border: 1px solid rgba(148, 163, 184, 0.15) !important;
+    border-radius: 20px !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+    padding: 24px !important;
+}
+
+.el-message-box__title {
+    color: #e2e8f0 !important;
+    font-weight: 600 !important;
+    font-size: 18px !important;
+}
+
+.el-message-box__content {
+    color: #94a3b8 !important;
+    font-size: 14px !important;
+    margin-top: 12px !important;
+}
+
+.el-message-box__headerbtn .el-message-box__close {
+    color: #64748b !important;
+}
+
+.el-message-box__headerbtn:hover .el-message-box__close {
+    color: #e2e8f0 !important;
+}
+
+.el-message-box__btns {
+    margin-top: 24px !important;
+}
+
+.el-message-box__btns .el-button {
+    min-width: 80px;
 }
 
 /* === Skeleton === */
