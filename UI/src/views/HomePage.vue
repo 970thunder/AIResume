@@ -4,15 +4,14 @@
         <div class="mouse-glow" :style="mouseGlowStyle"></div>
 
         <!-- Hero Section -->
-        <section class="hero-section">
+        <section class="hero-section" data-parallax="0.3">
             <div class="hero-content">
                 <div class="badge">
                     <span class="badge-dot"></span>
                     <span class="badge-text">AI 驱动的简历生成引擎 v2.0</span>
                 </div>
                 <h1 class="hero-title">
-                    用 <span class="gradient-text">智能算法</span> <br />
-                    重塑您的职业生涯
+                    <TypeWriter :text="fullText" :speed="100" :delay="500" />
                 </h1>
                 <p class="hero-subtitle">
                     不仅仅是简历工具，更是您的求职智能助手。深度分析、自动排版、精准匹配，让每一份简历都成为斩获 Offer 的利器。
@@ -53,7 +52,7 @@
             <div class="hero-visual">
                 <div class="visual-circle circle-1"></div>
                 <div class="visual-circle circle-2"></div>
-                <div class="visual-card">
+                <div class="visual-card gradient-border-card" ref="visualCardRef" @mousemove="handleCard3D" @mouseleave="resetCard3D">
                     <div class="card-header">
                         <div class="card-dots">
                             <span></span><span></span><span></span>
@@ -74,39 +73,22 @@
         </section>
 
         <!-- Features Scroll Section -->
-        <section class="features-section">
+        <section class="features-section" data-parallax="0.1">
             <div class="section-header">
-                <h2>全流程智能化求职体验</h2>
+                <h2 class="neon-text">全流程智能化求职体验</h2>
                 <p>从创建到投递，每一个环节都为您精细打磨</p>
             </div>
 
             <div class="feature-strip">
-                <div class="feature-item">
+                <div class="feature-item card-3d gradient-border-card" v-for="(feature, index) in features" :key="index"
+                    @mousemove="handleFeature3D($event, index)" @mouseleave="resetFeature3D(index)">
                     <div class="feature-icon-box">
                         <el-icon>
-                            <MagicStick />
+                            <component :is="feature.icon" />
                         </el-icon>
                     </div>
-                    <h3>智能生成</h3>
-                    <p>输入经历，AI 自动润色并生成专业话术</p>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon-box">
-                        <el-icon>
-                            <DataAnalysis />
-                        </el-icon>
-                    </div>
-                    <h3>简历评分</h3>
-                    <p>多维度打分，精准定位简历薄弱点</p>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon-box">
-                        <el-icon>
-                            <Reading />
-                        </el-icon>
-                    </div>
-                    <h3>模拟面试</h3>
-                    <p>基于简历生成面试题，提前演练</p>
+                    <h3>{{ feature.title }}</h3>
+                    <p>{{ feature.desc }}</p>
                 </div>
             </div>
         </section>
@@ -143,9 +125,9 @@
         <!-- CTA Section -->
         <section class="cta-section">
             <div class="cta-content">
-                <h2>准备好开始了吗？</h2>
+                <h2 class="neon-text">准备好开始了吗？</h2>
                 <p>立即加入，让 AI 为您的职业发展加速</p>
-                <router-link to="/generator" class="btn btn-primary btn-lg">
+                <router-link to="/generator" class="btn btn-primary btn-lg gradient-border-card">
                     免费创建简历
                 </router-link>
             </div>
@@ -174,6 +156,43 @@ import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
 import { ArrowRight, Files, MagicStick, DataAnalysis, Reading, Download } from '@element-plus/icons-vue';
 
 const homePageRef = ref(null);
+const visualCardRef = ref(null);
+
+// Features data
+const features = [
+    { icon: 'MagicStick', title: '智能生成', desc: '输入经历，AI 自动润色并生成专业话术' },
+    { icon: 'DataAnalysis', title: '简历评分', desc: '多维度打分，精准定位简历薄弱点' },
+    { icon: 'Reading', title: '模拟面试', desc: '基于简历生成面试题，提前演练' }
+];
+
+// Typewriter effect - MOVED to to TypeWriter component
+const fullText = '用 智能算法 重塑您的职业生涯';
+
+// Stats animation
+
+// 3D Card Effect for visual card
+const handleCard3D = (e) => {
+    const card = visualCardRef.value;
+    if (!card) return;
+
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = (y - centerY) / 10;
+    const rotateY = (centerX - x) / 10;
+
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+};
+
+const resetCard3D = () => {
+    const card = visualCardRef.value;
+    if (card) {
+        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    }
+};
 
 // Stats animation
 const stats = {
@@ -267,6 +286,7 @@ const handleMouseLeave = () => {
 
 onMounted(() => {
     animateStats();
+    window.addEventListener('scroll', handleParallax);
     if (homePageRef.value) {
         homePageRef.value.addEventListener('mousemove', handleMouseMove);
         homePageRef.value.addEventListener('mouseleave', handleMouseLeave);
@@ -274,6 +294,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+    window.removeEventListener('scroll', handleParallax);
     if (homePageRef.value) {
         homePageRef.value.removeEventListener('mousemove', handleMouseMove);
         homePageRef.value.removeEventListener('mouseleave', handleMouseLeave);
@@ -363,6 +384,66 @@ h4 {
     color: #ffffff;
     margin-bottom: 24px;
     letter-spacing: -1px;
+    min-height: 4.5rem;
+}
+
+/* Typewriter Effect */
+.typewriter-text {
+    background: linear-gradient(135deg, #38bdf8 0%, #a5f3fc 50%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradientFlow 3s ease infinite;
+}
+
+.cursor {
+    display: inline-block;
+    color: #38bdf8;
+    animation: blink 1s step-end infinite;
+    margin-left: 2px;
+    font-weight: 300;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+@keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Neon Text Effect */
+.neon-text {
+    color: #fff;
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px #38bdf8,
+        0 0 40px #38bdf8,
+        0 0 80px #38bdf8;
+    animation: neonPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes neonPulse {
+    from {
+        text-shadow:
+            0 0 5px #fff,
+            0 0 10px #fff,
+            0 0 20px #38bdf8,
+            0 0 40px #38bdf8,
+            0 0 80px #38bdf8;
+    }
+    to {
+        text-shadow:
+            0 0 2px #fff,
+            0 0 5px #fff,
+            0 0 10px #38bdf8,
+            0 0 20px #38bdf8,
+            0 0 40px #38bdf8;
+    }
 }
 
 .gradient-text {
@@ -631,6 +712,48 @@ h4 {
     padding: 32px;
     border-radius: 16px;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 3D Card Effect */
+.card-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
+}
+
+/* Gradient Border Animation */
+.gradient-border-card {
+    position: relative;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 20px;
+    overflow: visible;
+}
+
+.gradient-border-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #38bdf8, #818cf8, #f472b6, #38bdf8);
+    background-size: 400% 400%;
+    border-radius: 22px;
+    z-index: -1;
+    animation: gradientBorder 6s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gradient-border-card:hover::before {
+    opacity: 1;
+}
+
+@keyframes gradientBorder {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .feature-item:hover {
@@ -766,6 +889,54 @@ h4 {
     padding: 60px 8%;
     background: rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    z-index: 2;
+}
+
+/* Wave Background */
+.wave-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%2338bdf8' fill-opacity='0.1' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") repeat-x;
+    background-size: 50% 100%;
+    animation: wave 15s linear infinite;
+}
+
+.wave1 {
+    animation-delay: 0s;
+    opacity: 0.5;
+    bottom: 0;
+}
+
+.wave2 {
+    animation-delay: -5s;
+    opacity: 0.3;
+    bottom: 10px;
+}
+
+.wave3 {
+    animation-delay: -10s;
+    opacity: 0.2;
+    bottom: 20px;
+}
+
+@keyframes wave {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
 .footer-content {

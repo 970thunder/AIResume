@@ -122,6 +122,13 @@
                 <router-view></router-view>
             </el-main>
         </el-container>
+
+        <!-- Wave Background -->
+        <div class="wave-container">
+            <div class="wave wave1"></div>
+            <div class="wave wave2"></div>
+            <div class="wave wave3"></div>
+        </div>
     </el-container>
 </template>
 
@@ -475,6 +482,54 @@ onUnmounted(() => {
     overflow-y: auto;
     height: 100%;
     background: transparent;
+    position: relative;
+    z-index: 1;
+}
+
+/* Wave Background */
+.wave-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%2338bdf8' fill-opacity='0.1' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") repeat-x;
+    background-size: 50% 100%;
+    animation: wave 15s linear infinite;
+}
+
+.wave1 {
+    animation-delay: 0s;
+    opacity: 0.5;
+    bottom: 0;
+}
+
+.wave2 {
+    animation-delay: -5s;
+    opacity: 0.3;
+    bottom: 10px;
+}
+
+.wave3 {
+    animation-delay: -10s;
+    opacity: 0.2;
+    bottom: 20px;
+}
+
+@keyframes wave {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
 @media (max-width: 768px) {
