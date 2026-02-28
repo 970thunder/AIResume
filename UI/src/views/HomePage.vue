@@ -1,5 +1,8 @@
 <template>
-    <div class="home-page">
+    <div class="home-page" ref="homePageRef">
+        <!-- Mouse Glow Effect -->
+        <div class="mouse-glow" :style="mouseGlowStyle"></div>
+
         <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-content">
@@ -15,14 +18,14 @@
                     不仅仅是简历工具，更是您的求职智能助手。深度分析、自动排版、精准匹配，让每一份简历都成为斩获 Offer 的利器。
                 </p>
                 <div class="hero-actions">
-                    <router-link to="/generator" class="btn btn-primary">
+                    <router-link to="/generator" class="btn btn-primary" @click="addRipple">
                         <span class="btn-text">立即开始构建</span>
                         <div class="btn-glow"></div>
                         <el-icon>
                             <ArrowRight />
                         </el-icon>
                     </router-link>
-                    <router-link to="/store" class="btn btn-secondary">
+                    <router-link to="/store" class="btn btn-secondary" @click="addRipple">
                         <el-icon>
                             <files />
                         </el-icon>
@@ -31,17 +34,17 @@
                 </div>
                 <div class="hero-stats">
                     <div class="stat-item">
-                        <span class="stat-value">10k+</span>
+                        <span class="stat-value">{{ animatedStats.resumeCount }}<span class="stat-suffix">+</span></span>
                         <span class="stat-label">简历生成</span>
                     </div>
                     <div class="stat-divider"></div>
                     <div class="stat-item">
-                        <span class="stat-value">98%</span>
+                        <span class="stat-value">{{ animatedStats.satisfaction }}<span class="stat-suffix">%</span></span>
                         <span class="stat-label">好评率</span>
                     </div>
                     <div class="stat-divider"></div>
                     <div class="stat-item">
-                        <span class="stat-value">50+</span>
+                        <span class="stat-value">{{ animatedStats.templates }}<span class="stat-suffix">+</span></span>
                         <span class="stat-label">专业模板</span>
                     </div>
                 </div>
@@ -167,7 +170,115 @@
 </template>
 
 <script setup>
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
 import { ArrowRight, Files, MagicStick, DataAnalysis, Reading, Download } from '@element-plus/icons-vue';
+
+const homePageRef = ref(null);
+
+// Stats animation
+const stats = {
+    resumeCount: 10000,
+    satisfaction: 98,
+    templates: 50
+};
+
+const animatedStats = reactive({
+    resumeCount: 0,
+    satisfaction: 0,
+    templates: 0
+});
+
+// Mouse glow effect
+const mouseGlow = reactive({
+    x: 0,
+    y: 0,
+    visible: false
+});
+
+const mouseGlowStyle = computed(() => ({
+    left: `${mouseGlow.x}px`,
+    top: `${mouseGlow.y}px`,
+    opacity: mouseGlow.visible ? 1 : 0
+}));
+
+// Animate stats counting
+const animateStats = () => {
+    const duration = 2000;
+    const steps = 60;
+    const interval = duration / steps;
+
+    let step = 0;
+    const timer = setInterval(() => {
+        step++;
+        const progress = step / steps;
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+
+        animatedStats.resumeCount = Math.floor(stats.resumeCount * easeOut);
+        animatedStats.satisfaction = Math.floor(stats.satisfaction * easeOut);
+        animatedStats.templates = Math.floor(stats.templates * easeOut);
+
+        if (step >= steps) {
+            clearInterval(timer);
+            animatedStats.resumeCount = stats.resumeCount;
+            animatedStats.satisfaction = stats.satisfaction;
+            animatedStats.templates = stats.templates;
+        }
+    }, interval);
+};
+
+// Ripple effect for buttons
+const addRipple = (event) => {
+    const button = event.currentTarget;
+    const ripple = document.createElement('span');
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+
+    ripple.style.cssText = `
+        position: absolute;
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 0.6s ease-out;
+        pointer-events: none;
+    `;
+    button.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+};
+
+// Mouse move handler for glow effect
+const handleMouseMove = (e) => {
+    if (homePageRef.value) {
+        const rect = homePageRef.value.getBoundingClientRect();
+        mouseGlow.x = e.clientX - rect.left;
+        mouseGlow.y = e.clientY - rect.top;
+        mouseGlow.visible = true;
+    }
+};
+
+const handleMouseLeave = () => {
+    mouseGlow.visible = false;
+};
+
+onMounted(() => {
+    animateStats();
+    if (homePageRef.value) {
+        homePageRef.value.addEventListener('mousemove', handleMouseMove);
+        homePageRef.value.addEventListener('mouseleave', handleMouseLeave);
+    }
+});
+
+onUnmounted(() => {
+    if (homePageRef.value) {
+        homePageRef.value.removeEventListener('mousemove', handleMouseMove);
+        homePageRef.value.removeEventListener('mouseleave', handleMouseLeave);
+    }
+});
 </script>
 
 <style scoped>
@@ -177,6 +288,20 @@ import { ArrowRight, Files, MagicStick, DataAnalysis, Reading, Download } from '
     overflow-x: hidden;
     /* Main Background managed by Layout, but we add overlay */
     background: transparent;
+    position: relative;
+}
+
+/* Mouse Glow Effect */
+.mouse-glow {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s ease;
+    z-index: 0;
 }
 
 /* Typography & Variables locally mapped if needed, but using globals */
@@ -384,7 +509,7 @@ h4 {
     width: 340px;
     height: 460px;
     background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     backdrop-filter: blur(20px);
     position: relative;
@@ -693,6 +818,13 @@ h4 {
     }
 }
 
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
 @keyframes float {
 
     0%,
@@ -754,5 +886,40 @@ h4 {
         flex-direction: column;
         gap: 30px;
     }
+}
+</style>
+
+<style>
+/* Global Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #38bdf8 0%, #0ea5e9 50%, #0284c7 100%);
+    border-radius: 4px;
+    border: 2px solid rgba(15, 23, 42, 0.8);
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 50%, #0ea5e9 100%);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+    background: rgba(15, 23, 42, 0.6);
+}
+
+/* Firefox Scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #38bdf8 rgba(15, 23, 42, 0.6);
 }
 </style>

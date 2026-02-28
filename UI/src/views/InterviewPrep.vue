@@ -170,7 +170,7 @@
       </el-dialog>
 
       <!-- Interview Session -->
-      <div class="interview-session">
+      <div v-if="sessionActive" class="interview-session">
         <div class="exit-btn-wrapper">
           <el-button @click="exitSession" type="danger" plain round class="exit-btn">
             <el-icon class="mr-1">

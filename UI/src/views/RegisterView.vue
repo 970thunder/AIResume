@@ -1,11 +1,18 @@
 <template>
     <div class="auth-container">
-        <!-- Background Animation Elements -->
+        <!-- Enhanced Background Animation -->
+        <div class="bg-grid"></div>
         <div class="circles">
             <div class="circle circle-1"></div>
             <div class="circle circle-2"></div>
             <div class="circle circle-3"></div>
         </div>
+        <!-- Floating Particles -->
+        <div class="particles">
+            <div class="particle" v-for="n in 20" :key="n" :style="{ '--delay': n * 0.5 + 's', '--x': Math.random() * 100 + '%' }"></div>
+        </div>
+        <!-- Scan Line Effect -->
+        <div class="scan-line"></div>
 
         <div class="glass-card">
             <div class="card-content">

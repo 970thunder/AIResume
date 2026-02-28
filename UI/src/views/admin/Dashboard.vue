@@ -197,6 +197,34 @@ const initCharts = () => {
   animation: fadeInUp 0.5s ease-out;
 }
 
+/* Stat Card Enhancement */
+.stat-card {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, transparent, rgba(14, 165, 233, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(14, 165, 233, 0.2);
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -208,6 +236,12 @@ const initCharts = () => {
   font-weight: bold;
   color: var(--fg-primary);
   margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover .card-value {
+  color: var(--accent-primary);
+  text-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
 }
 
 .sub-value {
@@ -229,5 +263,22 @@ const initCharts = () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Element Plus Card Deep Theme */
+:deep(.el-card) {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 16px !important;
+}
+
+:deep(.el-card__header) {
+  border-bottom: 1px solid var(--glass-border) !important;
+  color: var(--fg-primary) !important;
+  font-weight: 600;
+}
+
+:deep(.el-card__body) {
+  color: var(--fg-secondary) !important;
 }
 </style>

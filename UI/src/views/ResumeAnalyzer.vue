@@ -1019,6 +1019,11 @@ onUnmounted(() => {
     margin-bottom: 20px;
 }
 
+.upload-text{
+    font-size: 14px;
+    color: var(--fg-muted);
+}
+
 .sci-fi-btn.small {
     width: auto;
     padding: 8px 20px;
@@ -1372,6 +1377,47 @@ onUnmounted(() => {
     font-weight: 600;
     transform: translateX(10px);
     box-shadow: 0 4px 15px rgba(14, 165, 233, 0.2);
+}
+
+/* Keyframe Animations */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @media (max-width: 1024px) {

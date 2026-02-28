@@ -1,5 +1,21 @@
 <template>
-    <el-container class="main-layout">
+    <el-container class="main-layout" ref="mainLayoutRef">
+        <!-- Particle Background -->
+        <ParticleBackground />
+
+        <!-- Comet Trail Effect -->
+        <div class="comet-container">
+            <div v-for="(particle, index) in cometParticles" :key="index" class="comet-particle"
+                :style="{
+                    left: particle.x + 'px',
+                    top: particle.y + 'px',
+                    opacity: particle.opacity,
+                    transform: `scale(${particle.scale})`,
+                    background: particle.color
+                }">
+            </div>
+        </div>
+
         <el-aside :width="isCollapsed ? '64px' : '260px'" class="sidebar">
             <div class="sidebar-header">
                 <div v-if="!isCollapsed" class="logo-container">
@@ -66,14 +82,14 @@
                 <div class="footer-actions">
                     <InfoButton :is-collapsed="isCollapsed"></InfoButton>
                 </div>
-                <div v-if="!isCollapsed" class="beian-info">
+                <!-- <div v-if="!isCollapsed" class="beian-info">
                     <a href="https://beian.miit.gov.cn/" target="_blank">桂ICP备2024034221号-2</a>
-                </div>
+                </div> -->
                 <div class="sidebar-toggle" @click="isCollapsed = !isCollapsed">
-                    <el-icon v-if="!isCollapsed">
+                    <el-icon v-if="!isCollapsed" class="toggle-icon">
                         <Fold />
                     </el-icon>
-                    <el-icon v-else>
+                    <el-icon v-else class="toggle-icon">
                         <Expand />
                     </el-icon>
                 </div>
@@ -110,7 +126,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import GradientText from '@/components/GradientText.vue';
@@ -129,6 +145,59 @@ import {
 const isCollapsed = ref(false);
 const authStore = useAuthStore();
 const router = useRouter();
+const mainLayoutRef = ref(null);
+
+// Comet trail effect
+const cometParticles = ref([]);
+const maxParticles = 20;
+let particleId = 0;
+const cometColors = [
+    'radial-gradient(circle, #38bdf8 0%, #0ea5e9 50%, transparent 100%)',
+    'radial-gradient(circle, #a5f3fc 0%, #67e8f9 50%, transparent 100%)',
+    'radial-gradient(circle, #22d3ee 0%, #06b6d4 50%, transparent 100%)',
+    'radial-gradient(circle, #818cf8 0%, #6366f1 50%, transparent 100%)'
+];
+
+const addCometParticle = (x, y) => {
+    const colorIndex = Math.floor(Math.random() * cometColors.length);
+    cometParticles.value.push({
+        id: particleId++,
+        x,
+        y,
+        opacity: 1,
+        scale: 1 + Math.random() * 0.5,
+        color: cometColors[colorIndex]
+    });
+
+    if (cometParticles.value.length > maxParticles) {
+        cometParticles.value.shift();
+    }
+};
+
+const updateCometParticles = () => {
+    cometParticles.value = cometParticles.value.map(p => ({
+        ...p,
+        opacity: p.opacity - 0.05,
+        scale: p.scale * 0.95
+    })).filter(p => p.opacity > 0);
+};
+
+let animationFrameId = null;
+
+const animateComet = () => {
+    updateCometParticles();
+    animationFrameId = requestAnimationFrame(animateComet);
+};
+
+// Mouse move handler
+let lastCometTime = 0;
+const handleMouseMove = (e) => {
+    const now = Date.now();
+    if (now - lastCometTime > 30) {
+        addCometParticle(e.clientX, e.clientY);
+        lastCometTime = now;
+    }
+};
 
 const handleCommand = (command) => {
     if (command === 'logout') {
@@ -138,6 +207,18 @@ const handleCommand = (command) => {
         router.push('/profile');
     }
 };
+
+onMounted(() => {
+    animateComet();
+    document.addEventListener('mousemove', handleMouseMove);
+});
+
+onUnmounted(() => {
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+    }
+    document.removeEventListener('mousemove', handleMouseMove);
+});
 </script>
 
 <style scoped>
@@ -145,6 +226,47 @@ const handleCommand = (command) => {
     height: 100vh;
     font-family: 'Plus Jakarta Sans', 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     background: radial-gradient(1200px 600px at 20% -20%, #0b1220 40%, #0f172a 100%);
+    position: relative;
+}
+
+/* Comet Trail Effect */
+.comet-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.comet-particle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+    box-shadow:
+        0 0 10px rgba(56, 189, 248, 0.5),
+        0 0 20px rgba(56, 189, 248, 0.3),
+        0 0 30px rgba(56, 189, 248, 0.2);
+    filter: blur(1px);
+}
+
+.comet-particle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px white;
 }
 
 .sidebar {
@@ -290,8 +412,12 @@ const handleCommand = (command) => {
 }
 
 .sidebar-toggle:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: rgba(243, 232, 232, 0.2);
     color: var(--fg);
+}
+
+.toggle-icon{
+    color: #b0b1b1;
 }
 
 .content-container {
