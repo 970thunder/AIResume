@@ -168,6 +168,18 @@ const features = [
 // Typewriter effect - MOVED to to TypeWriter component
 const fullText = '用 智能算法 重塑您的职业生涯';
 
+// Parallax scroll effect
+const handleParallax = () => {
+    const parallaxElements = document.querySelectorAll('[data-parallax]');
+    parallaxElements.forEach(el => {
+        const speed = parseFloat(el.dataset.parallax) || 0.1;
+        const rect = el.getBoundingClientRect();
+        const scrolled = window.scrollY;
+        const yPos = -(scrolled * speed);
+        el.style.transform = `translateY(${yPos}px)`;
+    });
+};
+
 // Stats animation
 
 // 3D Card Effect for visual card
@@ -737,7 +749,7 @@ h4 {
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(45deg, #38bdf8, #818cf8, #f472b6, #38bdf8);
+    background: linear-gradient(45deg, #616567, #9b9fc1, #897f84, #a1d8ee);
     background-size: 400% 400%;
     border-radius: 22px;
     z-index: -1;
